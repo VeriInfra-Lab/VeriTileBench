@@ -1,0 +1,41 @@
+# Lake build artifacts and downloaded packages
+/.lake
+/verso/.lake/
+/verso/_site/
+/.veritile-cache/bug-detection-build/
+
+# macOS
+.DS_Store
+
+# Editor / tooling
+/.claude/
+*.olean
+*.ilean
+*.hash
+
+# scripts/prove.sh log output
+/Logs/
+
+# Throwaway numerical scout scripts; verification scripts that need to be
+# preserved live as Lean comments next to the corresponding axiom or theorem.
+/scratch/
+
+# Personal review checklist (working notes, not for version control)
+/VeriTile/Examples/Readme.md
+
+# Private dev script for switching API providers
+/scripts/claude-miromind.sh
+
+# Astro / Starlight docs site build artifacts
+/site/node_modules
+/site/dist/
+/site/.astro/
+
+# Python bytecode caches (py_compile / import of the bench ports)
+__pycache__/
+
+# Returned FP experiment bundles contain large measurements and compiler output.
+/experiments/floating_point/results/
+
+# Local historical review snapshots moved out of the published checkpoint set.
+/.local-review-archive/
