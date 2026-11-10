@@ -53898,7 +53898,7 @@
     "bench/pretrain_kernels/tasks/te_fused_attn_mla_thd_dv/Misc/Validation.lean": "dbf22c00f86f62f96fc9576d0e25dd926f46690a4012ceb8f660d9159ac5cbeb",
     "bench/pretrain_kernels/tasks/te_fused_attn_mla_thd_dv/Proofs/Backend.lean": "09415464d3e03083d4b58d7be07beb565f8a088764424799ce9be6790c9b899d",
     "bench/pretrain_kernels/tasks/te_fused_attn_mla_thd_dv/task.json": "ce9735151cf467d28fae4020d4a1399cf1e02ec6b5525665019c9f6d4a3fbbd8",
-    "documents/bench/MAIN_THEOREM_CONVENTIONS.md": "43cfaa22f534efb1741dd6e96c7b4ac8696b362142a5def9d3d92a9a86c5b564",
+    "documents/bench/MAIN_THEOREM_CONVENTIONS.md": "659d0513f32f73dd9ae50da1f6bf6636858bc4e3070fd8d9bb4fec79c1b96f05",
     "lakefile.toml": "0859fe35a8633c366cd414a81fa047884eba7cfa8944e032c3bc1e86da21a62f",
     "scripts/bench/check_imported_kernel_review.py": "cf8bbf727a427a7db6d8dad40b9d7b59f7e7ef3691b6413ec138bb4adcdae387",
     "tests/lean/FPGuardedProgramIO.lean": "0fdd3d571fbb4343cf7340232e862484535e900d62005684d1db51d641553fc3"
@@ -54072,7 +54072,8 @@
       "bench/bug_detection/check.py": "eda66ba82550fbf78b011eb17ce74b7b0fe2615019007ee137dc31dfd261926d",
       "bench/pretrain_kernels/check.py": "55ef2927a9c2f912d465e6fc7962d139e7f658a983f582d6397679a56e154411",
       "lakefile.toml": "4acf3bc19e7d3b21c066a5974499383076309d10f0b33b243ab12aa8b7c992c8",
-      "scripts/bench/check_imported_kernel_review.py": "8600283f952c2d2d495ecdcc0fb91e444b6d17e61e325ac4d55764b95ed0e390"
+      "scripts/bench/check_imported_kernel_review.py": "8600283f952c2d2d495ecdcc0fb91e444b6d17e61e325ac4d55764b95ed0e390",
+      "documents/bench/MAIN_THEOREM_CONVENTIONS.md": "43cfaa22f534efb1741dd6e96c7b4ac8696b362142a5def9d3d92a9a86c5b564"
     }
   }
 }
