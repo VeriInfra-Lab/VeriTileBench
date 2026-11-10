@@ -1,0 +1,14 @@
+# Documentation terms that must appear in the Triton subset/gap docs.
+#
+# Format:
+#   path/to/doc<TAB>literal substring
+documents/TritonSubset.md	IEEE-754
+documents/TritonSubset.md	block pointer
+documents/TritonSubset.md	boundary_check
+documents/TritonSubset.md	RegionName → Nat → ℝ
+documents/TritonSubset.md	tl.dot
+documents/TritonSubset.md	tl.where
+documents/TritonSubset.md	tl.load(ptr, mask=mask, other=other)
+documents/TritonSubset.md	Unknown kwargs are rejected
+documents/TritonSubset.md	WithBot ℝ
+documents/TritonSubset.md	BlockState.undef

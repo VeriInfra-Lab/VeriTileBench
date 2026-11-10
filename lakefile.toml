@@ -1,0 +1,29 @@
+name = "veritilebench"
+defaultTargets = ["TritonBenchGFinal"]
+
+[[require]]
+name = "veritile"
+git = "https://github.com/VeriInfra-Lab/VeriTile.git"
+rev = "b965895cff80809ba852054ed3b3222ffda1b2bb"
+
+[[lean_lib]]
+name = "BugDetection"
+globs = ["bench.bug_detection.+"]
+
+[[lean_lib]]
+name = "PretrainKernels"
+globs = ["bench.pretrain_kernels.+"]
+weakLeanArgs = ["--tstack=65536"]
+
+[[lean_lib]]
+name = "TritonBenchGFinal"
+globs = ["bench.tritonbench_g.+"]
+weakLeanArgs = ["--tstack=65536"]
+
+[[lean_lib]]
+name = "BenchmarkExamples"
+globs = ["bench.examples.+"]
+
+[[lean_lib]]
+name = "BenchmarkRegressions"
+globs = ["tests.lean.+"]
