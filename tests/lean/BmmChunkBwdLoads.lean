@@ -22,20 +22,20 @@ private def initial : BlockState :=
     numPids := fun _ => 1 }
   let s := s.setReg "dout_ptrs" .ptr [1, 2] dp
   let s := s.setReg "a_ptrs" .ptr [2, 2] ap
-  let s := s.setReg "offs_m" .nat [1] (Tile.vec rows)
-  let s := s.setReg "offs_n" .nat [2] (Tile.vec columns)
-  let s := s.setReg "offs_cs" .nat [2] (Tile.vec Fin.val)
-  let s := s.setReg "chunk_size_limit" .nat [] (Tile.scalar 3)
-  s.setReg "cs" .nat [] (Tile.scalar 1)
+  let s := s.setReg "offs_m" .int [1] (Tile.vec fun i => (rows i : Int))
+  let s := s.setReg "offs_n" .int [2] (Tile.vec fun i => (columns i : Int))
+  let s := s.setReg "offs_cs" .int [2] (Tile.vec fun i => (i.val : Int))
+  let s := s.setReg "chunk_size_limit" .int [] (Tile.scalar 3)
+  s.setReg "cs" .int [] (Tile.scalar 1)
 
 theorem dout_actual_load : evalOp (RealLoads.doutLoad 1 2 4) initial =
     some (RealLoads.doutValues initial dp rows 4 3 1) := by
-  apply RealLoads.dout_load
+  apply RealLoads.dout_load (length := 3)
   all_goals simp [initial]
 
 theorem a_actual_load : evalOp (RealLoads.aLoad 2 2 3) initial =
     some (RealLoads.aValues initial ap columns 3 3 1) := by
-  apply RealLoads.a_load
+  apply RealLoads.a_load (length := 3)
   all_goals simp [initial]
 
 theorem load_values_and_masks :
