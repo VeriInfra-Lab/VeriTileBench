@@ -23,18 +23,16 @@ class AuditAggregateTests(unittest.TestCase):
         ports.mkdir(parents=True)
         (self.root / 'scripts' / 'bench').mkdir(parents=True)
         shutil.copy2(ROOT / 'scripts/bench/audit_tritonbench_g.sh', self.root / 'scripts/bench/audit_tritonbench_g.sh')
-        (self.root / 'scripts/bench/check_body_corpus.py').write_text('')
-        (self.root / 'scripts/bench/check_imported_kernel_review.py').write_text('')
         tools = self.root / 'bin'
         tools.mkdir()
         lake = tools / 'lake'
-        lake.write_text('#!/bin/sh\nexit "${FAIL_BUILD:-0}"\n')
+        lake.write_text('#!/bin/sh\nprintf "build\\n" >> calls\nexit "${FAIL_BUILD:-0}"\n')
         lake.chmod(0o755)
-        # Empty source fixtures exercise the actual structural rule dispatch.
-        # Replace the manifest and proof executors to inject independent failures.
+        # Inject failures at each source gate while using the real aggregate runner.
         for path, label, failure in [
-            ('scripts/bench/final_inventory.py', 'structural', 'FAIL_STATIC'),
-            ('scripts/check_comparator.py', 'library', 'FAIL_LIBRARY')]:
+            ('scripts/bench/final_inventory.py', 'inventory', 'FAIL_INVENTORY'),
+            ('scripts/bench/check_body_corpus.py', 'body', 'FAIL_BODY'),
+            ('scripts/bench/check_imported_kernel_review.py', 'review', 'FAIL_REVIEW')]:
             (self.root / path).write_text(
                 'import os\nfrom pathlib import Path\n'
                 f'with Path("calls").open("a") as log: log.write("{label}\\n")\n'
@@ -45,6 +43,7 @@ class AuditAggregateTests(unittest.TestCase):
         self.env = {key: value for key, value in os.environ.items()
                     if not key.startswith(('AUDIT_TRUST_', 'FAIL_'))}
         self.env['PATH'] = str(tools) + os.pathsep + self.env['PATH']
+        self.source_calls = ['inventory', 'body', 'review']
 
     def run_aggregate(self, args=(), env=None):
         calls = self.root / 'calls'
@@ -57,40 +56,39 @@ class AuditAggregateTests(unittest.TestCase):
     def test_default_still_runs_all_gates(self):
         result, calls = self.run_aggregate()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertEqual(calls, ['structural', 'library', 'corpus'])
+        self.assertEqual(calls, [*self.source_calls, 'build', 'corpus'])
         self.assertIn('TritonBench-G audit gates passed', result.stdout)
 
     def test_global_mode_does_not_run_or_claim_corpus_checks(self):
         result, calls = self.run_aggregate(['--global-only'])
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertEqual(calls, ['structural', 'library'])
+        self.assertEqual(calls, self.source_calls)
         self.assertIn('global gates passed; corpus audit is separate', result.stdout)
         self.assertNotIn('TritonBench-G audit gates passed', result.stdout)
 
     def test_source_mode_does_not_run_or_claim_any_proof_replay(self):
         result, calls = self.run_aggregate(['--source-only'])
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertEqual(calls, ['structural'])
+        self.assertEqual(calls, self.source_calls)
         self.assertIn('no proof replay was requested', result.stdout)
-        result, calls = self.run_aggregate(['--source-only'], {'FAIL_STATIC': '1'})
-        self.assertNotEqual(result.returncode, 0)
-        self.assertEqual(calls, ['structural'])
 
-    def test_global_failures_fail_both_modes(self):
-        for args in [(), ('--global-only',)]:
-            for failure in ['FAIL_STATIC', 'FAIL_LIBRARY', 'FAIL_BUILD']:
+    def test_source_failures_fail_all_modes(self):
+        for args in [(), ('--global-only',), ('--source-only',)]:
+            for failure in ['FAIL_INVENTORY', 'FAIL_BODY', 'FAIL_REVIEW']:
                 with self.subTest(args=args, failure=failure):
                     result, calls = self.run_aggregate(args, {failure: '1'})
                     self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-                    self.assertNotIn('gates passed', result.stdout)
-                    self.assertIn('structural', calls)
-                    self.assertIn('library', calls)
+                    self.assertNotIn('passed', result.stdout)
+                    expected = self.source_calls if args else [*self.source_calls, 'build', 'corpus']
+                    self.assertEqual(calls, expected)
 
-    def test_corpus_failure_still_fails_default_mode(self):
-        result, calls = self.run_aggregate(env={'FAIL_CORPUS': '1'})
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertEqual(calls, ['structural', 'library', 'corpus'])
-        self.assertNotIn('gates passed', result.stdout)
+    def test_build_and_replay_failures_fail_default_mode(self):
+        for failure in ['FAIL_BUILD', 'FAIL_CORPUS']:
+            with self.subTest(failure=failure):
+                result, calls = self.run_aggregate(env={failure: '1'})
+                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(calls, [*self.source_calls, 'build', 'corpus'])
+                self.assertNotIn('gates passed', result.stdout)
 
     def test_invalid_arguments_fail_before_checks(self):
         for args in [['--skip-library'], ['alpha'], ['--global-only', 'extra']]:
