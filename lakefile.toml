@@ -4,7 +4,7 @@ defaultTargets = ["TritonBenchGFinal"]
 [[require]]
 name = "veritile"
 git = "https://github.com/VeriInfra-Lab/VeriTile.git"
-rev = "3bf30ea6f9cc5905ceb4e16c013cea676c49876a"
+rev = "84d601edb2dec746c5030bd7a522686fa36dfc9d"
 
 [[lean_lib]]
 name = "BugDetection"
