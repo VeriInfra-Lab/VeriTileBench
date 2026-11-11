@@ -48,7 +48,7 @@ private def initial : BlockState where
 
 private def prefixCode (swapped : Bool) : List Stmt :=
   RealProgram.realPart (RealProgram.parts swapped 4 2 2 parameters).before ++
-    [.forRangeDyn "k" (.constNat 0) (RealProgram.loopBound 3 2) (.constNat 1)
+    [.forRangeInt "k" (.castNatToInt (.constNat 0)) (RealProgram.loopBound 3 2) (.constNat 1)
       (RealProgram.realPart (RealProgram.parts swapped 4 2 2 parameters).body)]
 
 /-- This is a surviving diagonal tile even though its (row 0, column 2)

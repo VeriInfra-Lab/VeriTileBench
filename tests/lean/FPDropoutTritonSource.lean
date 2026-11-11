@@ -34,9 +34,7 @@ theorem source_accesses (storage : Storage) (keep : KeepStorage) (swapped : Bool
       [("load",storageType storage,Bool.true,Bool.false),
        ("load",keepType keep,Bool.true,Bool.false),
        ("store",storageType storage,Bool.true,Bool.false)] := by
-  cases storage <;> cases keep <;> cases swapped
-  all_goals simp [source,VeriTile.Bench.Repairs.DropoutTriton.sourceFamily,ComputeKernel.surfaceBody,accesses,loads,storageType,keepType,
-    ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption]
+  cases storage <;> cases keep <;> cases swapped <;> rfl
 
 /-- Inspect actual division and condition nodes, after preserving casts. -/
 def arithmetic {d : TileDType} {sh : TileShape} : Op d sh → List (String × TileDType)

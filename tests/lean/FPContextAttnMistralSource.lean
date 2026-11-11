@@ -69,13 +69,14 @@ theorem signed_window (storage : Storage) (candidate : Bool) (BM BN D : Nat) (wi
     ((Source.intRange? (selected storage candidate BM BN D window).surfaceBody "start_n").bind
       fun lp => (lp.body.drop (Source.prefixBefore lp.body "qk" 4).length).head?) =
     some (.assign .real [BM,BN] "qk" (.compute (.alg .fp32
-      (.where (.gt .int Broadcast.nil.consR.consL
-        (.add .int .scalarL (.ref .int [] "start_n")
-          (Op.expandDim ⟨0,by simp⟩ (.ref .nat [BN] "offs_n")).castNatToInt)
-        (.sub .int .scalarR
-          (Op.expandDim ⟨1,by simp⟩ (.ref .nat [BM] "offs_m")).castNatToInt (.constInt window)))
+      (.where (.lt .int .scalarR
+        (.sub .int Broadcast.nil.consL.consR
+          (Op.expandDim ⟨1,by simp⟩ (.ref .int [BM] "offs_m"))
+          (.add .int .scalarL (.ref .int [] "start_n")
+            (Op.expandDim ⟨0,by simp⟩ (.ref .int [BN] "offs_n"))))
+        (.constInt window))
         (.ref .real [BM,BN] "qk")
-        (.broadcast (.const (-1e9 : ℝ)) [BM,BN]))))) := by
+        (.broadcast (.const (-1000000000.0 : ℝ)) [BM,BN]))))) := by
   cases storage <;> cases candidate <;> rfl
 
 #guard_msgs (drop info) in

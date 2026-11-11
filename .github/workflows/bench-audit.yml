@@ -62,6 +62,10 @@ jobs:
           build-args: >-
             bench.tritonbench_g.matrix_transpose.RealCorrect
             bench.tritonbench_g.matrix_transpose.FPEquiv
+            tests.lean.FPBgmvExpandSliceSource
+            tests.lean.FPDecayCumsumSource
+            tests.lean.FPDiagSsmTritonSource
+            tests.lean.FPFastRopeEmbeddingSource
       - name: Check final source and audit regressions
         run: |
           python3 -B -m unittest discover -s tests/python -p 'test_*.py'
