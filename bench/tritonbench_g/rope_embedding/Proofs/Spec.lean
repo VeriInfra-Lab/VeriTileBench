@@ -32,8 +32,8 @@ def Operations.backend (op : Operations α) : Algebra α where
 def scalarPair (op : Operations α) (backward : Bool) (a b c s : α) (second : Bool) : α :=
   let sine := if backward then op.neg (op.load s) else op.load s
   let cosine := op.load c
-  let first := a
-  let other := b
+  let first := op.cast (op.load a)
+  let other := op.cast (op.load b)
   if second then op.add (op.mul other cosine) (op.mul first sine)
     else op.sub (op.mul first cosine) (op.mul other sine)
 def scalarResult (op : Operations α) (r : Request) (backward : Bool)

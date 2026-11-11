@@ -85,8 +85,11 @@ theorem prepared_facts {α : Type} [Inhabited α] (M : Algebra α) (p : Paramete
 
 def value {α : Type} [Inhabited α] (M : Algebra α) (p : Parameters)
     (row head : Nat) (cs ss : Lane p → α) (s : State α) (second : Bool) (i : Lane p) : α :=
-  let a := (s.mem p.input (offset p row head Bool.false i)).read .real
-  let b := (s.mem p.input (offset p row head Bool.true i)).read .real
+  -- Each source load is converted to sin1.dtype before the rotation products.
+  let a := M.cast (some .fp32) .real .real
+    (M.fp32Load ((s.mem p.input (offset p row head Bool.false i)).read .real))
+  let b := M.cast (some .fp32) .real .real
+    (M.fp32Load ((s.mem p.input (offset p row head Bool.true i)).read .real))
   let v := if second then M.binary (some .fp32) .real .add
       (M.binary (some .fp32) .real .mul b (cs i)) (M.binary (some .fp32) .real .mul a (ss i))
     else M.binary (some .fp32) .real .sub
@@ -118,12 +121,20 @@ theorem oneHead_facts {α : Type} [Inhabited α] (M : Algebra α) (p : Parameter
     (oneHead M p backward row head cs ss s h).val.mem=(written M p row head cs ss s).mem := by
   constructor
   · rcases p with ⟨input,cosine,sine,rowStride,cosineStride,sineStride,length,dimension,heads,width,fast⟩
-    cases fast <;> cases backward <;> constructor <;> simp [oneHead,State.setReg,h.row,h.columns,h.half,h.mask,h.cosine,h.sine]
+    cases fast <;> cases backward <;> constructor <;>
+      simp (config := { maxSteps := 500000 }) [oneHead,State.setReg,h.row,h.columns,h.half,h.mask,h.cosine,h.sine]
   · rcases p with ⟨input,cosine,sine,rowStride,cosineStride,sineStride,length,dimension,heads,width,fast⟩
-    cases fast <;> cases backward <;> simp +contextual [oneHead,written,RotaryEmbNopad.Pair.written,
+    cases fast <;> cases backward <;> simp +contextual (config := { maxSteps := 500000 }) [oneHead,written,RotaryEmbNopad.Pair.written,
       RotaryEmbNopad.Pair.halfScatter,masked_scatter_memory,value,offset,active,
       FP.Structural.bop,Broadcast.leftIndex,Broadcast.rightIndex,State.setReg,Region.cast,
       h.row,h.columns,h.half,h.mask,h.cosine,h.sine]
+    all_goals
+      congr 1
+      · funext mem i
+        by_cases hi : i.1.val < dimension / 2 <;> simp [hi]
+      · congr 1
+        funext mem i
+        by_cases hi : i.1.val < dimension / 2 <;> simp [hi]
 
 theorem written_mem_congr {α : Type} [Inhabited α] (M : Algebra α) (p : Parameters)
     (row head : Nat) (cs ss : Lane p → α) (s t : State α) (h : s.mem=t.mem) :

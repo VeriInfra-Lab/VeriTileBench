@@ -13,25 +13,42 @@ def assignType? (code : List ComputeStmt) (name : RegName) : Option TileDType :=
   match code with
   | [] => none
   | .assign d _ out _ :: rest => if out = name then some d else assignType? rest name
+  | .alg (.assign d _ out _) :: rest => if out = name then some d else assignType? rest name
   | _ :: rest => assignType? rest name
 
-def loadType? {d : TileDType} {sh : TileShape} : Op d sh → Option TileDType
+def loadType? (previous : List (RegName × TileDType)) {d : TileDType} {sh : TileShape} :
+    Op d sh → Option TileDType
   | .load dtype _ _ _ => some dtype
-  | .castFloat _ _ e => loadType? e
-  | .mul _ _ a _ => loadType? a
+  | .ref _ _ name => previous.lookup name
+  | .castFloat _ _ e => loadType? previous e
+  | .withPrecision _ _ e => loadType? previous e
+  | .mul _ _ a _ => loadType? previous a
   | _ => none
 
-def assignedLoadType? (code : List ComputeStmt) (name : RegName) : Option TileDType :=
-  match code with
-  | [] => none
-  | .assign _ _ out e :: rest =>
-    if out = name then e.toAlgorithm?.toOption.bind loadType? else assignedLoadType? rest name
-  | _ :: rest => assignedLoadType? rest name
+/-- Track load origins through the frontend's explicit temporary assignments.
+A register overwrite replaces its earlier origin. -/
+def assignedLoadType? (code : List ComputeStmt) (name : RegName) : Option TileDType := go code []
+where
+  go (code : List ComputeStmt) (previous : List (RegName × TileDType)) : Option TileDType :=
+    match code with
+    | [] => none
+    | .assign _ _ out e :: rest =>
+      let found := e.toAlgorithm?.toOption.bind (loadType? previous)
+      if out = name then found else
+        let previous := previous.filter (fun pair => pair.1 != out)
+        go rest (found.elim previous fun dtype => (out, dtype) :: previous)
+    | .alg (.assign _ _ out e) :: rest =>
+      let found := loadType? previous e
+      if out = name then found else
+        let previous := previous.filter (fun pair => pair.1 != out)
+        go rest (found.elim previous fun dtype => (out, dtype) :: previous)
+    | _ :: rest => go rest previous
 
 def stores (code : List ComputeStmt) : List TileDType :=
   match code with
   | [] => []
   | .store d _ _ _ _ :: rest => d :: stores rest
+  | .alg (.store d _ _ _ _) :: rest => d :: stores rest
   | .ifThen _ body :: rest => stores body ++ stores rest
   | .ifThenElse _ a b :: rest => stores a ++ stores b ++ stores rest
   | _ :: rest => stores rest
@@ -41,6 +58,8 @@ def loopBody (code : List ComputeStmt) : List ComputeStmt :=
   match code.getLast? with
   | some (.forRangeDyn _ _ _ _ body) => body
   | some (.forRangeInt _ _ _ _ body) => body
+  | some (.alg (.forRangeDyn _ _ _ _ body)) => body.map ComputeStmt.alg
+  | some (.alg (.forRangeInt _ _ _ _ body)) => body.map ComputeStmt.alg
   | _ => []
 
 def fwd (storage : Storage) (swapped : Bool) :=
@@ -62,7 +81,7 @@ theorem forward_types (storage : Storage) (swapped : Bool) :
     stores (loopBody code) = [dtype storage] := by
   cases storage <;> cases swapped
   all_goals refine ⟨?_,rfl,rfl,?_⟩
-  all_goals simp [stores,loopBody,fwd,forward,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedForward,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedForwardIndexCommuted,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedPrepare,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedPrepareIndexCommuted,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedBackward,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedBackwardIndexCommuted,ComputeKernel.surfaceBody,assignedLoadType?,loadType?,dtype,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption,Option.bind]
+  all_goals simp [stores,loopBody,fwd,forward,VeriTile.Bench.Repairs.DecayCumsum.forwardKernel,VeriTile.Bench.Repairs.DecayCumsum.forwardCandidateKernel,VeriTile.Bench.Repairs.DecayCumsum.prepareKernel,VeriTile.Bench.Repairs.DecayCumsum.prepareCandidateKernel,VeriTile.Bench.Repairs.DecayCumsum.backwardKernel,VeriTile.Bench.Repairs.DecayCumsum.backwardCandidateKernel,ComputeKernel.surfaceBody,assignedLoadType?,assignedLoadType?.go,loadType?,dtype,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption,Option.bind]
 
 /-- Query/key and gate storage are independent, including the unmasked final
 gate load. Neither the explicit fp32 conversion nor output casts are erased. -/
@@ -76,7 +95,7 @@ theorem prepare_types (source gate : Storage) (swapped : Bool) :
     stores (loopBody code) = [dtype source,dtype source] := by
   cases source <;> cases gate <;> cases swapped
   all_goals refine ⟨?_,?_,?_,?_,rfl,?_⟩
-  all_goals simp [stores,loopBody,prep,prepare,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedForward,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedForwardIndexCommuted,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedPrepare,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedPrepareIndexCommuted,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedBackward,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedBackwardIndexCommuted,ComputeKernel.surfaceBody,assignedLoadType?,loadType?,dtype,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption,Option.bind]
+  all_goals simp [stores,loopBody,prep,prepare,VeriTile.Bench.Repairs.DecayCumsum.forwardKernel,VeriTile.Bench.Repairs.DecayCumsum.forwardCandidateKernel,VeriTile.Bench.Repairs.DecayCumsum.prepareKernel,VeriTile.Bench.Repairs.DecayCumsum.prepareCandidateKernel,VeriTile.Bench.Repairs.DecayCumsum.backwardKernel,VeriTile.Bench.Repairs.DecayCumsum.backwardCandidateKernel,ComputeKernel.surfaceBody,assignedLoadType?,assignedLoadType?.go,loadType?,dtype,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption,Option.bind]
 
 theorem backward_types (source gate : Storage) (swapped : Bool) :
     let code := (bwd source gate swapped).surfaceBody
@@ -91,7 +110,7 @@ theorem backward_types (source gate : Storage) (swapped : Bool) :
     stores (loopBody code) = [dtype source,dtype source,dtype gate] := by
   cases source <;> cases gate <;> cases swapped
   all_goals refine ⟨?_,?_,?_,?_,?_,?_,?_,rfl,?_⟩
-  all_goals simp [stores,loopBody,bwd,backward,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedForward,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedForwardIndexCommuted,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedPrepare,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedPrepareIndexCommuted,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedBackward,VeriTile.Bench.Repairs.DecayCumsum.Kernels.quotedBackwardIndexCommuted,ComputeKernel.surfaceBody,assignedLoadType?,loadType?,dtype,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption,Option.bind]
+  all_goals simp [stores,loopBody,bwd,backward,VeriTile.Bench.Repairs.DecayCumsum.forwardKernel,VeriTile.Bench.Repairs.DecayCumsum.forwardCandidateKernel,VeriTile.Bench.Repairs.DecayCumsum.prepareKernel,VeriTile.Bench.Repairs.DecayCumsum.prepareCandidateKernel,VeriTile.Bench.Repairs.DecayCumsum.backwardKernel,VeriTile.Bench.Repairs.DecayCumsum.backwardCandidateKernel,ComputeKernel.surfaceBody,assignedLoadType?,assignedLoadType?.go,loadType?,dtype,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption,Option.bind]
 
 #guard_msgs (drop info) in
 #auditModuleAxioms
