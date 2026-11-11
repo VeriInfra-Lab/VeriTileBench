@@ -15,9 +15,12 @@ private def source (h : Call) (candidate : Bool) :=
   if candidate then Kernels.outputFirst h else Kernels.source h
 private def activeBody (h : Call) (candidate : Bool) :=
   ((Source.conditional? (source h candidate).surfaceBody
-    (fun body => (Source.intRange? body "n").isSome)).map (·.yes)).getD []
+    (fun _ => Bool.true)).map (·.yes)).getD []
+private def castBranch (h : Call) (candidate : Bool) :=
+  Source.conditional? (activeBody h candidate)
+    (fun body => (Source.intRange? body "n").isSome)
 private def loop (h : Call) (candidate : Bool) :=
-  Source.intRange? (activeBody h candidate) "n"
+  (castBranch h candidate).bind fun c => Source.intRange? c.yes "n"
 private def loopBody (h : Call) (candidate : Bool) := ((loop h candidate).map (·.body)).getD []
 private def firstConditional (code : List ComputeStmt) :=
   Source.conditional? code (fun _ => Bool.true)
@@ -48,21 +51,26 @@ theorem old_output_load_keeps_storage (h : Call) (candidate : Bool) :
     assignedLoad (branch (loopBody h candidate) Bool.true) "tiled_out" = some .fp32 := by
   cases candidate <;> rfl
 
-/-- The cast is an actual top-level reassignment, outside the input-load branch. -/
+/-- The CAST_TYPE arm follows the input-load branch and retains its cast. -/
 theorem input_cast_rebinds_to_half (h : Call) (candidate : Bool) :
-    (assignment (activeBody h candidate) "tiled_a").bind assignedDType? = some .fp16 := by
+    ((castBranch h candidate).bind fun c => assignment c.yes "tiled_a").bind assignedDType? =
+      some .fp16 := by
+  cases candidate <;> rfl
+
+theorem input_cast_enabled (h : Call) (candidate : Bool) :
+    (castBranch h candidate).map (·.condition) = some (.constBool Bool.true) := by
   cases candidate <;> rfl
 
 theorem loop_keeps_signed_bounds (h : Call) (candidate : Bool) :
     (loop h candidate).map (fun r => (r.start,r.stop,r.stride)) =
-      some (.constInt 0,.ref .int [] "split_n_length",.constNat 256) := by
+      some ((Op.constNat 0).castNatToInt,.ref .int [] "split_n_length",.constNat 256) := by
   cases candidate <;> rfl
 
 /-- Early return is lowered by guarding the complete remaining body with the
 negated signed sentinel test. No arithmetic or store precedes that guard. -/
 theorem signed_early_return (h : Call) (candidate : Bool) :
     (Source.conditional? (source h candidate).surfaceBody
-      (fun body => (Source.intRange? body "n").isSome)).map (fun c => c.condition) =
+      (fun _ => Bool.true)).map (fun c => c.condition) =
         some (.boolNot (.eq .int .nil (.ref .int [] "lora_index") (.constInt (-1)))) := by
   cases candidate <;> rfl
 
@@ -81,19 +89,27 @@ private def halfSum (h : Call) : Op .fp16 [256] :=
 addition; the current candidate exchanges just those addition operands. -/
 theorem output_promotes_after_half_sum (h : Call) (candidate : Bool) :
     assignment (branch (loopBody h candidate) Bool.true) "accumulator" =
-      some (.assign .real [256] "accumulator" (.compute (.alg .fp32 (.castFloat .real .real
+      some (.assign .real [256] "accumulator" (.compute (.alg .fp32
         (if candidate then
           .add .real (.consSame .nil) (.ref .real [256] "tiled_out") (.castFloat .fp16 .real (halfSum h))
-        else .add .real (.consSame .nil) (.castFloat .fp16 .real (halfSum h)) (.ref .real [256] "tiled_out")))))) := by
+        else .add .real (.consSame .nil) (.castFloat .fp16 .real (halfSum h)) (.ref .real [256] "tiled_out"))))) := by
   cases candidate <;> rfl
 
-/-- The active output lane test survives the implicit destination conversion. -/
+private def outputStore (add : Bool) : ComputeStmt :=
+  .store .real [256]
+    (.ptr (.ptrAdd .scalarL (.ref .ptr [] "c_ptr")
+      (.castIntToNat (.mul .int .scalarR (.ref .int [256] "current_n")
+        (Op.constNat 1).castNatToInt))))
+    (if add then .compute (.alg .fp32 (.ref .real [256] "accumulator"))
+      else .compute (.alg .fp32 (.castFloat .fp16 .real (.ref .fp16 [256] "accumulator"))))
+    (.mask (.ref .bool [256] "c_mask"))
+
+/-- The store continuation retains its mask in both ADD_INPUTS arms. The
+half-precision sum is converted to FP32 when no old output is added. -/
 theorem masked_output_store (h : Call) (candidate : Bool) :
-    (loopBody h candidate).getLast? = some (.store .real [256]
-      (.ptr (.ptrAdd .scalarL (.ref .ptr [] "c_ptr") (.castIntToNat (.ref .int [256] "current_n"))))
-      (.compute (.alg .fp32 (.ref .real [256] "accumulator")))
-      (.mask (.ref .bool [256] "c_mask"))) := by
-  cases candidate <;> rfl
+    (branch (loopBody h candidate) Bool.true).getLast? = some (outputStore Bool.true) ∧
+    (branch (loopBody h candidate) Bool.false).getLast? = some (outputStore Bool.false) := by
+  cases candidate <;> exact ⟨rfl,rfl⟩
 
 theorem complete_io_signature (h : Call) (candidate : Bool) :
     (source h candidate).inputs = ["X","W","Y","Indices"] ∧
