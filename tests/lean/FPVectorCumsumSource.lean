@@ -9,26 +9,28 @@ open VeriTile.Triton
 open VeriTile.Bench.Repairs.ChunkCumsumVector
 set_option maxRecDepth 24000
 
-def loop (h : Call) (c : Config) : Source.DynamicRange :=
-  (Source.dynamicRange? (Kernels.sourceKernel h c).surfaceBody "i_t").getD
-    ⟨[], .constNat 0, .constNat 0, .constNat 0, [], []⟩
+def loop (h : Call) (c : Config) : Source.IntRange :=
+  (Source.intRange? (Kernels.sourceKernel h c).surfaceBody "i_t").getD
+    ⟨[], .constInt 0, .constInt 0, .constNat 0, [], []⟩
 
 theorem load_explicitly_promotes (h : Call) (c : Config) :
-    (loop h c).body[7]? = some (.assign .real [c.BT,BS] "b_s"
+    (loop h c).body[7]? = some (.assign h.inputDType.toTileDType [c.BT,BS] "__veritile_load_0"
+      (.alg (.load h.inputDType.toTileDType (.ptr (.ref .ptr [c.BT,BS] "p_s"))
+        (.maskOther (.ref .bool [c.BT,BS] "active")
+          (.broadcast (.castFloat .real h.inputDType (.const 0)) [c.BT,BS]))))) ∧
+    (loop h c).body[8]? = some (.assign .real [c.BT,BS] "b_s"
       (.compute (.alg .fp32 (.castFloat h.inputDType .real
-        (.load h.inputDType.toTileDType (.ptr (.ref .ptr [c.BT,BS] "p_s"))
-          (.maskOther (.ref .bool [c.BT,BS] "active")
-            (.broadcast (.castFloat .real h.inputDType (.const 0)) [c.BT,BS]))))))) := rfl
+        (.ref h.inputDType.toTileDType [c.BT,BS] "__veritile_load_0"))))) := ⟨rfl, rfl⟩
 
 theorem dot_disables_tf32 (h : Call) (c : Config) :
-    (loop h c).body[8]? = some (.assign .real [c.BT,BS] "b_c"
-      (.compute (.alg .fp32 (.add .real (.consL (.consSame .nil))
+    (loop h c).body[9]? = some (.assign .real [c.BT,BS] "b_c"
+      (.compute (.alg .fp32 (.add .real Broadcast.nil.consSame.consL
         (.expandDim ⟨0, by simp⟩ (.ref .real [BS] "b_z"))
         (.dot (batch := []) (.ref .real [c.BT,c.BT] "m_s") (.ref .real [c.BT,BS] "b_s")
           {allowTF32 := some Bool.false}))))) := rfl
 
 theorem output_cast_and_both_boundaries (h : Call) (c : Config) :
-    (loop h c).body[9]? = some (.store h.outputDType.toTileDType [c.BT,BS]
+    (loop h c).body[10]? = some (.store h.outputDType.toTileDType [c.BT,BS]
       (.ptr (.ref .ptr [c.BT,BS] "p_z"))
       (.alg (.castFloat .real h.outputDType
         (.withPrecision .real .fp32 (.ref .real [c.BT,BS] "b_c"))))

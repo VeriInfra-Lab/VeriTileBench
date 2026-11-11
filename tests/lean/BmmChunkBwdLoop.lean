@@ -52,7 +52,7 @@ private def initial : BlockState where
 
 private def code (swapped : Bool) : List Stmt :=
   RealProgram.realPart (RealProgram.parts swapped 4 2 2 parameters).before ++
-    [.forRangeDyn "cs" (.constNat 0) (RealProgram.loopBound 2) (.constNat 1)
+    [.forRangeInt "cs" (.constInt 0) (RealProgram.loopBound 2) (.constNat 1)
       (RealProgram.realPart (RealProgram.parts swapped 4 2 2 parameters).body)]
 
 theorem complete_contraction (swapped : Bool) :

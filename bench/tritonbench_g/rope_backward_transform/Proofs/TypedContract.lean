@@ -41,7 +41,7 @@ def component {α : Type} [Inhabited α] (M : Algebra α)
   M.cast none input rotation
     (if active heads (p.headDim / 2) i then
       readFloat input s.mem r (address (s.pids 0) stride p.headDim (p.headDim / 2) second i)
-    else M.cast (some .fp32) .real input (M.literal (some .fp32) .real 0))
+    else paddedZero M input)
 
 /-- Two rounded products, then one rounded addition/subtraction, then the
 actual output-storage conversion. This is intentionally not a real polynomial. -/

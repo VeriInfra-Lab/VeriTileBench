@@ -32,17 +32,13 @@ theorem to_half_accesses (format : Format) (swapped : Bool) :
     accesses (toHalf format swapped "y" "x" 2 4).surfaceBody =
       [("load",formatType format,Bool.true,Bool.false),
        ("store",.fp16,Bool.true,Bool.false),("store",.fp16,Bool.true,Bool.false)] := by
-  cases format <;> cases swapped
-  all_goals simp [toHalf,ComputeKernel.surfaceBody,accesses,loads,formatType,
-    ComputeExpr.toAlgorithm?,Except.toOption]
+  cases format <;> cases swapped <;> rfl
 
 theorem to_fp8_accesses (input : Input) (format : Format) (swapped : Bool) :
     accesses (toFP8 input format swapped "y" "x" 2 4).surfaceBody =
       [("load",inputType input,Bool.true,Bool.false),
        ("store",formatType format,Bool.true,Bool.false)] := by
-  cases input <;> cases format <;> cases swapped
-  all_goals simp [toFP8,ComputeKernel.surfaceBody,accesses,loads,formatType,inputType,
-    ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption]
+  cases input <;> cases format <;> cases swapped <;> rfl
 
 def casts {d : TileDType} {sh : TileShape} : Op d sh → List (TileDType × TileDType)
   | .castFloat src dst e => (src.toTileDType,dst.toTileDType) :: casts e
