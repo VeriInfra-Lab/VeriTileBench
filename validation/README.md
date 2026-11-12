@@ -17,6 +17,10 @@
   `python3 scripts/bench/final_inventory.py --write PATH`.
 - `imported_kernel_review.json` preserves findings for the 334 imported challenges.
 - `bench-layout.json` records the path migration and unchanged Lean/JIT code.
+- [`examples-copy.json`](examples-copy.json) records the 18 worked examples copied
+  from a fixed VeriTile main revision, unchanged Lean/Python bytes, and local
+  source-correspondence/build checks. The existing TritonBenchVectorAddition
+  example remains alongside them.
 
 Task-specific compiler and numerical receipts are under `tasks/`. Their JSON
 bytes, source hashes, outcomes and original paths are preserved. Resolve those
