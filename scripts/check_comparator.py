@@ -118,9 +118,8 @@ def library_targets(manifest):
     return sorted(modules), sorted(set(names))
 
 
-def check(workspace, source=None, trust=False, library=False):
-    state = prepare(workspace)
-    judge = workspace / 'project'
+def prepare_target(state, judge, source=None, trust=False, library=False):
+    """Write one audited inventory module without claiming proof acceptance."""
     logs = Path(state['logs'])
     if library:
         modules, selected = library_targets(judge / 'scripts/kernel-manifest.tsv')
@@ -148,16 +147,33 @@ def check(workspace, source=None, trust=False, library=False):
     program = add_import(text, 'Lean') + '\n' + footer
     (judge / 'VeriTileComparator' / (tag + '.lean')).write_text(program)
     (job_logs / 'Source.lean').write_text(program)
+    return {'module': module, 'logs': job_logs, 'metadata': metadata,
+            'source': label, 'tag': tag}
+
+
+def build_inventory(judge, target):
+    """Run the existing per-module audits and discover every local theorem."""
+    job_logs = target['logs']
     # These are trusted repository sources, not an untrusted agent submission.
     # Elaboration discovers actual theorem objects, never regex-matched names.
     with (job_logs / 'build.log').open('w') as output:
-        build = subprocess.run(['lake', 'build', module], cwd=judge,
+        build = subprocess.run(['lake', 'build', target['module']], cwd=judge,
                                stdout=output, stderr=subprocess.STDOUT)
-    if build.returncode or not metadata.is_file():
+    if build.returncode or not target['metadata'].is_file():
         print((job_logs / 'build.log').read_text(), file=sys.stderr)
-        raise ValueError(f'{label}: elaboration/inventory failed; logs: {job_logs}')
-    inventory = json.loads(metadata.read_text())
-    shutil.copyfile(metadata, job_logs / 'targets.json')
+        raise ValueError(f'{target["source"]}: elaboration/inventory failed; logs: {job_logs}')
+    inventory = json.loads(target['metadata'].read_text())
+    shutil.copyfile(target['metadata'], job_logs / 'targets.json')
+    return inventory
+
+
+def check(workspace, source=None, trust=False, library=False):
+    state = prepare(workspace)
+    judge = workspace / 'project'
+    target = prepare_target(state, judge, source, trust, library)
+    inventory = build_inventory(judge, target)
+    job_logs, module = target['logs'], target['module']
+    label, tag = target['source'], target['tag']
     config = write_config(judge, inventory['aliases'], challenge=module, solution=module,
                           filename=f'.lake/comparator/{tag}/config.json')
     shutil.copyfile(config, job_logs / 'config.json')

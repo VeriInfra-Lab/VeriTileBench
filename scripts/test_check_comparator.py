@@ -75,7 +75,7 @@ else:
     def project(self, root, source):
         (root / 'scripts' / 'bench').mkdir(parents=True)
         (root / 'bench/tritonbench_g/fixture').mkdir(parents=True)
-        for name in ('check_comparator.py', 'comparator_common.py', 'check-artifact.sh', 'source_axioms.py'):
+        for name in ('check_comparator.py', 'check_comparator_batch.py', 'comparator_common.py', 'check-artifact.sh', 'source_axioms.py'):
             shutil.copyfile(ROOT / 'scripts' / name, root / 'scripts' / name)
         for name in ('audit_trust_prep.py', 'audit_source.py', 'check_ports.sh', 'audit_trust.sh', 'check_worker_results.py', 'port_layout.py'):
             shutil.copyfile(ROOT / 'scripts' / 'bench' / name, root / 'scripts' / 'bench' / name)
@@ -84,8 +84,8 @@ else:
         (root / 'VeriTile/Meta').mkdir(parents=True)
         (root / 'VeriTile/Meta/StatementAudit.lean').write_text(
             'import Lean\nopen Lean Elab Command\n'
-            'elab "#auditModuleAxioms" : command => pure ()\n'
-            'elab "#auditModuleSpecs" : command => pure ()\n')
+            'elab "#auditModuleAxioms" : command => logInfo "Axiom audit: fixture"\n'
+            'elab "#auditModuleSpecs" : command => logInfo "Spec audit: fixture"\n')
         (root / 'bench/tritonbench_g/fixture/Fixture.lean').write_text(source)
         shutil.copyfile(ROOT / 'lean-toolchain', root / 'lean-toolchain')
         (root / 'lakefile.toml').write_text(
@@ -247,6 +247,57 @@ theorem chosen : model.choose (some 7) = 7 := by simp [model]
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('Official comparator is required', result.stderr)
         self.assertEqual(reports, [])
+
+    def run_batch(self, source, extra=None):
+        with tempfile.TemporaryDirectory(prefix='veritile-batch-regression-') as temp:
+            root = Path(temp)
+            self.project(root, source)
+            with (root / 'lakefile.toml').open('a') as output:
+                output.write('\n[[lean_lib]]\nname = "BatchFixtures"\n'
+                             'globs = ["bench.tritonbench_g.+"]\n')
+            for name, body in (extra or {}).items():
+                path = root / 'bench/tritonbench_g/fixture' / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(body)
+            result = subprocess.run(['python3', 'scripts/check_comparator_batch.py',
+                                     '--task', 'fixture'], cwd=root, text=True,
+                                    capture_output=True, timeout=180)
+            reports = [json.loads(p.read_text()) for p in root.glob('Logs/*/Batch_*/result.json')]
+            return result, reports
+
+    def test_batch_covers_private_generated_and_unimported_helpers(self):
+        result, reports = self.run_batch('''
+structure BatchModel where
+  choose : Option Nat → Nat
+private def batchModel : BatchModel where
+  choose := fun x => match x with
+    | some n => n
+    | none => 0
+theorem chosen : batchModel.choose (some 7) = 7 := by simp [batchModel]
+private theorem «a.b» : True := True.intro
+''', {'Proofs/Unused.lean': 'private theorem unused : True := True.intro\n',
+      'Kernels.lean': 'def batchDtype : Nat := 32\n'})
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(len(reports), 1)
+        report = reports[0]
+        self.assertTrue(report['accepted'])
+        self.assertEqual(report['module_count'], 3)
+        names = [name for names in report['modules'].values() for name in names]
+        self.assertTrue(any('batchModel.match_' in name and '.eq_' in name for name in names), names)
+        self.assertTrue(any(name.endswith('.unused') for name in names), names)
+        self.assertTrue(any('a.b' in name for name in names), names)
+        self.assertEqual(report['modules']['bench/tritonbench_g/fixture/Kernels.lean'], [])
+
+    def test_batch_rejects_unreferenced_private_bad_helper(self):
+        for proof in ('injected', 'by sorry'):
+            with self.subTest(proof=proof):
+                result, reports = self.run_batch('theorem target : True := True.intro\n', {
+                    'Proofs/Unused.lean': 'axiom injected : False\n'
+                    f'private theorem forgotten : False := {proof}\n'})
+                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(len(reports), 1, result.stdout + result.stderr)
+                self.assertFalse(reports[0]['accepted'])
+                self.assertIn('Illegal axiom detected', result.stderr)
 
 
 if __name__ == '__main__':
