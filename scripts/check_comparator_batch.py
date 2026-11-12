@@ -176,18 +176,60 @@ def require_sources(state, judge, task, files):
             raise ValueError('Source changed during batch audit: ' + name)
 
 
-def check_task(workspace, task):
+def build_inventories(judge, targets, batch_size=4):
+    """Build bounded waves, retaining each compiler's own audit log.
+
+    Lake's aggregate stdout also replays dependency logs. Its per-module trace
+    keeps messages attached to the compiler that actually produced them.
+    Never attribute a different file's successful audit to the current file.
+    """
+    if batch_size < 1:
+        raise ValueError('Audit batch size must be positive')
+    inventories = []
+    for start in range(0, len(targets), batch_size):
+        wave = targets[start:start + batch_size]
+        if batch_size == 1:
+            inventories.append(build_inventory(judge, wave[0]))
+            continue
+        log = wave[0]['logs'].parent / f'audit-wave-{start // batch_size:04d}.log'
+        with log.open('w') as output:
+            result = subprocess.run(['lake', 'build', *(t['module'] for t in wave)],
+                                    cwd=judge, stdout=output, stderr=subprocess.STDOUT)
+        if result.returncode:
+            print(log.read_text(), file=sys.stderr)
+            raise ValueError('Audit wave build failed; logs: ' + str(log))
+        for target in wave:
+            trace = judge / '.lake/build/lib/lean' / Path(*target['module'].split('.')).with_suffix('.trace')
+            if not trace.is_file() or not target['metadata'].is_file():
+                raise ValueError('Missing per-module audit trace or inventory: ' + target['source'])
+            entries = json.loads(trace.read_text())['log']
+            if any(entry['level'] == 'error' for entry in entries):
+                raise ValueError('Per-module compiler trace contains an error: ' + target['source'])
+            (target['logs'] / 'build.log').write_text(
+                '\n'.join(entry['message'] for entry in entries) + '\n')
+            shutil.copyfile(trace, target['logs'] / 'build.trace.json')
+            shutil.copyfile(target['metadata'], target['logs'] / 'targets.json')
+            inventories.append(json.loads(target['metadata'].read_text()))
+        print(f'Audit wave: {start + len(wave)}/{len(targets)} modules built', flush=True)
+    return inventories
+
+
+def check_task(workspace, task, audit_batch_size=4):
+    if audit_batch_size < 1:
+        raise ValueError('Audit batch size must be positive')
     start = time.monotonic()
     files = task_files(ROOT, task)
     state = prepare(workspace)
     judge = workspace / 'project'
     require_sources(state, judge, task, files)
     logs = Path(tempfile.mkdtemp(prefix='Batch_' + task + '-', dir=state['logs']))
+    snapshot_done = time.monotonic()
     reference = {}
     per_file = []
-    for file in files:
-        target = prepare_target(state, judge, ROOT / file, trust=True, all_axioms=True)
-        inventory = build_inventory(judge, target)
+    targets = [prepare_target(state, judge, ROOT / file, trust=True, all_axioms=True)
+               for file in files]
+    inventories = build_inventories(judge, targets, audit_batch_size)
+    for file, target, inventory in zip(files, targets, inventories, strict=True):
         if any('._hyg' in name for name in inventory['theorems']):
             raise ValueError('Hygienic source-copy targets require individual replay in this pilot: ' + file)
         audit_log = (target['logs'] / 'build.log').read_text()
@@ -240,6 +282,9 @@ def check_task(workspace, task):
               'coverage_matches': True, 'modules': discovered, 'per_file_audits': per_file,
               'comparator_exit': result.returncode, 'accepted': result.returncode == 0,
               'evidence_dir': str(logs), 'wall_seconds': time.monotonic() - start,
+              'snapshot_seconds': snapshot_done - start,
+              'audit_batch_size': audit_batch_size,
+              'audit_build_invocations': (len(files) + audit_batch_size - 1) // audit_batch_size,
               'audit_inventory_seconds': audit_done - start,
               'batch_inventory_seconds': replay_start - audit_done,
               'comparator_seconds': time.monotonic() - replay_start}
@@ -256,12 +301,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--task', required=True)
     parser.add_argument('--workspace', type=Path)
+    parser.add_argument('--audit-batch-size', type=int, default=4,
+                        help='audited modules per Lake build wave (default: 4; 1 retains the serial path)')
     args = parser.parse_args()
     if args.workspace:
-        check_task(args.workspace.resolve(), args.task)
+        check_task(args.workspace.resolve(), args.task, args.audit_batch_size)
     else:
         with tempfile.TemporaryDirectory(prefix='veritile-batch-') as temp:
-            check_task(Path(temp), args.task)
+            check_task(Path(temp), args.task, args.audit_batch_size)
 
 
 if __name__ == '__main__':
