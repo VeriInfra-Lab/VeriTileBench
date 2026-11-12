@@ -7,13 +7,16 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      full_audit:
-        description: Replay every retained module, including unused helper theorems
-        type: boolean
-        default: true
+      mode:
+        description: Smoke checks, full Lean build, or full build and independent replay
+        type: choice
+        default: build
+        options: [build, replay, smoke]
   schedule:
-    # 04:00 Asia/Singapore; GitHub cron uses UTC.
-    - cron: '0 20 * * *'
+    # 04:00 Asia/Singapore: build daily, add replay on Sunday.
+    # The UTC schedules do not overlap, so Sunday runs only once.
+    - cron: '0 20 * * 0-5'
+    - cron: '0 20 * * 6'
 
 permissions:
   contents: read
@@ -29,27 +32,17 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     outputs:
-      full_audit: ${{ steps.scope.outputs.full }}
-      audit_mode: ${{ steps.scope.outputs.mode }}
+      mode: ${{ steps.scope.outputs.mode }}
       shard_count: ${{ steps.scope.outputs.count }}
       shards: ${{ steps.scope.outputs.shards }}
     steps:
       - uses: actions/checkout@v4
-      - name: Select daily or manually requested full-corpus audit
+      - name: Select smoke, daily build, or weekly proof replay
         id: scope
         env:
-          FULL_AUDIT: ${{ inputs.full_audit }}
-        run: |
-          python3 - <<'PY'
-          import json, os
-          full = os.environ['GITHUB_EVENT_NAME'] == 'schedule' or os.environ['FULL_AUDIT'] == 'true'
-          count = 64 if full else 16
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
-              print('full=' + str(full).lower(), file=output)
-              print('mode=' + ('--final-inventory' if full else '--ci-targets'), file=output)
-              print(f'count={count}', file=output)
-              print('shards=' + json.dumps(list(range(count))), file=output)
-          PY
+          BENCH_AUDIT_MODE: ${{ inputs.mode }}
+          BENCH_AUDIT_SCHEDULE: ${{ github.event.schedule }}
+        run: python3 scripts/bench/ci_audit.py scope
       - name: Make room for the complete Lean corpus
         run: sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
       - name: Install required source audit tools
@@ -71,13 +64,14 @@ jobs:
           python3 -B -m unittest discover -s tests/python -p 'test_*.py'
           python3 -B -m unittest discover -s scripts -p 'test_audit_source.py'
           python3 -B -m unittest discover -s scripts -p 'test_audit_shards.py'
+          python3 -B -m unittest discover -s scripts -p 'test_bench_ci.py'
           python3 -B -m unittest discover -s scripts -p 'test_comparator_preflight.py'
           bash scripts/bench/audit_tritonbench_g.sh --source-only
 
   drafts:
     name: All 334 benchmark interfaces
     needs: global
-    if: needs.global.outputs.full_audit == 'true'
+    if: needs.global.outputs.mode != 'smoke'
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
@@ -98,9 +92,9 @@ jobs:
           python3 scripts/bench/check_imported_kernel_review.py
 
   audit:
-    name: Final entry build and replay ${{ matrix.shard }}
+    name: Final entry ${{ needs.global.outputs.mode == 'replay' && 'build and replay' || 'build' }} ${{ matrix.shard }}
     needs: global
-    if: needs.global.outputs.full_audit == 'true'
+    if: needs.global.outputs.mode != 'smoke'
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     strategy:
@@ -111,7 +105,6 @@ jobs:
       AUDIT_TRUST_JOBS: 1
       AUDIT_TRUST_SHARD_COUNT: ${{ needs.global.outputs.shard_count }}
       AUDIT_TRUST_SHARD_INDEX: ${{ matrix.shard }}
-      AUDIT_MODE: ${{ needs.global.outputs.audit_mode }}
     steps:
       - uses: actions/checkout@v4
       - name: Make room for proof replay
@@ -137,11 +130,7 @@ jobs:
         run: |
           snapshot="$RUNNER_TEMP/final-inventory.json"
           python3 scripts/bench/final_inventory.py --write "$snapshot"
-          inventory_targets=--ci-targets
-          if [ "$AUDIT_MODE" = --final-inventory ]; then
-            inventory_targets=--targets
-          fi
-          python3 scripts/bench/final_inventory.py "$inventory_targets" --snapshot "$snapshot" > "$RUNNER_TEMP/all-targets.txt"
+          python3 scripts/bench/final_inventory.py --targets --snapshot "$snapshot" > "$RUNNER_TEMP/all-targets.txt"
           snapshot_sha256=$(sha256sum -- "$snapshot")
           printf 'AUDIT_TRUST_SNAPSHOT=%s\nAUDIT_TRUST_SNAPSHOT_SHA256=%s\n' \
             "$snapshot" "${snapshot_sha256%% *}" >> "$GITHUB_ENV"
@@ -149,9 +138,13 @@ jobs:
             < "$RUNNER_TEMP/all-targets.txt" > "$RUNNER_TEMP/shard-targets.txt"
           test -s "$RUNNER_TEMP/shard-targets.txt"
           sed 's|/|.|g; s|\.lean$||' "$RUNNER_TEMP/shard-targets.txt" | xargs lake build
+      - name: Verify the build source snapshot
+        run: python3 scripts/bench/final_inventory.py --check --snapshot "$AUDIT_TRUST_SNAPSHOT"
       - uses: ./.github/actions/setup-comparator
+        if: needs.global.outputs.mode == 'replay'
       - name: Replay selected entries and their proof dependencies
-        run: scripts/bench/audit_trust.sh "$AUDIT_MODE"
+        if: needs.global.outputs.mode == 'replay'
+        run: scripts/bench/audit_trust.sh --final-inventory
 
   complete:
     name: TritonBench-G audit complete
@@ -162,16 +155,8 @@ jobs:
       GLOBAL_RESULT: ${{ needs.global.result }}
       CORPUS_RESULT: ${{ needs.audit.result }}
       DRAFTS_RESULT: ${{ needs.drafts.result }}
-      FULL_AUDIT: ${{ needs.global.outputs.full_audit }}
+      BENCH_AUDIT_MODE: ${{ needs.global.outputs.mode }}
     steps:
+      - uses: actions/checkout@v4
       - name: Require every build and proof gate
-        run: |
-          test "$GLOBAL_RESULT" = success
-          if [ "$FULL_AUDIT" = true ]; then
-            test "$CORPUS_RESULT" = success
-            test "$DRAFTS_RESULT" = success
-          else
-            test "$FULL_AUDIT" = false
-            test "$CORPUS_RESULT" = skipped
-            test "$DRAFTS_RESULT" = skipped
-          fi
+        run: python3 scripts/bench/ci_audit.py complete
