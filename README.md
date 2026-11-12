@@ -9,7 +9,7 @@ The original history and earlier proof snapshots remain available in that reposi
 | [TritonBench-G](bench/tritonbench_g) | 183 selected repairs with Python, Lean source, proof entries, and recorded proof scopes |
 | [Bug detection](bench/bug_detection) | 65 independent challenges |
 | [Pretraining kernels](bench/pretrain_kernels) | 269 independent challenges |
-| [Benchmark tutorial](bench/examples/TritonBenchVectorAddition) | Vector addition backed by the imported benchmark kernel |
+| [Worked examples](bench/examples) | 19 examples with Python sources and public Real/FP proof entries |
 
 ## Verify
 

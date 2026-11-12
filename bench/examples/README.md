@@ -1,0 +1,148 @@
+# Worked examples
+
+The 18 library examples are copied from VeriTile commit
+`3a0d07615a31b28e46ceff9660ce44351c425a73`, alongside the existing
+TritonBenchVectorAddition example. Lean and Python source bytes are preserved;
+the copy inventory is recorded in
+[`validation/examples-copy.json`](../../validation/examples-copy.json).
+
+All 19 groups have checked Python `@triton.jit` bodies in the
+[body-source inventory](https://github.com/VeriInfra-Lab/VeriTileBench/blob/main/documents/bench/BodySourceCorrespondence.md).
+[Source provenance](SOURCE_PROVENANCE.md) identifies examples whose Python
+reference was authored from an independent mathematical specification.
+
+There are **19 example groups and 21 public FP specifications**. Ten groups use
+empirical rules and nine use only strict-model or structural proofs; at
+specification level the split is 10 and 11. HyperConnectionsWidth contains a
+strict scalar specification and an empirical matrix specification.
+
+These proofs use **12 of the 36 available empirical instances**, counted with
+their full precision and guards. The 183 task main statements add no further
+instance. See the [current rule-usage guide](https://github.com/VeriInfra-Lab/VeriTile/blob/3a0d07615a31b28e46ceff9660ce44351c425a73/documents/FPRemainingAdmissionGaps.md)
+for the complete list and proof boundaries; catalogue availability is not proof use.
+
+Each example has its own directory. Start with `Kernels.lean` to read the
+Triton programs, then choose the specification you want to inspect.
+
+| File | Purpose |
+| --- | --- |
+| `<example>.py` | Python Triton sources for the example, with names for the reference and candidate. |
+| `Kernels.lean` | Original, optimized and intermediate source programs, including precision, casts, masks and stores. |
+| `RealCorrect.lean` | Public Real correctness against independent mathematical formulas. |
+| `FPEquiv.lean` | Public FP equivalence with the applicable precision and domain, and `#print_fp_assumptions`. |
+| `IO.lean` | Shared port bindings, logical views, memory layout and schedules. |
+| `Contract.lean` | Allowed inputs, call constraints and shared mathematical specifications. |
+| `Proofs/` | Execution, memory, projection and composition lemmas. Optional applications go in `Proofs/Misc/`. |
+
+The same layout applies to selected TritonBench-G tasks. Required proof
+helpers use the IO and contract definitions directly. Real and FP public
+entries remain independent, and cross-example reuse imports the relevant
+definition or helper module. StableLogSumExp keeps the historical FP
+countermodel in `Proofs/Unconditional.lean` and `Proofs/UnconditionalModel.lean`.
+
+IO windows, masks, scratch regions, precision profiles and numerical domains
+determine the statement itself. Scheduled examples assemble their public
+contracts from the named definitions. Lean checks their connection to the
+execution interfaces used by the proofs.
+
+Reduction examples use `FP.Kernel₁`, `FP.Kernel₁ₓ₂` or `FP.Kernel₃` from
+`VeriTile.Triton.Float.Kernel`, according to the number of input/output regions.
+Declare the reference with named `io`, `profile` and `domain` fields, then reuse
+that configuration for the other source. `FP.Kernel₁` also lists `comparisons`:
+`[]` means no comparison support is required; StableLogSumExp lists the two
+operations used by its fallback. `FP.Kernel₁.ofExecution` reuses existing
+reduction proofs, preserving their execution and memory-frame obligations.
+`FP.fp32` names the default precision and sum-tree profile, preserving source casts.
+
+LogExp and the reciprocal examples use `FP.PrefixKernel₁`: their domain checks
+the actual registers after an explicit prefix, with `defaultPrecision` stated
+in the entry. Pure structural proofs retain `KernelIO…`; local rewrites retain
+their `Program` and its named `kernel`/`domain` fields. Their broader execution
+scope is preserved. For IO contracts, `withKernel` replaces the source while
+Lean checks its projection automatically; changes to scratch or masks remain
+explicit. These helpers do not establish numerical equivalence.
+
+`RealCorrect.lean` and `FPEquiv.lean` reference the same typed source definitions
+without importing one another. Names such as `originalKernel` only specialize
+region names or the documented scalar slice; they do not duplicate the source.
+Correctness uses the real projection of that source, erasing casts when required.
+In `FloatDTypeSoftmax`, both proofs retain the separate `x32` load and `x` cast
+assignments; only their numerical interpretation differs.
+
+Experiment shape and distribution select atomic assumptions. They do not fix
+the dimensions of the subsequent proofs. Precision, intrinsic choice and
+required input/intermediate domains remain part of the FP statements.
+
+| Example | Transformation and existing proof scope |
+| --- | --- |
+| [TritonBenchVectorAddition](TritonBenchVectorAddition) | Masked TritonBench addition; strict FP32 addition commutation with `≡[[]]`. |
+| [VectorAdd](VectorAdd) | Aligned addition; strict FP32 addition commutation with `≡[[]]`. |
+| [FlatVectorAdd](FlatVectorAdd) | Masked addition; strict FP32 addition commutation with `≡[[]]`. |
+| [FloatDTypeAdd](FloatDTypeAdd) | Explicitly typed addition; strict FP32 addition commutation with `≡[[]]`, preserving the output cast. |
+| [AdamUpdateGridLaunch](AdamUpdateGridLaunch) | In-place Lion update (the source is named Adam); strictly commute the update's addition with `≡[[]]`. |
+| [HyperConnectionsDepth](HyperConnectionsDepth) | Symbolic `S/T/D` and normalization count; strictly commute the final pointwise addition with `≡[[]]`. General real matrix formula with bounded flat memory; contextual FP proof uses the two tactics. |
+| [HyperConnectionsWidth](HyperConnectionsWidth) | Scalar specialization strictly commutes two products with `≡[[]]`. The symbolic matrix variant replaces logit division by reciprocal multiplication and retains `R` for `DIV-MUL-RCP`, preserving both matrix products. General real formulas with bounded flat memory; the two tactics compose both FP rewrite sites. |
+| [RowWiseMax](RowWiseMax) | Inline the maximum computation; structural FP equivalence without numerical assumptions. |
+| [RowWiseSum](RowWiseSum) | Prove reversed reduction lanes using strict addition commutation and empirical association/zero identities, with guarded intermediate operands. |
+| [FusedSiLU](FusedSiLU) | Fuse the pipeline; structural FP equivalence without numerical assumptions. |
+| [FusedSwiglu](FusedSwiglu) | Fuse the masked pipeline while retaining casts; structural FP equivalence without numerical assumptions. |
+| [SoftmaxReciprocal](SoftmaxReciprocal) | Replace per-lane division with reciprocal multiplication; unchanged tl.exp prefix, only div_mul_rcp assumed. |
+| [FloatDTypeSoftmax](FloatDTypeSoftmax) | The reciprocal rewrite with fp32 loads/stores and fp64 work; unchanged tl.exp prefix, only the casted div_mul_rcp atom assumed. |
+| [SoftmaxStable](SoftmaxStable) | Naive versus max-shifted softmax, derived from scalar assumptions and reduction plans. |
+| [OnlineSoftmax](OnlineSoftmax) | Complete two-pass online kernel versus batch softmax; successful executions, stored output rows and memory frames; real correctness includes bounded flat memory. |
+| [Welford](Welford) | Two-pass versus online mean/variance, with the stated count bound and reduction plan. |
+| [FusedLayerNorm](FusedLayerNorm) | Two-pass versus Welford-based LayerNorm, with the stated count bound and domains. |
+| [LogExp](LogExp) | Eliminate the masked, piecewise libdevice log-exp expression using its admitted atom. |
+| [StableLogSumExp](StableLogSumExp) | Fallback-preserving optimized source versus the unchanged direct tl.log reference, proved using `log_mul_split .tl`, `log_exp_cancel .tl`, libdevice exp-sub and arithmetic. Symbolic row size, reduction schedule, bf16 output and frame retained. `Proofs/Unconditional.lean` refutes the historical general FP target: a singleton logical countermodel satisfies all selected rules but stores different results. This does not assert a GPU or two-gates failure. |
+
+Both versions now have real correctness specifications for vector addition,
+the Lion update, general mHC matrices and their scalar specializations, reversed row sum and inlined row max.
+Each real statement includes successful execution and a memory frame. General mHC and complete online correctness include bounded flat memory: buffer placements are disjoint, both input/output windows are bounded, and all other flat cells are preserved. Empty tiles are covered by the optimized aligned/float/TritonBench adds,
+row sum and Lion update; masked FlatVectorAdd and row max retain their stated
+positive-block-size conditions. OnlineSoftmax proves actual stored outputs; the recurrence-only helper remains available separately.
+
+The six addition-commutation examples above contain seven public FP
+specifications, including scalar and matrix HyperConnectionsDepth. Each uses
+the original `Program` and `≡[[]]`, with no empirical `R` parameter.
+`ScalarArithmetic.add_comm_strict` connects the shared `ScalarOpsLaws.add_comm`
+proof to the fixed `Guarded.fp32Theory`; its arithmetic profile is
+`Software.strictFP32` with `.ieeeValue`. Contextual proofs retain source
+precision, casts, computed operands, order, and the unchanged surrounding
+operations. Historical ADD-COMMUTE reports remain historical evidence;
+these specifications do not depend on their admission.
+
+HyperConnectionsWidth's scalar `mhc_width_equiv` likewise uses `≡[[]]` and the
+shared strict multiplication commutation theorem at both sites, preserving
+the actual computed exponential operands and their finite domains. Its matrix
+`mhc_width_matrix_equiv` performs a division-to-reciprocal rewrite instead and
+keeps the empirical `DIV-MUL-RCP` rule in `R`.
+
+The seven local-rewrite examples retain the finite operands of each actual
+rewrite in `GuardedRewrite.Program.domain`. The checked contextual lemmas
+preserve the whole execution result, including all registers and memory.
+They preserve successful runs and also agree on failure; they do not claim
+that every possible surrounding instruction can execute. Masked additions
+require finite evaluated operands even on inactive lanes, since these statements
+still compute the addition before the masked store.
+
+RowWiseSum uses successful execution summaries and explicit reduction trees.
+The domain lists the intermediate operands of both normalization paths; finite
+input leaves alone are insufficient. The proof uses strict `add_commute` and
+empirical `add_assoc`/`add_zero`, including normalization's zero steps. Padding stays
+explicit in the original schedules, and row length/stride remain symbolic.
+The generic tactics remain available for syntax derivations and their existing
+IO adapter; see [the tactic guide](https://github.com/VeriInfra-Lab/VeriTile/blob/3a0d07615a31b28e46ceff9660ce44351c425a73/documents/EquivalenceTactics.md).
+Both scalar and matrix local rewrites use `split_equiv` and `solve_fp`.
+The `GuardedRewrite` and `ProfiledRewrite` adapters retain each actual execution
+prefix and compose checked contextual lemmas. Domains locate assignments with
+`Source.prefixBefore`, using a zero-based occurrence for repeated writes to the
+same register. The proof checks that the selected prefix matches the source;
+inserting an unrelated common statement does not require new statement offsets.
+The other completed FP examples connect their transformations
+to execution or observable outputs. A proof of one stated slice or observation
+does not certify a larger kernel or a different precision/intrinsic variant.
+
+Build all local example modules with `lake build BenchmarkExamples`.
+Run `python3 scripts/bench/audit_jit_correspondence.py --help` for the source
+correspondence audit. The benchmark's final inventory and full proof replay
+discover all local example modules, including auxiliary proofs.
