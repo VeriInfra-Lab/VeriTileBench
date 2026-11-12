@@ -8,7 +8,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from check_comparator_batch import canonical_name, require_coverage
+from check_comparator_batch import canonical_name, require_batch_targets, require_coverage
 
 
 def digest(data):
@@ -64,12 +64,22 @@ def compare(baseline, batch_file, old_metrics, new_metrics):
         for file, names in batch['modules'].items()])
     if batch['module_count'] != len(canonical) or batch['theorem_count'] != sum(map(len, canonical.values())):
         raise ValueError('Batch receipt counts differ from its inventory')
+    inventory = json.loads((batch_file.parent / 'targets.json').read_text())
+    additional = require_batch_targets(canonical, inventory)
+    if (inventory['theorems'] != batch['batch_targets'] or
+            inventory['owned_modules'] != batch['owned_modules'] or
+            batch['unique_theorem_count'] != len(inventory['theorems']) or
+            batch['additional_targets'] != additional or not batch['all_theorems_axioms_checked']):
+        raise ValueError('Batch receipt differs from its unique target inventory')
     audits = batch['per_file_audits']
     if len(audits) != len(canonical) or {a['file'] for a in audits} != set(canonical):
         raise ValueError('Batch did not retain every per-file trust audit')
     for audit in audits:
         if audit_summaries(Path(audit['audit_log'])) != old_audits[audit['file']]:
             raise ValueError('Old and new trust audits differ: ' + audit['file'])
+        expected = f'Full theorem axiom audit: theorems={len(canonical[audit["file"]])}'
+        if expected not in Path(audit['audit_log']).read_text():
+            raise ValueError('Missing complete theorem axiom audit: ' + audit['file'])
     for metrics, invocations in ((old_metrics, len(canonical)), (new_metrics, 1)):
         if metrics['exit_code'] != 0:
             raise ValueError('Measured command failed')
@@ -79,13 +89,22 @@ def compare(baseline, batch_file, old_metrics, new_metrics):
             old_metrics['requested_sampling_interval_seconds'] != new_metrics['requested_sampling_interval_seconds']):
         raise ValueError('Memory measurement methods differ')
     total = sum(map(len, canonical.values()))
+    unique = {name for names in canonical.values() for name in names}
+    payload = {'per_file': canonical, 'batch_targets': inventory['theorems'],
+               'owned_modules': inventory['owned_modules']}
     summary = {
         'schema': 1, 'task': batch['task'], 'proof_inputs_identical': True,
-        'proof_inputs_sha256': digest(old_inputs), 'inventory_sha256': digest(canonical),
-        'module_count': len(canonical), 'theorem_count': total,
-        'private_theorem_count': sum(n.startswith('_private.') for ns in canonical.values() for n in ns),
-        'proofs_directory_theorem_count': sum(len(ns) for f, ns in canonical.items() if '/Proofs/' in f),
-        'missing_theorems': [], 'extra_theorems': [], 'per_file_trust_audits_passed': len(audits),
+        'proof_inputs_sha256': digest(old_inputs), 'canonical_inventory_sha256': digest(payload),
+        'module_count': len(canonical), 'per_file_theorem_occurrences': total,
+        'baseline_unique_theorem_count': len(unique),
+        'batch_unique_theorem_count': len(inventory['theorems']),
+        'private_theorem_count': sum(n.startswith('_private.') for n in unique),
+        'batch_private_theorem_count': sum(n.startswith('_private.') for n in inventory['theorems']),
+        'proofs_directory_theorem_occurrences': sum(len(ns) for f, ns in canonical.items() if '/Proofs/' in f),
+        'additional_batch_theorems': additional,
+        'per_file_inventories_identical': True, 'missing_theorems': [],
+        'per_file_trust_audits_passed': len(audits),
+        'all_theorem_axiom_audits_passed': len(audits),
         'per_file_trust_audit_summaries_identical': True,
         'audit_summaries_sha256': digest(old_audits),
         'baseline_accepted': True, 'batch_accepted': True,
@@ -107,7 +126,7 @@ def compare(baseline, batch_file, old_metrics, new_metrics):
                         'cache': 'Both runs start with copies of the same built dependency cache; fresh independent judge workspaces. Wall time includes snapshot preparation and cleanup.',
                         'boundary': 'Local-host measurement; sampled aggregate RSS can count shared pages repeatedly. Not a GitHub runner capacity or speed guarantee.'},
     }
-    return summary, canonical
+    return summary, payload
 
 
 def main():
@@ -123,9 +142,12 @@ def main():
                                  json.loads(args.old_metrics.read_text()),
                                  json.loads(args.new_metrics.read_text()))
     args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.inventory.parent.mkdir(parents=True, exist_ok=True)
+    packed = gzip.compress(json.dumps(inventory, sort_keys=True, ensure_ascii=False,
+                                      separators=(',', ':')).encode(), mtime=0)
+    summary['inventory_file_sha256'] = hashlib.sha256(packed).hexdigest()
+    args.inventory.write_bytes(packed)
     args.output.write_text(json.dumps(summary, indent=2) + '\n')
-    args.inventory.write_bytes(gzip.compress(json.dumps(inventory, sort_keys=True,
-                                                        ensure_ascii=False).encode(), mtime=0))
     print(json.dumps(summary, indent=2))
 
 

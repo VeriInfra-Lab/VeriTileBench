@@ -8,7 +8,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from check_comparator_batch import canonical_name, require_coverage, task_files
+from check_comparator_batch import canonical_name, require_batch_targets, require_coverage, task_files
 from scripts.bench.compare_replay import compare
 
 
@@ -88,6 +88,28 @@ class BatchCoverageTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'use individual replay'):
                 task_files(root, 'fixture')
 
+    def test_lazy_equations_can_move_module_attribution_without_being_dropped(self):
+        other = 'bench/tritonbench_g/fixture/Other.lean'
+        reference = {self.file: ['local_helper', 'imported.eq_1'], other: ['other_helper']}
+        inventory = {'owned_modules': [
+            {'module': self.module, 'theorems': ['local_helper']},
+            {'module': other[:-5].replace('/', '.'), 'theorems': ['other_helper', 'imported.eq_1']}],
+            'theorems': ['local_helper', 'other_helper', 'imported.eq_1'],
+            'aliases': ['target0', 'target1', 'target2']}
+        self.assertEqual(require_batch_targets(reference, inventory), [])
+        inventory['theorems'].remove('imported.eq_1')
+        with self.assertRaisesRegex(ValueError, 'target union differs'):
+            require_batch_targets(reference, inventory)
+
+    def test_original_module_additional_theorems_must_also_be_replayed(self):
+        inventory = {'owned_modules': [{'module': self.module, 'theorems': ['extra']}],
+                     'theorems': ['helper', self.private], 'aliases': ['target0', 'target1']}
+        with self.assertRaises(ValueError):
+            require_batch_targets(self.reference, inventory)
+        inventory['theorems'].append('extra')
+        inventory['aliases'].append('target2')
+        self.assertEqual(require_batch_targets(self.reference, inventory), ['extra'])
+
 
 class ReplayComparisonTests(unittest.TestCase):
     def setUp(self):
@@ -112,7 +134,7 @@ class ReplayComparisonTests(unittest.TestCase):
         (old / 'targets.json').write_text(json.dumps({'theorems': names}))
         audit = 'Axiom audit: headlines=0\nSpec audit: kernels=0\n'
         (old / 'build.log').write_text(audit)
-        (new / 'audit.log').write_text(audit)
+        (new / 'audit.log').write_text(audit + 'Full theorem axiom audit: theorems=2\n')
         inputs = {'Input.lean': 'b' * 64}
         (self.baseline / 'inputs.json').write_text(json.dumps(inputs))
         (new.parent / 'inputs.json').write_text(json.dumps(inputs))
@@ -122,6 +144,13 @@ class ReplayComparisonTests(unittest.TestCase):
                       'per_file_audits': [{'file': file, 'audit_log': str(new / 'audit.log')}],
                       'audit_inventory_seconds': 0.3, 'batch_inventory_seconds': 0.2,
                       'comparator_seconds': 0.5}
+        self.batch.update({'batch_targets': self.batch['modules'][file],
+                           'owned_modules': [{'module': module, 'theorems': self.batch['modules'][file]}],
+                           'unique_theorem_count': 2, 'additional_targets': [],
+                           'all_theorems_axioms_checked': True})
+        (new / 'targets.json').write_text(json.dumps({
+            'theorems': self.batch['batch_targets'], 'owned_modules': self.batch['owned_modules'],
+            'aliases': ['target0', 'target1']}))
         self.batch_file.write_text(json.dumps(self.batch))
         self.metrics = {'exit_code': 0, 'observed_systemd_service_cgroups': ['run-fixture.service'],
                         'wall_seconds': 1, 'sampled_peak_total_rss_bytes': 100,
@@ -130,7 +159,7 @@ class ReplayComparisonTests(unittest.TestCase):
 
     def test_comparison_preserves_every_auxiliary_target(self):
         summary, _ = compare(self.baseline, self.batch_file, self.metrics, self.metrics)
-        self.assertEqual(summary['theorem_count'], 2)
+        self.assertEqual(summary['per_file_theorem_occurrences'], 2)
         self.assertEqual(summary['private_theorem_count'], 1)
         self.assertTrue(summary['per_file_trust_audit_summaries_identical'])
 
