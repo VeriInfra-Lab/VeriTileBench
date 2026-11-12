@@ -148,3 +148,45 @@ not predictions for GitHub runners. The largest sampling gaps were 170.3 ms
 (old) and 165.5 ms (new); short memory spikes may be missed. The pilot is opt-in
 and does not replace the full-corpus CI driver. Wider adoption requires checking
 batch compatibility, memory limits and runtime on representative tasks.
+
+## Bounded audit-build measurements
+
+The follow-up keeps the exact audited source copies and audit predicates, but
+submits multiple modules to each Lake build. Both measured wave sizes pass the
+same official replay and strict comparison against the original 100 per-file
+receipts and the initial serial-preparation batch.
+
+| Audit preparation | Lake audit builds | Preparation, compilation and audits | Total wall time | Sampled aggregate RSS peak |
+| --- | ---: | ---: | ---: | ---: |
+| Serial, one module per build | 100 | 24m 04s | 27m 20s | 11.65 GiB |
+| Two modules per wave (default) | 50 | 17m 45s | 21m 08s | 11.68 GiB |
+| Four modules per wave | 25 | 13m 33s | 17m 22s | 16.57 GiB |
+
+The default reduces the preparation/audit phase by **26.2%** and total wall time
+by **22.7%**, with a 33 MiB increase in the sampled aggregate RSS peak. Four-module
+waves reduce total wall time by **36.4%**, but their peak contains four compiler
+processes at approximately 3.9 GiB RSS each. The serial and two-module peaks
+occur in the official replay phase instead. These are aggregate RSS readings;
+shared pages can be counted repeatedly.
+
+The [two-module receipt](../../validation/replay_batch/rms_matmul_rbe.audit-waves-2.json)
+and [four-module receipt](../../validation/replay_batch/rms_matmul_rbe.audit-waves-4.json)
+bind each result to its measured implementation and driver hashes. Both reuse
+the initial compressed inventory: its canonical digest is unchanged. Every
+per-file list, the full 1,890-target union, all 374 private targets and the
+per-module trust-audit summaries match. The 10,741 proof inputs and official
+comparator binary also match across all runs. No auxiliary theorem is filtered
+out, and no task source or public theorem condition changed.
+
+The measured four-module implementation is
+`e03b84f7bf5f6066f715e81bdba72bad2c407f95` and the measured two-module implementation is
+`a3c79f11b313eaffc08bccf97e91076fe3813898`. These are single local trials with
+the same built dependency cache; the trial commands ran sequentially. The
+two-module comparator phase took 159.5 s, close to the initial 158.6 s; the
+four-module phase took 193.6 s. The largest sampling gaps were 160.7 ms for two
+modules and 304.4 ms for four. This comparison is not a statistical runtime or
+physical-memory guarantee for other machines or tasks.
+
+Use `--audit-batch-size 1` for the previous serial preparation or `4` to select
+the measured higher-memory configuration. Full-corpus CI continues to use the
+existing per-file driver; this pilot does not change its acceptance scope.
