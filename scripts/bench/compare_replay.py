@@ -129,6 +129,52 @@ def compare(baseline, batch_file, old_metrics, new_metrics):
     return summary, payload
 
 
+def compare_previous_batch(previous_file, batch_file, previous_metrics, new_metrics):
+    """Require the earlier batch to cover exactly the same proofs and audits."""
+    previous = json.loads(previous_file.read_text())
+    current = json.loads(batch_file.read_text())
+    for row, metrics in ((previous, previous_metrics), (current, new_metrics)):
+        if (row.get('mode') != 'task-batch-replay' or not row.get('accepted') or
+                row.get('comparator_exit') != 0 or metrics['exit_code'] != 0):
+            raise ValueError('Batch comparison requires two accepted replays')
+    for key in ('task', 'comparator_sha256', 'module_count', 'theorem_count',
+                'unique_theorem_count', 'batch_targets', 'owned_modules',
+                'additional_targets', 'all_theorems_axioms_checked'):
+        if previous[key] != current[key]:
+            raise ValueError('Previous/current batch differs: ' + key)
+    require_coverage(previous['modules'], [
+        {'module': f[:-5].replace('/', '.'), 'theorems': names}
+        for f, names in current['modules'].items()])
+    old_inputs = json.loads((previous_file.parent.parent / 'inputs.json').read_text())
+    new_inputs = json.loads((batch_file.parent.parent / 'inputs.json').read_text())
+    if old_inputs != new_inputs:
+        raise ValueError('Previous/current batch proof inputs differ')
+    for row in (previous, current):
+        audits = row['per_file_audits']
+        if len(audits) != len(row['modules']) or {a['file'] for a in audits} != set(row['modules']):
+            raise ValueError('Missing previous/current per-file audit')
+    old_audits = {a['file']: audit_summaries(Path(a['audit_log'])) for a in previous['per_file_audits']}
+    new_audits = {a['file']: audit_summaries(Path(a['audit_log'])) for a in current['per_file_audits']}
+    if old_audits != new_audits:
+        raise ValueError('Previous/current per-file trust audits differ')
+    for key in ('rss_method', 'requested_sampling_interval_seconds', 'cpu_affinity_count'):
+        if previous_metrics[key] != new_metrics[key]:
+            raise ValueError('Batch measurement conditions differ: ' + key)
+    return {
+        'per_file_inventories_identical': True,
+        'per_file_trust_audit_summaries_identical': True,
+        'batch_targets_identical': True, 'proof_inputs_identical': True,
+        'previous_wall_seconds': previous_metrics['wall_seconds'],
+        'previous_sampled_peak_total_rss_bytes': previous_metrics['sampled_peak_total_rss_bytes'],
+        'previous_audit_inventory_seconds': previous['audit_inventory_seconds'],
+        'wall_speedup_over_previous_batch': previous_metrics['wall_seconds'] / new_metrics['wall_seconds'],
+        'audit_inventory_speedup': previous['audit_inventory_seconds'] / current['audit_inventory_seconds'],
+        'audit_batch_size': current['audit_batch_size'],
+        'audit_build_invocations': current['audit_build_invocations'],
+        'snapshot_seconds': current['snapshot_seconds'],
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--baseline', type=Path, required=True)
@@ -137,10 +183,18 @@ def main():
     parser.add_argument('--new-metrics', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--inventory', type=Path, required=True)
+    parser.add_argument('--previous-batch', type=Path)
+    parser.add_argument('--previous-metrics', type=Path)
     args = parser.parse_args()
+    if bool(args.previous_batch) != bool(args.previous_metrics):
+        parser.error('--previous-batch and --previous-metrics must be supplied together')
     summary, inventory = compare(args.baseline, args.batch,
                                  json.loads(args.old_metrics.read_text()),
                                  json.loads(args.new_metrics.read_text()))
+    if args.previous_batch:
+        summary['previous_batch_comparison'] = compare_previous_batch(
+            args.previous_batch, args.batch, json.loads(args.previous_metrics.read_text()),
+            json.loads(args.new_metrics.read_text()))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.inventory.parent.mkdir(parents=True, exist_ok=True)
     packed = gzip.compress(json.dumps(inventory, sort_keys=True, ensure_ascii=False,

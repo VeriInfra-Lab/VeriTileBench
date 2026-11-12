@@ -5,11 +5,13 @@ import json
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
+from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from check_comparator_batch import canonical_name, require_batch_targets, require_coverage, task_files
-from scripts.bench.compare_replay import compare
+from check_comparator_batch import build_inventories, canonical_name, require_batch_targets, require_coverage, task_files
+from scripts.bench.compare_replay import compare, compare_previous_batch
 
 
 class BatchCoverageTests(unittest.TestCase):
@@ -111,6 +113,62 @@ class BatchCoverageTests(unittest.TestCase):
         self.assertEqual(require_batch_targets(self.reference, inventory), ['extra'])
 
 
+class AuditWaveTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.targets = []
+        for i in range(5):
+            module = f'VeriTileComparator.Case{i}'
+            logs = self.root / 'logs' / str(i)
+            logs.mkdir(parents=True)
+            metadata = logs / 'metadata.json'
+            metadata.write_text(json.dumps({'theorems': [f'theorem{i}']}))
+            trace = self.root / '.lake/build/lib/lean/VeriTileComparator' / f'Case{i}.trace'
+            trace.parent.mkdir(parents=True, exist_ok=True)
+            trace.write_text(json.dumps({'log': [{'level': 'info', 'message': f'audit of module {i}'}]}))
+            self.targets.append({'module': module, 'source': f'Case{i}.lean',
+                                 'logs': logs, 'metadata': metadata})
+
+    def test_bounded_waves_preserve_individual_inventories_and_logs(self):
+        with patch('check_comparator_batch.subprocess.run', return_value=SimpleNamespace(returncode=0)) as run:
+            rows = build_inventories(self.root, self.targets, 2)
+        self.assertEqual([r['theorems'] for r in rows], [[f'theorem{i}'] for i in range(5)])
+        self.assertEqual([len(call.args[0]) - 2 for call in run.call_args_list], [2, 2, 1])
+        for i, target in enumerate(self.targets):
+            self.assertEqual((target['logs'] / 'build.log').read_text(), f'audit of module {i}\n')
+            self.assertTrue((target['logs'] / 'build.trace.json').is_file())
+
+    def test_serial_path_remains_available(self):
+        with patch('check_comparator_batch.build_inventory', return_value={'theorems': []}) as run:
+            self.assertEqual(len(build_inventories(self.root, self.targets, 1)), 5)
+        self.assertEqual(run.call_count, 5)
+
+    def test_failed_build_cannot_reuse_existing_metadata(self):
+        with patch('check_comparator_batch.subprocess.run', return_value=SimpleNamespace(returncode=1)):
+            with self.assertRaisesRegex(ValueError, 'wave build failed'):
+                build_inventories(self.root, self.targets, 2)
+
+    def test_missing_individual_trace_is_a_failure(self):
+        (self.root / '.lake/build/lib/lean/VeriTileComparator/Case1.trace').unlink()
+        with patch('check_comparator_batch.subprocess.run', return_value=SimpleNamespace(returncode=0)):
+            with self.assertRaisesRegex(ValueError, 'Missing per-module audit trace'):
+                build_inventories(self.root, self.targets, 2)
+
+    def test_trace_error_cannot_be_hidden_by_a_successful_wave(self):
+        (self.root / '.lake/build/lib/lean/VeriTileComparator/Case1.trace').write_text(
+            json.dumps({'log': [{'level': 'error', 'message': 'failed audit'}]}))
+        with patch('check_comparator_batch.subprocess.run', return_value=SimpleNamespace(returncode=0)):
+            with self.assertRaisesRegex(ValueError, 'compiler trace contains an error'):
+                build_inventories(self.root, self.targets, 2)
+
+    def test_invalid_batch_size_is_rejected(self):
+        for size in (0, -1):
+            with self.assertRaisesRegex(ValueError, 'must be positive'):
+                build_inventories(self.root, self.targets, size)
+
+
 class ReplayComparisonTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -181,6 +239,36 @@ class ReplayComparisonTests(unittest.TestCase):
         self.batch_file.write_text(json.dumps(self.batch))
         with self.assertRaisesRegex(ValueError, 'theorem coverage differs'):
             compare(self.baseline, self.batch_file, self.metrics, self.metrics)
+
+    def previous_batch(self):
+        previous = self.batch_file.parent.parent.parent / 'previous/Batch_case/result.json'
+        previous.parent.mkdir(parents=True)
+        (previous.parent.parent / 'inputs.json').write_text(
+            (self.batch_file.parent.parent / 'inputs.json').read_text())
+        self.batch.update(mode='task-batch-replay', audit_batch_size=4,
+                          audit_build_invocations=1, snapshot_seconds=0.1)
+        self.batch_file.write_text(json.dumps(self.batch))
+        previous.write_text(json.dumps(self.batch))
+        return previous
+
+    def test_previous_batch_must_preserve_exact_helpers_and_audits(self):
+        previous = self.previous_batch()
+        row = compare_previous_batch(previous, self.batch_file, self.metrics, self.metrics)
+        self.assertTrue(row['batch_targets_identical'])
+        self.assertEqual(row['audit_batch_size'], 4)
+
+    def test_previous_batch_different_helper_cannot_be_compared(self):
+        previous = self.previous_batch()
+        self.batch['batch_targets'] = ['different_helper']
+        self.batch_file.write_text(json.dumps(self.batch))
+        with self.assertRaisesRegex(ValueError, 'batch_targets'):
+            compare_previous_batch(previous, self.batch_file, self.metrics, self.metrics)
+
+    def test_previous_batch_different_measurement_conditions_cannot_be_compared(self):
+        previous = self.previous_batch()
+        metrics = {**self.metrics, 'cpu_affinity_count': 2}
+        with self.assertRaisesRegex(ValueError, 'measurement conditions differ'):
+            compare_previous_batch(previous, self.batch_file, self.metrics, metrics)
 
 
 if __name__ == '__main__':
