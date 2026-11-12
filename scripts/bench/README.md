@@ -67,8 +67,12 @@ different statement order, unresolved helper links and unsupported syntax fail
 the source check.
 
 `audit_tritonbench_g.sh` without arguments builds and audits the complete
-corpus; `--global-only` checks source inventories and review evidence. The full corpus
-CI audit runs daily at 04:00 Asia/Singapore or on manual dispatch.
+corpus; `--global-only` checks source inventories and review evidence. CI builds
+the full corpus daily at 04:00 Asia/Singapore, using 16 build workers. Sunday's
+run adds complete independent comparator replay using 64 workers instead.
+The schedules do not overlap. Manual dispatch defaults to `mode=build`;
+`mode=replay` requests the full independent audit and `mode=smoke` runs the PR
+checks. A daily build pass does not claim comparator acceptance.
 `check_ports.sh` without arguments forwards to the current corpus audit;
 named arguments select one task and all its retained Lean helpers.
 
