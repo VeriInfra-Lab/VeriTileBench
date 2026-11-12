@@ -15,7 +15,7 @@ import subprocess
 import sys
 import tempfile
 
-from comparator_common import comparator_command, require_tools, snapshot_project, write_config
+from comparator_common import AXIOMS, comparator_command, require_tools, snapshot_project, write_config
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -40,6 +40,7 @@ run_cmd do
   else
     names := selected
   names := names.qsort (·.toString < ·.toString)
+__AXIOM_AUDIT__
   let mut aliases : Array String := #[]
   for i in [:names.size] do
     let name := names[i]!
@@ -67,6 +68,23 @@ run_cmd do
     ("aliases", toJson aliases)
   ]
   liftIO <| IO.FS.writeFile __REPORT__ report.compress
+'''
+
+ALL_THEOREM_AXIOMS = r'''
+  let allowed : Array Name := __ALLOWED__
+  let mut pending := names
+  let mut seen : NameSet := {}
+  while !pending.isEmpty do
+    let name := pending.back!
+    pending := pending.pop
+    if seen.contains name then continue
+    seen := seen.insert name
+    let some info := kernelEnv.find? name
+      | throwError "Missing proof dependency: {name}"
+    if let .axiomInfo _ := info then
+      unless allowed.contains name do throwError "DISALLOWED axiom: {name}"
+    pending := pending ++ info.getUsedConstantsAsSet.toList.toArray
+  logInfo m!"Full theorem axiom audit: theorems={names.size}"
 '''
 
 
@@ -118,7 +136,7 @@ def library_targets(manifest):
     return sorted(modules), sorted(set(names))
 
 
-def prepare_target(state, judge, source=None, trust=False, library=False):
+def prepare_target(state, judge, source=None, trust=False, library=False, all_axioms=False):
     """Write one audited inventory module without claiming proof acceptance."""
     logs = Path(state['logs'])
     if library:
@@ -144,6 +162,9 @@ def prepare_target(state, judge, source=None, trust=False, library=False):
     selection = '#[' + ', '.join(f'{json.dumps(n)}.toName' for n in selected) + ']'
     footer = INVENTORY.replace('__SELECTED__', selection).replace(
         '__REPORT__', json.dumps(str(metadata)))
+    audit = ALL_THEOREM_AXIOMS.replace('__ALLOWED__', '#[' + ', '.join(
+        json.dumps(name) + '.toName' for name in AXIOMS) + ']') if all_axioms else ''
+    footer = footer.replace('__AXIOM_AUDIT__', audit)
     program = add_import(text, 'Lean') + '\n' + footer
     (judge / 'VeriTileComparator' / (tag + '.lean')).write_text(program)
     (job_logs / 'Source.lean').write_text(program)

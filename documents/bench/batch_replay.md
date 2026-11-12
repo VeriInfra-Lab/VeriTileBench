@@ -20,24 +20,38 @@ selects **all** Lean modules in the task, including modules not imported by
 `RealCorrect.lean` or `FPEquiv.lean`.
 
 1. Compile the same audited source copies used by the per-file driver. Retain
-   each module's axiom/specification audit and complete theorem inventory.
-2. Import all original task modules into one generated module. Independently
-   enumerate their theorems by defining-module identity in Lean's kernel
-   environment, including private and generated theorems. Imported dependencies
-   outside the task remain part of recursive proof checking.
-3. Require exact agreement between both inventories, including zero-theorem
+   each module's axiom/specification audit and complete theorem inventory. Check
+   the standard-axiom boundary for **every** theorem occurrence before merging;
+   a bad proof cannot hide behind another proof of a same-named theorem.
+2. Import all original task modules into one generated module. Resolve the union
+   of the per-file inventories in the actual kernel environment and supplement
+   it with all theorems owned by the original task modules. Dependencies outside
+   the task remain part of recursive proof checking.
+3. Compare the old and new per-file inventories exactly, including zero-theorem
    modules. Normalize only the private-name module prefix introduced by the old
-   source-copy mechanism; retain private counters, names and macro scopes.
+   source-copy mechanism; retain private counters and complete names. Lean's
+   import compatibility checks reject same-named declarations with conflicting
+   types. Deduplicate replay targets only after all per-file axiom audits pass.
 4. Pass every discovered target to one official comparator invocation. The
    exporter deduplicates shared dependencies within each export. Record batch
    acceptance only after official replay and the final source-hash check pass.
 
-The source snapshot is checked before and after replay. Missing/extra targets,
+Equation theorems are generated lazily and may be attributed to different
+consumer modules under combined imports. Filtering targets solely by their
+final module attribution would omit some old targets. The driver therefore
+preserves each file's original inventory and checks its union. Original-module
+theorems not already in that union are also replayed and reported separately.
+Reports distinguish per-file theorem occurrences from unique replay targets.
+
+The source snapshot is checked before and after replay. Missing/unexpected targets,
 failed per-module audits, missing modules, import conflicts and comparator
 rejections fail the command. Definition-only tasks retain the standard primitive
 checks while reporting zero original theorem targets. Sources using Lean's new
-`module` header currently require the existing individual replay path; the pilot
-rejects them explicitly rather than dropping their private declarations.
+`module` header and source-copy hygienic macro names currently require the
+existing individual replay path. The pilot rejects these cases explicitly
+rather than erasing scopes or dropping declarations. Private names, quoted names,
+generated matcher equations and imported equation theorems are covered by the
+pilot regressions.
 
 ## Reproduce the performance comparison
 

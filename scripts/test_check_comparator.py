@@ -84,6 +84,8 @@ else:
         (root / 'VeriTile/Meta').mkdir(parents=True)
         (root / 'VeriTile/Meta/StatementAudit.lean').write_text(
             'import Lean\nopen Lean Elab Command\n'
+            'syntax "alias" ident : command\n'
+            'def fixtureExternal : Bool → Nat | true => 1 | false => 0\n'
             'elab "#auditModuleAxioms" : command => logInfo "Axiom audit: fixture"\n'
             'elab "#auditModuleSpecs" : command => logInfo "Spec audit: fixture"\n')
         (root / 'bench/tritonbench_g/fixture/Fixture.lean').write_text(source)
@@ -267,6 +269,8 @@ theorem chosen : model.choose (some 7) = 7 := by simp [model]
 
     def test_batch_covers_private_generated_and_unimported_helpers(self):
         result, reports = self.run_batch('''
+import VeriTile.Meta.StatementAudit
+theorem external_true : fixtureExternal true = 1 := by simp [fixtureExternal]
 structure BatchModel where
   choose : Option Nat → Nat
 private def batchModel : BatchModel where
@@ -287,6 +291,7 @@ private theorem «a.b» : True := True.intro
         self.assertTrue(any(name.endswith('.unused') for name in names), names)
         self.assertTrue(any('a.b' in name for name in names), names)
         self.assertEqual(report['modules']['bench/tritonbench_g/fixture/Kernels.lean'], [])
+        self.assertTrue(any('fixtureExternal.eq_' in name for name in report['batch_targets']))
 
     def test_batch_rejects_unreferenced_private_bad_helper(self):
         for proof in ('injected', 'by sorry'):
@@ -295,9 +300,25 @@ private theorem «a.b» : True := True.intro
                     'Proofs/Unused.lean': 'axiom injected : False\n'
                     f'private theorem forgotten : False := {proof}\n'})
                 self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-                self.assertEqual(len(reports), 1, result.stdout + result.stderr)
-                self.assertFalse(reports[0]['accepted'])
-                self.assertIn('Illegal axiom detected', result.stderr)
+                self.assertFalse(any(report['accepted'] for report in reports))
+                self.assertIn('DISALLOWED axiom', result.stderr)
+
+    def test_batch_cannot_hide_bad_proof_behind_same_named_valid_theorem(self):
+        result, reports = self.run_batch('theorem target : True := True.intro\n', {
+            'Good.lean': 'theorem duplicated_helper : True := True.intro\n',
+            'Bad.lean': 'theorem duplicated_helper : True := by sorry\n'})
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(any(report['accepted'] for report in reports))
+        self.assertIn('DISALLOWED axiom', result.stderr)
+
+    def test_batch_rejects_unsupported_hygienic_names_instead_of_skipping(self):
+        result, reports = self.run_batch('''
+macro "batchFixtureTheorem" : command => `(theorem generatedBatch : True := True.intro)
+batchFixtureTheorem
+''')
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(any(report['accepted'] for report in reports))
+        self.assertIn('Hygienic source-copy targets require individual replay', result.stderr)
 
 
 if __name__ == '__main__':

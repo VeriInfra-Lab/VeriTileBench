@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Opt-in task batch replay; retain the existing per-module trust audits.
 
-The audit-copy inventory and the original imported-module inventory are
-discovered independently. Every selected module and theorem must agree before
-the official comparator is invoked, including unused and private helpers.
+Every per-file inventory is retained. Its target union is resolved in the
+original imported environment, supplemented by every original-module theorem.
+Lazy equation theorems can change module attribution under combined imports.
 """
 import argparse
 import hashlib
@@ -24,46 +24,62 @@ from scripts.bench.audit_source import lean_code_mask
 BATCH_INVENTORY = r'''
 open Lean Elab Command in
 run_cmd do
+  let modules : Array Name := __MODULES__
+  let requested : Array String := __TARGETS__
+  let mut targets : Array Name := #[]
+  let mut seen : NameSet := {}
+  for text in requested do
+    let some name := Syntax.decodeNameLit ("`" ++ text)
+      | throwError "Cannot decode theorem name: {text}"
+    if ((← getEnv).toKernelEnv.find? name).isNone then
+      let realized ← liftCoreM <| realizeGlobalConstNoOverloadCore name
+      unless realized == name do throwError "Theorem resolved to another name: {name}"
+    unless seen.contains name do
+      targets := targets.push name
+      seen := seen.insert name
   let env ← getEnv
   let kernelEnv := env.toKernelEnv
-  let modules : Array Name := __MODULES__
   for module in modules do
     unless env.header.modules.any (·.module == module) do
       throwError "Batch module is not imported: {module}"
-  let mut targets : Array (Name × Name) := #[]
+  let mut owned : Array (Name × Name) := #[]
   for (name, info) in kernelEnv.constants.toList do
     let some idx := env.getModuleIdxFor? name | continue
     let module := env.header.modules[idx.toNat]!.module
     unless modules.contains module do continue
-    if let .thmInfo _ := info then targets := targets.push (module, name)
-  targets := targets.qsort (fun a b =>
-    if a.1 == b.1 then a.2.toString < b.2.toString else a.1.toString < b.1.toString)
+    if let .thmInfo _ := info then
+      owned := owned.push (module, name)
+      unless seen.contains name do
+        targets := targets.push name
+        seen := seen.insert name
+  targets := targets.qsort (·.toString < ·.toString)
   let mut aliases : Array String := #[]
   for i in [:targets.size] do
-    let name := targets[i]!.2
+    let name := targets[i]!
     let some (.thmInfo info) := kernelEnv.find? name
       | throwError "Batch target is not a theorem: {name}"
-    let alias := Name.mkSimple s!"veritile_batch_target_{i}"
-    if env.contains alias then throwError "Reserved batch name: {alias}"
+    let wrapperName := Name.mkSimple s!"veritile_batch_target_{i}"
+    if env.contains wrapperName then throwError "Reserved batch name: {wrapperName}"
     liftCoreM <| addDecl <| .thmDecl {
-      name := alias, levelParams := info.levelParams, type := info.type,
+      name := wrapperName, levelParams := info.levelParams, type := info.type,
       value := mkConst name (info.levelParams.map Level.param)
     }
-    aliases := aliases.push alias.toString
+    aliases := aliases.push wrapperName.toString
   if aliases.isEmpty then
-    let alias := `veritile_batch_empty_module
-    if env.contains alias then throwError "Reserved batch name: {alias}"
+    let wrapperName := `veritile_batch_empty_module
+    if env.contains wrapperName then throwError "Reserved batch name: {wrapperName}"
     liftCoreM <| addDecl <| .thmDecl {
-      name := alias, levelParams := [], type := mkConst ``True,
+      name := wrapperName, levelParams := [], type := mkConst ``True,
       value := mkConst ``True.intro
     }
-    aliases := #[alias.toString]
+    aliases := #[wrapperName.toString]
   let entries := modules.map fun module => Json.mkObj [
     ("module", toJson module.toString),
-    ("theorems", toJson ((targets.filter (·.1 == module)).map (·.2.toString)))
+    ("theorems", toJson (((owned.filter (·.1 == module)).map (·.2.toString)).qsort (· < ·)))
   ]
   liftIO <| IO.FS.writeFile __REPORT__ (Json.mkObj [
-    ("modules", toJson entries), ("aliases", toJson aliases)
+    ("owned_modules", toJson entries), ("theorems", toJson (targets.map Name.toString)),
+    ("aliases", toJson aliases)
   ]).compress
 '''
 
@@ -124,6 +140,33 @@ def require_coverage(reference, entries):
     return discovered
 
 
+def require_batch_targets(reference, inventory):
+    """Module attribution can move for lazily generated equation theorems."""
+    owned = {}
+    for entry in inventory['owned_modules']:
+        file = entry['module'].replace('.', '/') + '.lean'
+        if file in owned or len(entry['theorems']) != len(set(entry['theorems'])):
+            raise ValueError('Duplicate original-module inventory: ' + file)
+        owned[file] = entry['theorems']
+    if set(owned) != set(reference):
+        raise ValueError('Batch original-module membership differs')
+    # Validate the per-file lists too; duplicate occurrences inside one file
+    # must never disappear under a set union.
+    require_coverage(reference, [{'module': f[:-5].replace('/', '.'), 'theorems': ns}
+                                 for f, ns in reference.items()])
+    requested = {n for ns in reference.values() for n in ns}
+    original = {n for ns in owned.values() for n in ns}
+    actual = inventory['theorems']
+    if len(actual) != len(set(actual)) or set(actual) != requested | original:
+        raise ValueError('Batch target union differs: ' + json.dumps({
+            'missing': sorted((requested | original) - set(actual)),
+            'extra': sorted(set(actual) - (requested | original))}))
+    if (len(inventory['aliases']) != max(1, len(actual)) or
+            len(set(inventory['aliases'])) != len(inventory['aliases'])):
+        raise ValueError('Comparator aliases do not cover the unique batch targets')
+    return sorted(original - requested)
+
+
 def require_sources(state, judge, task, files):
     if task_files(ROOT, task) != files or task_files(judge, task) != files:
         raise ValueError('Task membership changed during batch audit')
@@ -143,10 +186,13 @@ def check_task(workspace, task):
     reference = {}
     per_file = []
     for file in files:
-        target = prepare_target(state, judge, ROOT / file, trust=True)
+        target = prepare_target(state, judge, ROOT / file, trust=True, all_axioms=True)
         inventory = build_inventory(judge, target)
+        if any('._hyg' in name for name in inventory['theorems']):
+            raise ValueError('Hygienic source-copy targets require individual replay in this pilot: ' + file)
         audit_log = (target['logs'] / 'build.log').read_text()
-        if 'Axiom audit:' not in audit_log or 'Spec audit:' not in audit_log:
+        if ('Axiom audit:' not in audit_log or 'Spec audit:' not in audit_log or
+                f'Full theorem axiom audit: theorems={len(inventory["theorems"])}' not in audit_log):
             raise ValueError('Missing per-module trust audit: ' + file)
         original_module = file[:-5].replace('/', '.')
         reference[file] = [canonical_name(name, target['module'], original_module)
@@ -161,7 +207,9 @@ def check_task(workspace, task):
     source = ('import Lean\n' + ''.join('import ' + module + '\n' for module in modules) +
               BATCH_INVENTORY.replace('__MODULES__', '#[' + ', '.join(
                   json.dumps(module) + '.toName' for module in modules) + ']').replace(
-                  '__REPORT__', json.dumps(str(metadata))))
+                  '__REPORT__', json.dumps(str(metadata))).replace('__TARGETS__', '#[' +
+                  ', '.join(json.dumps(name, ensure_ascii=False) for name in sorted({
+                      n for names in reference.values() for n in names})) + ']'))
     tag = 'Batch_' + hashlib.sha256('\n'.join(files).encode()).hexdigest()[:24]
     module = 'VeriTileComparator.' + tag
     (judge / 'VeriTileComparator' / (tag + '.lean')).write_text(source)
@@ -173,10 +221,8 @@ def check_task(workspace, task):
         print((logs / 'build.log').read_text(), file=sys.stderr)
         raise ValueError('Batch inventory build failed; logs: ' + str(logs))
     inventory = json.loads(metadata.read_text())
-    discovered = require_coverage(reference, inventory['modules'])
-    if (len(inventory['aliases']) != max(1, sum(map(len, discovered.values()))) or
-            len(set(inventory['aliases'])) != len(inventory['aliases'])):
-        raise ValueError('Comparator aliases do not cover the batch inventory')
+    additional = require_batch_targets(reference, inventory)
+    discovered = {file: sorted(names) for file, names in reference.items()}
     require_sources(state, judge, task, files)
     config = write_config(judge, inventory['aliases'], challenge=module, solution=module,
                           filename=f'.lake/comparator/{tag}.json')
@@ -188,6 +234,9 @@ def check_task(workspace, task):
     require_sources(state, judge, task, files)
     report = {**state, 'mode': 'task-batch-replay', 'task': task,
               'module_count': len(files), 'theorem_count': sum(map(len, discovered.values())),
+              'unique_theorem_count': len(inventory['theorems']),
+              'batch_targets': inventory['theorems'], 'owned_modules': inventory['owned_modules'],
+              'additional_targets': additional, 'all_theorems_axioms_checked': True,
               'coverage_matches': True, 'modules': discovered, 'per_file_audits': per_file,
               'comparator_exit': result.returncode, 'accepted': result.returncode == 0,
               'evidence_dir': str(logs), 'wall_seconds': time.monotonic() - start,
@@ -198,7 +247,8 @@ def check_task(workspace, task):
     if result.returncode:
         print((logs / 'comparator.log').read_text(), file=sys.stderr)
         raise ValueError('Official comparator rejected batch; logs: ' + str(logs))
-    print(f'Batch comparator: {len(files)} modules, {report["theorem_count"]} theorem(s) accepted; logs: {logs}')
+    print(f'Batch comparator: {len(files)} modules, {report["theorem_count"]} theorem occurrences, '
+          f'{report["unique_theorem_count"]} unique targets accepted; logs: {logs}')
     return report
 
 
