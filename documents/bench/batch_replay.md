@@ -8,6 +8,20 @@ default. The initial performance trial uses `rms_matmul_rbe`.
 python3 scripts/check_comparator_batch.py --task rms_matmul_rbe
 ```
 
+Audit preparation submits at most two audited modules to each Lake build.
+`--audit-batch-size N` controls this wave size; `1` retains the initial serial
+audit path. Each module still compiles its complete original audited source
+copy and runs the same headline, independent-specification and full-theorem
+axiom checks. This optimization changes scheduling, not the audit predicates.
+
+Per-module compiler messages come from Lake's individual `.trace` log, retained
+alongside that module's inventory. Aggregate wave logs are retained separately.
+A successful message from a sibling module cannot satisfy a missing audit;
+missing traces/inventories, a failed wave or a module error abort acceptance.
+The wave size bounds audited targets submitted together, not all dependency
+compilation on an initially empty cache. The measurements below use built
+dependency-cache copies.
+
 Use the existing [judge setup](../../scripts/README.md). The command requires
 the same exporter, comparator, allowed axioms, and systemd/Landlock isolation as
 the per-file driver. It does not change kernel sources, specifications, FP
@@ -87,7 +101,7 @@ binary hashes, every old/new acceptance result, exact canonical theorem lists,
 and matching per-module trust-audit summaries. It writes a compact JSON summary
 and a deterministic compressed theorem inventory. Raw logs stay outside Git.
 
-## Measured `rms_matmul_rbe` result
+## Initial result with serial audit preparation
 
 The [generated comparison summary](../../validation/replay_batch/rms_matmul_rbe.json)
 and [compressed complete theorem inventory](../../validation/replay_batch/rms_matmul_rbe.theorems.json.gz)
