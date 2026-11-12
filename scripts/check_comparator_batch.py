@@ -176,7 +176,7 @@ def require_sources(state, judge, task, files):
             raise ValueError('Source changed during batch audit: ' + name)
 
 
-def build_inventories(judge, targets, batch_size=4):
+def build_inventories(judge, targets, batch_size=2):
     """Build bounded waves, retaining each compiler's own audit log.
 
     Lake's aggregate stdout also replays dependency logs. Its per-module trace
@@ -214,7 +214,7 @@ def build_inventories(judge, targets, batch_size=4):
     return inventories
 
 
-def check_task(workspace, task, audit_batch_size=4):
+def check_task(workspace, task, audit_batch_size=2):
     if audit_batch_size < 1:
         raise ValueError('Audit batch size must be positive')
     start = time.monotonic()
@@ -301,8 +301,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--task', required=True)
     parser.add_argument('--workspace', type=Path)
-    parser.add_argument('--audit-batch-size', type=int, default=4,
-                        help='audited modules per Lake build wave (default: 4; 1 retains the serial path)')
+    parser.add_argument('--audit-batch-size', type=int, default=2,
+                        help='audited modules per Lake build wave (default: 2; 1 retains the serial path)')
     args = parser.parse_args()
     if args.workspace:
         check_task(args.workspace.resolve(), args.task, args.audit_batch_size)
