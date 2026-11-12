@@ -1,0 +1,76 @@
+# Task batch replay pilot
+
+The opt-in batch driver replays every theorem in a selected TritonBench-G task
+through the pinned official comparator. The regular per-file audit remains the
+default. The initial performance trial uses `rms_matmul_rbe`.
+
+```sh
+python3 scripts/check_comparator_batch.py --task rms_matmul_rbe
+```
+
+Use the existing [judge setup](../../scripts/README.md). The command requires
+the same exporter, comparator, allowed axioms, and systemd/Landlock isolation as
+the per-file driver. It does not change kernel sources, specifications, FP
+rules, or theorem premises.
+
+## Coverage and acceptance
+
+The driver freezes an independent source/build-cache copy, then recursively
+selects **all** Lean modules in the task, including modules not imported by
+`RealCorrect.lean` or `FPEquiv.lean`.
+
+1. Compile the same audited source copies used by the per-file driver. Retain
+   each module's axiom/specification audit and complete theorem inventory.
+2. Import all original task modules into one generated module. Independently
+   enumerate their theorems by defining-module identity in Lean's kernel
+   environment, including private and generated theorems. Imported dependencies
+   outside the task remain part of recursive proof checking.
+3. Require exact agreement between both inventories, including zero-theorem
+   modules. Normalize only the private-name module prefix introduced by the old
+   source-copy mechanism; retain private counters, names and macro scopes.
+4. Pass every discovered target to one official comparator invocation. The
+   exporter deduplicates shared dependencies within each export. Record batch
+   acceptance only after official replay and the final source-hash check pass.
+
+The source snapshot is checked before and after replay. Missing/extra targets,
+failed per-module audits, missing modules, import conflicts and comparator
+rejections fail the command. Definition-only tasks retain the standard primitive
+checks while reporting zero original theorem targets. Sources using Lean's new
+`module` header currently require the existing individual replay path; the pilot
+rejects them explicitly rather than dropping their private declarations.
+
+## Reproduce the performance comparison
+
+Use a frozen old checkout and the pilot checkout with copies of the same built
+dependency cache. Keep the official tools fixed, set `AUDIT_TRUST_JOBS=1` for the
+baseline, and run the two trials sequentially on the same host. Each trial
+creates and cleans its own independent judge workspace.
+
+```sh
+trial_dir="$(mktemp -d)"
+export AUDIT_TRUST_JOBS=1
+python3 scripts/bench/measure_replay.py \
+  --cwd /path/to/frozen-baseline --workspace "$trial_dir/old-tmp" \
+  --output "$trial_dir/old-metrics.json" --log "$trial_dir/old.log" \
+  -- bash scripts/bench/audit_trust.sh rms_matmul_rbe
+python3 scripts/bench/measure_replay.py \
+  --cwd "$PWD" --workspace "$trial_dir/new-tmp" \
+  --output "$trial_dir/new-metrics.json" --log "$trial_dir/new.log" \
+  -- python3 scripts/check_comparator_batch.py --task rms_matmul_rbe
+```
+
+Wall time includes snapshot preparation and cleanup. Memory is sampled every
+100 ms as the sum of process RSS. The sampler follows both driver descendants
+and processes whose working directory belongs to the private judge workspace,
+so comparator services launched separately by systemd remain included. RSS can
+count shared pages repeatedly; the sampled peak is not an exact physical-memory
+high-water mark or a prediction of GitHub runner capacity.
+
+`scripts/bench/compare_replay.py` compares the old receipt directory and the new
+batch receipt. It requires identical frozen proof inputs, identical comparator
+binary hashes, every old/new acceptance result, exact canonical theorem lists,
+and matching per-module trust-audit summaries. It writes a compact JSON summary
+and a deterministic compressed theorem inventory. Raw logs stay outside Git.
+
+The trial measures one local-host pair. Wider corpus adoption requires checking
+batch compatibility, memory limits and runtime on representative tasks.
