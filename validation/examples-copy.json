@@ -186,6 +186,12 @@
     "build_command": "lake build BenchmarkExamples",
     "build_passed": true,
     "new_gpu_experiments": false,
-    "comparator_scope": "No new full replay claimed for this byte-preserving copy; RMS scheduling measurements are separate."
+    "comparator_scope": "No new full replay claimed for this byte-preserving copy; RMS scheduling measurements are separate.",
+    "full_source_gate_passed": true,
+    "full_source_gate_command": "bash scripts/bench/audit_tritonbench_g.sh --source-only",
+    "source_inventory_examples": 19,
+    "existing_task_source_inventory_rows_preserved": 517,
+    "imported_snapshot_task_facts_preserved": 334,
+    "imported_shared_dependency_hashes_preserved": 109
   }
 }

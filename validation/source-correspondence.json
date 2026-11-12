@@ -3,12 +3,12 @@
   "scope": "Every bench task directory, including imported challenges; selected references, all task-local Python files and manifest pairs. Missing references remain pending. No Lean proof, semantic-connection or hardware certification.",
   "complete": false,
   "counts": {
-    "total": 518,
+    "total": 536,
     "tasks": 517,
-    "examples": 1,
+    "examples": 19,
     "collections": {
       "bug_detection": 65,
-      "examples": 1,
+      "examples": 19,
       "pretrain_kernels": 269,
       "tritonbench_g": 183
     },
@@ -17,21 +17,21 @@
       "selected_body_copy_checked": 183
     },
     "example_status": {
-      "selected_body_copy_checked": 1
+      "selected_body_copy_checked": 19
     },
     "selected_jit_functions": 527,
     "uncovered_selected_jit_functions": 0,
-    "inventoried_jit_functions": 529,
+    "inventoried_jit_functions": 574,
     "uncovered_inventoried_jit_functions": 0,
     "checked_pair_modes": {
-      "pasted_body": 549
+      "pasted_body": 594
     },
     "collection_status": {
       "bug_detection": {
         "no_independent_python_reference": 65
       },
       "examples": {
-        "selected_body_copy_checked": 1
+        "selected_body_copy_checked": 19
       },
       "pretrain_kernels": {
         "no_independent_python_reference": 269
@@ -51335,6 +51335,1677 @@
   ],
   "examples": [
     {
+      "name": "AdamUpdateGridLaunch",
+      "kind": "example",
+      "python": "bench/examples/AdamUpdateGridLaunch/AdamUpdateGridLaunch.py",
+      "lean": "bench/examples/AdamUpdateGridLaunch/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 21,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "update_fn_kernel",
+          "line": 17,
+          "statements": 19,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "commuted_update",
+          "line": 137,
+          "statements": 19,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/AdamUpdateGridLaunch/AdamUpdateGridLaunch.py",
+          "jits": [
+            {
+              "function": "update_fn_kernel",
+              "line": 17,
+              "statements": 19,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "commuted_update",
+              "line": 137,
+              "statements": 19,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "update_fn_kernel",
+          "lean_definition": "update_fn_kernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 19,
+          "runtime_parameters": {
+            "lr": "fp32",
+            "wd": "fp32",
+            "beta1": "fp32",
+            "beta2": "fp32",
+            "n_elements": "integer",
+            "chunk_elements": "integer"
+          },
+          "constexpr_parameters": [
+            "BLOCK_SIZE"
+          ],
+          "python": "bench/examples/AdamUpdateGridLaunch/AdamUpdateGridLaunch.py",
+          "lean": "bench/examples/AdamUpdateGridLaunch/Kernels.lean"
+        },
+        {
+          "python_function": "commuted_update",
+          "lean_definition": "commuted_update_kernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 19,
+          "runtime_parameters": {
+            "lr": "fp32",
+            "wd": "fp32",
+            "beta1": "fp32",
+            "beta2": "fp32",
+            "n_elements": "integer",
+            "chunk_elements": "integer"
+          },
+          "constexpr_parameters": [
+            "BLOCK_SIZE"
+          ],
+          "python": "bench/examples/AdamUpdateGridLaunch/AdamUpdateGridLaunch.py",
+          "lean": "bench/examples/AdamUpdateGridLaunch/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/AdamUpdateGridLaunch/AdamUpdateGridLaunch.py": "7eb01b44b8ffd2374e1da2d6fa567c88c8224cd1cc8c5cd6bd50e01d114f761a",
+        "bench/examples/AdamUpdateGridLaunch/Kernels.lean": "c64cdb0351662f2d458b24b0c997322b5e720dc2a953cacc377fd1d08ffc0e43"
+      },
+      "collection": "examples",
+      "id": "bench/examples/AdamUpdateGridLaunch"
+    },
+    {
+      "name": "FlatVectorAdd",
+      "kind": "example",
+      "python": "bench/examples/FlatVectorAdd/FlatVectorAdd.py",
+      "lean": "bench/examples/FlatVectorAdd/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 7,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "flat_vector_add",
+          "line": 13,
+          "statements": 7,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "flat_vector_add_commuted",
+          "line": 24,
+          "statements": 7,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/FlatVectorAdd/FlatVectorAdd.py",
+          "jits": [
+            {
+              "function": "flat_vector_add",
+              "line": 13,
+              "statements": 7,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "flat_vector_add_commuted",
+              "line": 24,
+              "statements": 7,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "flat_vector_add",
+          "lean_definition": "addMaskedKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 7,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize",
+            "nElements"
+          ],
+          "python": "bench/examples/FlatVectorAdd/FlatVectorAdd.py",
+          "lean": "bench/examples/FlatVectorAdd/Kernels.lean"
+        },
+        {
+          "python_function": "flat_vector_add_commuted",
+          "lean_definition": "commutedKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 7,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize",
+            "nElements"
+          ],
+          "python": "bench/examples/FlatVectorAdd/FlatVectorAdd.py",
+          "lean": "bench/examples/FlatVectorAdd/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/FlatVectorAdd/FlatVectorAdd.py": "7ad3b73c43f69c96dd488cb878016b702e5d1fd0684b83ac4a3e34fb393c8f22",
+        "bench/examples/FlatVectorAdd/Kernels.lean": "5405ba166d295898ddd9d950757acea8e5f3b9d7e4b7eef49f4d5a992dcf27ad"
+      },
+      "collection": "examples",
+      "id": "bench/examples/FlatVectorAdd"
+    },
+    {
+      "name": "FloatDTypeAdd",
+      "kind": "example",
+      "python": "bench/examples/FloatDTypeAdd/FloatDTypeAdd.py",
+      "lean": "bench/examples/FloatDTypeAdd/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 15,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "float_add",
+          "line": 12,
+          "statements": 6,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "float_add_commuted",
+          "line": 22,
+          "statements": 6,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/FloatDTypeAdd/FloatDTypeAdd.py",
+          "jits": [
+            {
+              "function": "float_add",
+              "line": 12,
+              "statements": 6,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "float_add_commuted",
+              "line": 22,
+              "statements": 6,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "float_add",
+          "lean_definition": "floatAddKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 6,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "BLOCK_SIZE"
+          ],
+          "python": "bench/examples/FloatDTypeAdd/FloatDTypeAdd.py",
+          "lean": "bench/examples/FloatDTypeAdd/Kernels.lean"
+        },
+        {
+          "python_function": "float_add_commuted",
+          "lean_definition": "commutedKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 6,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "BLOCK_SIZE"
+          ],
+          "python": "bench/examples/FloatDTypeAdd/FloatDTypeAdd.py",
+          "lean": "bench/examples/FloatDTypeAdd/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/FloatDTypeAdd/FloatDTypeAdd.py": "9864986a2fb41d5a0d2b8552f67202e1b8c71cc66d969caf08df3c9cc88d55cc",
+        "bench/examples/FloatDTypeAdd/Kernels.lean": "9a3ccc49199ee56aa959f69cff0f714f74771443da6b4859f0d1a2fd98ed012d"
+      },
+      "collection": "examples",
+      "id": "bench/examples/FloatDTypeAdd"
+    },
+    {
+      "name": "FloatDTypeSoftmax",
+      "kind": "example",
+      "python": "bench/examples/FloatDTypeSoftmax/FloatDTypeSoftmax.py",
+      "lean": "bench/examples/FloatDTypeSoftmax/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 9,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "stable_softmax_fp64",
+          "line": 13,
+          "statements": 9,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "reciprocal_softmax_fp64",
+          "line": 26,
+          "statements": 10,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/FloatDTypeSoftmax/FloatDTypeSoftmax.py",
+          "jits": [
+            {
+              "function": "stable_softmax_fp64",
+              "line": 13,
+              "statements": 9,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "reciprocal_softmax_fp64",
+              "line": 26,
+              "statements": 10,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "stable_softmax_fp64",
+          "lean_definition": "floatStableSoftmaxKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 9,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/FloatDTypeSoftmax/FloatDTypeSoftmax.py",
+          "lean": "bench/examples/FloatDTypeSoftmax/Kernels.lean"
+        },
+        {
+          "python_function": "reciprocal_softmax_fp64",
+          "lean_definition": "floatSoftmaxRecipKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 10,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/FloatDTypeSoftmax/FloatDTypeSoftmax.py",
+          "lean": "bench/examples/FloatDTypeSoftmax/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/FloatDTypeSoftmax/FloatDTypeSoftmax.py": "240a4b52bed7c83ef867e13f834bf6a9b44d5ebf9b2e256a752c487daa35877e",
+        "bench/examples/FloatDTypeSoftmax/Kernels.lean": "7b0df06fafdad89e3e387d749040afd43c54d906dc09f571e1284f6aa684c62d"
+      },
+      "collection": "examples",
+      "id": "bench/examples/FloatDTypeSoftmax"
+    },
+    {
+      "name": "FusedLayerNorm",
+      "kind": "example",
+      "python": "bench/examples/FusedLayerNorm/FusedLayerNorm.py",
+      "lean": "bench/examples/FusedLayerNorm/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 9,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "twoPassLayerNormKernel",
+          "line": 14,
+          "statements": 14,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "fusedLayerNormKernel",
+          "line": 32,
+          "statements": 14,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/FusedLayerNorm/FusedLayerNorm.py",
+          "jits": [
+            {
+              "function": "twoPassLayerNormKernel",
+              "line": 14,
+              "statements": 14,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "fusedLayerNormKernel",
+              "line": 32,
+              "statements": 14,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "twoPassLayerNormKernel",
+          "lean_definition": "twoPassLayerNormKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 14,
+          "runtime_parameters": {
+            "rowStride": "integer"
+          },
+          "constexpr_parameters": [
+            "N",
+            "ε"
+          ],
+          "python": "bench/examples/FusedLayerNorm/FusedLayerNorm.py",
+          "lean": "bench/examples/FusedLayerNorm/Kernels.lean"
+        },
+        {
+          "python_function": "fusedLayerNormKernel",
+          "lean_definition": "fusedLayerNormKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 14,
+          "runtime_parameters": {
+            "rowStride": "integer"
+          },
+          "constexpr_parameters": [
+            "N",
+            "ε"
+          ],
+          "python": "bench/examples/FusedLayerNorm/FusedLayerNorm.py",
+          "lean": "bench/examples/FusedLayerNorm/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/FusedLayerNorm/FusedLayerNorm.py": "f1ac489a38d4d0f10a9d1388b87be02cc1d0b5d0d2cdd39796e573a197d8ebcd",
+        "bench/examples/FusedLayerNorm/Kernels.lean": "b4f1e07e399684ad3718fbd093d57578e48d94e5e77a0f333a05fb1bf5a954db"
+      },
+      "collection": "examples",
+      "id": "bench/examples/FusedLayerNorm"
+    },
+    {
+      "name": "FusedSiLU",
+      "kind": "example",
+      "python": "bench/examples/FusedSiLU/FusedSiLU.py",
+      "lean": "bench/examples/FusedSiLU/Kernels.lean",
+      "lean_screen": {
+        "quotations": 4,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 17,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "fused_silu",
+          "line": 12,
+          "statements": 9,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "silu_gate",
+          "line": 25,
+          "statements": 6,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "silu_activation",
+          "line": 35,
+          "statements": 5,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "silu_residual",
+          "line": 44,
+          "statements": 6,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/FusedSiLU/FusedSiLU.py",
+          "jits": [
+            {
+              "function": "fused_silu",
+              "line": 12,
+              "statements": 9,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "silu_gate",
+              "line": 25,
+              "statements": 6,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "silu_activation",
+              "line": 35,
+              "statements": 5,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "silu_residual",
+              "line": 44,
+              "statements": 6,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "fused_silu",
+          "lean_definition": "fusedSiLUKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 9,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/FusedSiLU/FusedSiLU.py",
+          "lean": "bench/examples/FusedSiLU/Kernels.lean"
+        },
+        {
+          "python_function": "silu_gate",
+          "lean_definition": "siluStepGateKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 6,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/FusedSiLU/FusedSiLU.py",
+          "lean": "bench/examples/FusedSiLU/Kernels.lean"
+        },
+        {
+          "python_function": "silu_activation",
+          "lean_definition": "siluStepSiluKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 5,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/FusedSiLU/FusedSiLU.py",
+          "lean": "bench/examples/FusedSiLU/Kernels.lean"
+        },
+        {
+          "python_function": "silu_residual",
+          "lean_definition": "siluStepResidualKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 6,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/FusedSiLU/FusedSiLU.py",
+          "lean": "bench/examples/FusedSiLU/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/FusedSiLU/FusedSiLU.py": "767205c4e25d249415c499be7b4db740a84cf1e9d4cda1b37df8f03cf5373405",
+        "bench/examples/FusedSiLU/Kernels.lean": "caa7a35abaa9ef59a323fae2771ccf55626b1712b992cb16ad631d2a9f6a54f9"
+      },
+      "collection": "examples",
+      "id": "bench/examples/FusedSiLU"
+    },
+    {
+      "name": "FusedSwiglu",
+      "kind": "example",
+      "python": "bench/examples/FusedSwiglu/FusedSwiglu.py",
+      "lean": "bench/examples/FusedSwiglu/Kernels.lean",
+      "lean_screen": {
+        "quotations": 3,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 13,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "swiglu_fused",
+          "line": 10,
+          "statements": 7,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "silu_step",
+          "line": 20,
+          "statements": 5,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "mul_step",
+          "line": 28,
+          "statements": 6,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/FusedSwiglu/FusedSwiglu.py",
+          "jits": [
+            {
+              "function": "swiglu_fused",
+              "line": 10,
+              "statements": 7,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "silu_step",
+              "line": 20,
+              "statements": 5,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "mul_step",
+              "line": 28,
+              "statements": 6,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "swiglu_fused",
+          "lean_definition": "swiglu_fused_kernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 7,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "BLOCK_N",
+            "ncols"
+          ],
+          "python": "bench/examples/FusedSwiglu/FusedSwiglu.py",
+          "lean": "bench/examples/FusedSwiglu/Kernels.lean"
+        },
+        {
+          "python_function": "silu_step",
+          "lean_definition": "silu_step_kernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 5,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "BLOCK_N",
+            "ncols"
+          ],
+          "python": "bench/examples/FusedSwiglu/FusedSwiglu.py",
+          "lean": "bench/examples/FusedSwiglu/Kernels.lean"
+        },
+        {
+          "python_function": "mul_step",
+          "lean_definition": "mul_step_kernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 6,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "BLOCK_N",
+            "ncols"
+          ],
+          "python": "bench/examples/FusedSwiglu/FusedSwiglu.py",
+          "lean": "bench/examples/FusedSwiglu/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/FusedSwiglu/FusedSwiglu.py": "bb381b21f410a386cf64585366775874f93fad003dca9e5ba7dac0a7e0baeea1",
+        "bench/examples/FusedSwiglu/Kernels.lean": "bb96a72403cb8523990fbdcd756e029ecbf159088b1f9760d63d3f97e7890ea1"
+      },
+      "collection": "examples",
+      "id": "bench/examples/FusedSwiglu"
+    },
+    {
+      "name": "HyperConnectionsDepth",
+      "kind": "example",
+      "python": "bench/examples/HyperConnectionsDepth/HyperConnectionsDepth.py",
+      "lean": "bench/examples/HyperConnectionsDepth/Kernels.lean",
+      "lean_screen": {
+        "quotations": 4,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 27,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 4
+      },
+      "python_jits": [
+        {
+          "function": "matrixKernel",
+          "line": 11,
+          "statements": 20,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "scalarKernel",
+          "line": 40,
+          "statements": 7,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "optimizedKernel",
+          "line": 50,
+          "statements": 7,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "matrixOptimized",
+          "line": 60,
+          "statements": 20,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/HyperConnectionsDepth/HyperConnectionsDepth.py",
+          "jits": [
+            {
+              "function": "matrixKernel",
+              "line": 11,
+              "statements": 20,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "scalarKernel",
+              "line": 40,
+              "statements": 7,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "optimizedKernel",
+              "line": 50,
+              "statements": 7,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "matrixOptimized",
+              "line": 60,
+              "statements": 20,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "matrixKernel",
+          "lean_definition": "matrixKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 20,
+          "runtime_parameters": {
+            "tau": "fp32"
+          },
+          "constexpr_parameters": [
+            "D",
+            "S",
+            "T",
+            "numIters"
+          ],
+          "python": "bench/examples/HyperConnectionsDepth/HyperConnectionsDepth.py",
+          "lean": "bench/examples/HyperConnectionsDepth/Kernels.lean"
+        },
+        {
+          "python_function": "scalarKernel",
+          "lean_definition": "scalarKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 7,
+          "runtime_parameters": {
+            "tau": "fp32"
+          },
+          "constexpr_parameters": [],
+          "python": "bench/examples/HyperConnectionsDepth/HyperConnectionsDepth.py",
+          "lean": "bench/examples/HyperConnectionsDepth/Kernels.lean"
+        },
+        {
+          "python_function": "optimizedKernel",
+          "lean_definition": "optimizedKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 7,
+          "runtime_parameters": {
+            "tau": "fp32"
+          },
+          "constexpr_parameters": [],
+          "python": "bench/examples/HyperConnectionsDepth/HyperConnectionsDepth.py",
+          "lean": "bench/examples/HyperConnectionsDepth/Kernels.lean"
+        },
+        {
+          "python_function": "matrixOptimized",
+          "lean_definition": "matrixOptimizedKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 20,
+          "runtime_parameters": {
+            "tau": "fp32"
+          },
+          "constexpr_parameters": [
+            "D",
+            "S",
+            "T",
+            "numIters"
+          ],
+          "python": "bench/examples/HyperConnectionsDepth/HyperConnectionsDepth.py",
+          "lean": "bench/examples/HyperConnectionsDepth/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/HyperConnectionsDepth/HyperConnectionsDepth.py": "b43f164c1148f53a17671f73749dfce955ebe488d9898447b2a9bbf15aff29ef",
+        "bench/examples/HyperConnectionsDepth/Kernels.lean": "326a4523f747f41c036b76020c194a41a15480239ffa027bc33557edd48d7dc3"
+      },
+      "collection": "examples",
+      "id": "bench/examples/HyperConnectionsDepth"
+    },
+    {
+      "name": "HyperConnectionsWidth",
+      "kind": "example",
+      "python": "bench/examples/HyperConnectionsWidth/HyperConnectionsWidth.py",
+      "lean": "bench/examples/HyperConnectionsWidth/Kernels.lean",
+      "lean_screen": {
+        "quotations": 6,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 43,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 12
+      },
+      "python_jits": [
+        {
+          "function": "matrixKernel",
+          "line": 11,
+          "statements": 27,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "scalarKernel",
+          "line": 51,
+          "statements": 8,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "middleKernel",
+          "line": 62,
+          "statements": 8,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "optimizedKernel",
+          "line": 73,
+          "statements": 8,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "matrixMiddle",
+          "line": 84,
+          "statements": 27,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "matrixOptimized",
+          "line": 124,
+          "statements": 27,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/HyperConnectionsWidth/HyperConnectionsWidth.py",
+          "jits": [
+            {
+              "function": "matrixKernel",
+              "line": 11,
+              "statements": 27,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "scalarKernel",
+              "line": 51,
+              "statements": 8,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "middleKernel",
+              "line": 62,
+              "statements": 8,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "optimizedKernel",
+              "line": 73,
+              "statements": 8,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "matrixMiddle",
+              "line": 84,
+              "statements": 27,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "matrixOptimized",
+              "line": 124,
+              "statements": 27,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "matrixKernel",
+          "lean_definition": "matrixKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 27,
+          "runtime_parameters": {
+            "tau": "fp32"
+          },
+          "constexpr_parameters": [
+            "D",
+            "S",
+            "T",
+            "numIters"
+          ],
+          "python": "bench/examples/HyperConnectionsWidth/HyperConnectionsWidth.py",
+          "lean": "bench/examples/HyperConnectionsWidth/Kernels.lean"
+        },
+        {
+          "python_function": "scalarKernel",
+          "lean_definition": "scalarKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 8,
+          "runtime_parameters": {
+            "tau": "fp32"
+          },
+          "constexpr_parameters": [],
+          "python": "bench/examples/HyperConnectionsWidth/HyperConnectionsWidth.py",
+          "lean": "bench/examples/HyperConnectionsWidth/Kernels.lean"
+        },
+        {
+          "python_function": "middleKernel",
+          "lean_definition": "middleKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 8,
+          "runtime_parameters": {
+            "tau": "fp32"
+          },
+          "constexpr_parameters": [],
+          "python": "bench/examples/HyperConnectionsWidth/HyperConnectionsWidth.py",
+          "lean": "bench/examples/HyperConnectionsWidth/Kernels.lean"
+        },
+        {
+          "python_function": "optimizedKernel",
+          "lean_definition": "optimizedKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 8,
+          "runtime_parameters": {
+            "tau": "fp32"
+          },
+          "constexpr_parameters": [],
+          "python": "bench/examples/HyperConnectionsWidth/HyperConnectionsWidth.py",
+          "lean": "bench/examples/HyperConnectionsWidth/Kernels.lean"
+        },
+        {
+          "python_function": "matrixMiddle",
+          "lean_definition": "matrixMiddleKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 27,
+          "runtime_parameters": {
+            "tau": "fp32"
+          },
+          "constexpr_parameters": [
+            "D",
+            "S",
+            "T",
+            "numIters"
+          ],
+          "python": "bench/examples/HyperConnectionsWidth/HyperConnectionsWidth.py",
+          "lean": "bench/examples/HyperConnectionsWidth/Kernels.lean"
+        },
+        {
+          "python_function": "matrixOptimized",
+          "lean_definition": "matrixOptimizedKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 27,
+          "runtime_parameters": {
+            "tau": "fp32"
+          },
+          "constexpr_parameters": [
+            "D",
+            "S",
+            "T",
+            "numIters"
+          ],
+          "python": "bench/examples/HyperConnectionsWidth/HyperConnectionsWidth.py",
+          "lean": "bench/examples/HyperConnectionsWidth/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/HyperConnectionsWidth/HyperConnectionsWidth.py": "51ec95cf68da349cd5866c6a1874f6cd435858c99a491ef2d39773b2013eed69",
+        "bench/examples/HyperConnectionsWidth/Kernels.lean": "3d0134b14fc737e8ff8121440e49ce2042a871458b21c673fb19ecac7237fbf7"
+      },
+      "collection": "examples",
+      "id": "bench/examples/HyperConnectionsWidth"
+    },
+    {
+      "name": "LogExp",
+      "kind": "example",
+      "python": "bench/examples/LogExp/LogExp.py",
+      "lean": "bench/examples/LogExp/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 5,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "log_exp",
+          "line": 15,
+          "statements": 5,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "log_exp_guarded",
+          "line": 24,
+          "statements": 8,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/LogExp/LogExp.py",
+          "jits": [
+            {
+              "function": "log_exp",
+              "line": 15,
+              "statements": 5,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "log_exp_guarded",
+              "line": 24,
+              "statements": 8,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "log_exp",
+          "lean_definition": "originalKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 5,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/LogExp/LogExp.py",
+          "lean": "bench/examples/LogExp/Kernels.lean"
+        },
+        {
+          "python_function": "log_exp_guarded",
+          "lean_definition": "optimizedKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 8,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/LogExp/LogExp.py",
+          "lean": "bench/examples/LogExp/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/LogExp/Kernels.lean": "117a7b89e85baf7e36e18b49f0d3e6ae3be0374da3b19b43f5f1f0a7df048f6c",
+        "bench/examples/LogExp/LogExp.py": "02876bca6a5a02076b82bf516e623fb40a9187fa7b9a5621c0622fa233ebfdcc"
+      },
+      "collection": "examples",
+      "id": "bench/examples/LogExp"
+    },
+    {
+      "name": "OnlineSoftmax",
+      "kind": "example",
+      "python": "bench/examples/OnlineSoftmax/OnlineSoftmax.py",
+      "lean": "bench/examples/OnlineSoftmax/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 13,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "stableSoftmaxKernel",
+          "line": 15,
+          "statements": 8,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "onlineSoftmaxKernel",
+          "line": 27,
+          "statements": 10,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/OnlineSoftmax/OnlineSoftmax.py",
+          "jits": [
+            {
+              "function": "stableSoftmaxKernel",
+              "line": 15,
+              "statements": 8,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "onlineSoftmaxKernel",
+              "line": 27,
+              "statements": 10,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "stableSoftmaxKernel",
+          "lean_definition": "stableSoftmaxKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 8,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/OnlineSoftmax/OnlineSoftmax.py",
+          "lean": "bench/examples/OnlineSoftmax/Kernels.lean"
+        },
+        {
+          "python_function": "onlineSoftmaxKernel",
+          "lean_definition": "onlineSoftmaxKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 10,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "N"
+          ],
+          "python": "bench/examples/OnlineSoftmax/OnlineSoftmax.py",
+          "lean": "bench/examples/OnlineSoftmax/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/OnlineSoftmax/Kernels.lean": "36819fcbc46fad1f1eacfd8eb7c8f256c5d65928f486e7d145cf0c7f648548a1",
+        "bench/examples/OnlineSoftmax/OnlineSoftmax.py": "dc40b50e23c94cb33a07fd4f9a6c8142ba9f2ad02d6446d9fffaca1d5e2f4bf2"
+      },
+      "collection": "examples",
+      "id": "bench/examples/OnlineSoftmax"
+    },
+    {
+      "name": "RowWiseMax",
+      "kind": "example",
+      "python": "bench/examples/RowWiseMax/RowWiseMax.py",
+      "lean": "bench/examples/RowWiseMax/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 5,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "row_wise_max",
+          "line": 13,
+          "statements": 5,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "row_wise_max_inlined",
+          "line": 22,
+          "statements": 3,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/RowWiseMax/RowWiseMax.py",
+          "jits": [
+            {
+              "function": "row_wise_max",
+              "line": 13,
+              "statements": 5,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "row_wise_max_inlined",
+              "line": 22,
+              "statements": 3,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "row_wise_max",
+          "lean_definition": "rowWiseMaxKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 5,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize",
+            "nCol"
+          ],
+          "python": "bench/examples/RowWiseMax/RowWiseMax.py",
+          "lean": "bench/examples/RowWiseMax/Kernels.lean"
+        },
+        {
+          "python_function": "row_wise_max_inlined",
+          "lean_definition": "inlinedKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 3,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize",
+            "nCol"
+          ],
+          "python": "bench/examples/RowWiseMax/RowWiseMax.py",
+          "lean": "bench/examples/RowWiseMax/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/RowWiseMax/Kernels.lean": "f90d3ffa760b4bfba566d09b5c6b9b0312ada89b3b68e8305d7111f09b2d7942",
+        "bench/examples/RowWiseMax/RowWiseMax.py": "104f0c446d89470a9a0433e639a31b34063bf30f62e68c455e5e26ea410fdbbb"
+      },
+      "collection": "examples",
+      "id": "bench/examples/RowWiseMax"
+    },
+    {
+      "name": "RowWiseSum",
+      "kind": "example",
+      "python": "bench/examples/RowWiseSum/RowWiseSum.py",
+      "lean": "bench/examples/RowWiseSum/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 5,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "row_wise_sum",
+          "line": 13,
+          "statements": 5,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "row_wise_sum_reversed",
+          "line": 22,
+          "statements": 5,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/RowWiseSum/RowWiseSum.py",
+          "jits": [
+            {
+              "function": "row_wise_sum",
+              "line": 13,
+              "statements": 5,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "row_wise_sum_reversed",
+              "line": 22,
+              "statements": 5,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "row_wise_sum",
+          "lean_definition": "rowWiseSumKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 5,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize",
+            "nCol"
+          ],
+          "python": "bench/examples/RowWiseSum/RowWiseSum.py",
+          "lean": "bench/examples/RowWiseSum/Kernels.lean"
+        },
+        {
+          "python_function": "row_wise_sum_reversed",
+          "lean_definition": "reversedKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 5,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize",
+            "nCol"
+          ],
+          "python": "bench/examples/RowWiseSum/RowWiseSum.py",
+          "lean": "bench/examples/RowWiseSum/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/RowWiseSum/Kernels.lean": "11d839d2ad50ea19d0896091596e4b3282fbce7f2234eb7babbde4659becf0c0",
+        "bench/examples/RowWiseSum/RowWiseSum.py": "a847d56fafcd803927dedc7cccd6d4e3da12b75c60acb76cd67d3dace4e8a30e"
+      },
+      "collection": "examples",
+      "id": "bench/examples/RowWiseSum"
+    },
+    {
+      "name": "SoftmaxReciprocal",
+      "kind": "example",
+      "python": "bench/examples/SoftmaxReciprocal/SoftmaxReciprocal.py",
+      "lean": "bench/examples/SoftmaxReciprocal/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 9,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "stable_softmax",
+          "line": 14,
+          "statements": 8,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "reciprocal_softmax",
+          "line": 26,
+          "statements": 9,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/SoftmaxReciprocal/SoftmaxReciprocal.py",
+          "jits": [
+            {
+              "function": "stable_softmax",
+              "line": 14,
+              "statements": 8,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "reciprocal_softmax",
+              "line": 26,
+              "statements": 9,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "stable_softmax",
+          "lean_definition": "stableSoftmaxKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 8,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/SoftmaxReciprocal/SoftmaxReciprocal.py",
+          "lean": "bench/examples/SoftmaxReciprocal/Kernels.lean"
+        },
+        {
+          "python_function": "reciprocal_softmax",
+          "lean_definition": "softmaxRecipKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 9,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/SoftmaxReciprocal/SoftmaxReciprocal.py",
+          "lean": "bench/examples/SoftmaxReciprocal/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/SoftmaxReciprocal/Kernels.lean": "cad227fcf87cb8b645c580b78bde871dad4e683bd03625fb294d4cfb0d630b31",
+        "bench/examples/SoftmaxReciprocal/SoftmaxReciprocal.py": "2bfedc7cb5adfa8439e0966448be53f4e6fa0dd3266db71b475431dc4781d64f"
+      },
+      "collection": "examples",
+      "id": "bench/examples/SoftmaxReciprocal"
+    },
+    {
+      "name": "SoftmaxStable",
+      "kind": "example",
+      "python": "bench/examples/SoftmaxStable/SoftmaxStable.py",
+      "lean": "bench/examples/SoftmaxStable/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 5,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "naive_softmax",
+          "line": 14,
+          "statements": 7,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "stable_softmax",
+          "line": 25,
+          "statements": 8,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/SoftmaxStable/SoftmaxStable.py",
+          "jits": [
+            {
+              "function": "naive_softmax",
+              "line": 14,
+              "statements": 7,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "stable_softmax",
+              "line": 25,
+              "statements": 8,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "naive_softmax",
+          "lean_definition": "naiveSoftmaxKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 7,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "B"
+          ],
+          "python": "bench/examples/SoftmaxStable/SoftmaxStable.py",
+          "lean": "bench/examples/SoftmaxStable/Kernels.lean"
+        },
+        {
+          "python_function": "stable_softmax",
+          "lean_definition": "stableSoftmaxKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 8,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "B"
+          ],
+          "python": "bench/examples/SoftmaxStable/SoftmaxStable.py",
+          "lean": "bench/examples/SoftmaxStable/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/SoftmaxStable/Kernels.lean": "6213889e2f93fb7440e4f4b507506fa93a350912c91b49f9ed0a3b73b52706dd",
+        "bench/examples/SoftmaxStable/SoftmaxStable.py": "5e6d4376bd80d5d861aac5d3829e193246b296d4d7c36331a646fd11a16c56c6"
+      },
+      "collection": "examples",
+      "id": "bench/examples/SoftmaxStable"
+    },
+    {
+      "name": "StableLogSumExp",
+      "kind": "example",
+      "python": "bench/examples/StableLogSumExp/StableLogSumExp.py",
+      "lean": "bench/examples/StableLogSumExp/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 5,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "direct_log_sum_exp",
+          "line": 14,
+          "statements": 7,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "guarded_log_sum_exp",
+          "line": 25,
+          "statements": 16,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/StableLogSumExp/StableLogSumExp.py",
+          "jits": [
+            {
+              "function": "direct_log_sum_exp",
+              "line": 14,
+              "statements": 7,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "guarded_log_sum_exp",
+              "line": 25,
+              "statements": 16,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "direct_log_sum_exp",
+          "lean_definition": "directLSEKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 7,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/StableLogSumExp/StableLogSumExp.py",
+          "lean": "bench/examples/StableLogSumExp/Kernels.lean"
+        },
+        {
+          "python_function": "guarded_log_sum_exp",
+          "lean_definition": "optimizedLSEKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 16,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/StableLogSumExp/StableLogSumExp.py",
+          "lean": "bench/examples/StableLogSumExp/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/StableLogSumExp/Kernels.lean": "ec640f892f37cf52f5a334d72aa1946a3c4622d5709e2be1dc36d16ee5a7e50a",
+        "bench/examples/StableLogSumExp/StableLogSumExp.py": "81398cb404781c43e9eac779c340757780a8fba429fc1cd01dc1f83b4977d6e7"
+      },
+      "collection": "examples",
+      "id": "bench/examples/StableLogSumExp"
+    },
+    {
       "name": "TritonBenchVectorAddition",
       "kind": "example",
       "python": "bench/examples/TritonBenchVectorAddition/TritonBenchVectorAddition.py",
@@ -51424,6 +53095,184 @@
       },
       "collection": "examples",
       "id": "bench/examples/TritonBenchVectorAddition"
+    },
+    {
+      "name": "VectorAdd",
+      "kind": "example",
+      "python": "bench/examples/VectorAdd/VectorAdd.py",
+      "lean": "bench/examples/VectorAdd/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 15,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "add_kernel",
+          "line": 7,
+          "statements": 6,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "add_commuted_kernel",
+          "line": 18,
+          "statements": 6,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/VectorAdd/VectorAdd.py",
+          "jits": [
+            {
+              "function": "add_kernel",
+              "line": 7,
+              "statements": 6,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "add_commuted_kernel",
+              "line": 18,
+              "statements": 6,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "add_kernel",
+          "lean_definition": "addKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 6,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "BLOCK_SIZE"
+          ],
+          "python": "bench/examples/VectorAdd/VectorAdd.py",
+          "lean": "bench/examples/VectorAdd/Kernels.lean"
+        },
+        {
+          "python_function": "add_commuted_kernel",
+          "lean_definition": "commutedKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 6,
+          "runtime_parameters": {},
+          "constexpr_parameters": [
+            "BLOCK_SIZE"
+          ],
+          "python": "bench/examples/VectorAdd/VectorAdd.py",
+          "lean": "bench/examples/VectorAdd/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/VectorAdd/Kernels.lean": "db16d9234a0ff611ee5ff8c3deb41063800ea1ca614df4728c0075c83e6f6768",
+        "bench/examples/VectorAdd/VectorAdd.py": "9d72f79b9ea85aaa884c5f42da09f593e7d1db52b244d57ef8815bfc3db47ab9"
+      },
+      "collection": "examples",
+      "id": "bench/examples/VectorAdd"
+    },
+    {
+      "name": "Welford",
+      "kind": "example",
+      "python": "bench/examples/Welford/Welford.py",
+      "lean": "bench/examples/Welford/Kernels.lean",
+      "lean_screen": {
+        "quotations": 2,
+        "in_body_type_directives": 0,
+        "antiquotes": 0,
+        "dsl_assignment": 7,
+        "dsl_loop": 0,
+        "dsl_numeric_helpers": 0,
+        "load_dtype_extension": 0
+      },
+      "python_jits": [
+        {
+          "function": "twopassWelfordKernel",
+          "line": 15,
+          "statements": 11,
+          "explicit_int64_casts": []
+        },
+        {
+          "function": "onlineWelfordKernel",
+          "line": 30,
+          "statements": 7,
+          "explicit_int64_casts": []
+        }
+      ],
+      "python_sources": [
+        {
+          "path": "bench/examples/Welford/Welford.py",
+          "jits": [
+            {
+              "function": "twopassWelfordKernel",
+              "line": 15,
+              "statements": 11,
+              "explicit_int64_casts": []
+            },
+            {
+              "function": "onlineWelfordKernel",
+              "line": 30,
+              "statements": 7,
+              "explicit_int64_casts": []
+            }
+          ]
+        }
+      ],
+      "checked_pairs": [
+        {
+          "python_function": "twopassWelfordKernel",
+          "lean_definition": "twopassWelfordKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 11,
+          "runtime_parameters": {
+            "rowStride": "integer"
+          },
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/Welford/Welford.py",
+          "lean": "bench/examples/Welford/Kernels.lean"
+        },
+        {
+          "python_function": "onlineWelfordKernel",
+          "lean_definition": "onlineWelfordKernel",
+          "status": "PASS",
+          "mode": "pasted_body",
+          "statements": 7,
+          "runtime_parameters": {
+            "rowStride": "integer"
+          },
+          "constexpr_parameters": [
+            "blockSize"
+          ],
+          "python": "bench/examples/Welford/Welford.py",
+          "lean": "bench/examples/Welford/Kernels.lean"
+        }
+      ],
+      "uncovered_python_jits": [],
+      "uncovered_selected_jits": [],
+      "int64_screen": "inconclusive",
+      "body_copy_scope": "selected reference, all task-local Python files and all manifest pairs; no proof or backend certification",
+      "status": "selected_body_copy_checked",
+      "source_sha256": {
+        "bench/examples/Welford/Kernels.lean": "7c3d0bdf6cd4780457d7884c6f266c2d3a0b1e57285818d0702cd1ea499102a9",
+        "bench/examples/Welford/Welford.py": "5b021702042d4df0bf7213b5dabec155956f757dc489268d057273fbc9f51601"
+      },
+      "collection": "examples",
+      "id": "bench/examples/Welford"
     }
   ]
 }
