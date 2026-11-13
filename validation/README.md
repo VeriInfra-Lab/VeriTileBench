@@ -17,6 +17,15 @@
   `python3 scripts/bench/final_inventory.py --write PATH`.
 - `imported_kernel_review.json` preserves findings for the 334 imported challenges.
 - `bench-layout.json` records the path migration and unchanged Lean/JIT code.
+- [`replay_batch/rms_matmul_rbe.json`](replay_batch/rms_matmul_rbe.json) records the
+  opt-in batch-replay pilot: exact old/new inventories, official acceptance,
+  runtime and sampled aggregate RSS. The adjacent compressed inventory preserves
+  every per-file theorem name and the batch target union. See the
+  [measurement method and limits](../documents/bench/batch_replay.md).
+- The follow-up receipts [`replay_batch/rms_matmul_rbe.audit-waves-2.json`](replay_batch/rms_matmul_rbe.audit-waves-2.json)
+  and [`replay_batch/rms_matmul_rbe.audit-waves-4.json`](replay_batch/rms_matmul_rbe.audit-waves-4.json)
+  compare bounded audit-build waves against both original replay paths. Their
+  complete theorem inventory is identical to the initial pilot's inventory.
 
 Task-specific compiler and numerical receipts are under `tasks/`. Their JSON
 bytes, source hashes, outcomes and original paths are preserved. Resolve those
