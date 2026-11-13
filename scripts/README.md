@@ -153,28 +153,37 @@ require the official comparator and the sandbox tools installed above. Missing
 tools, export failures, and comparator rejections fail the gate. CI installs
 the same pinned tools through `.github/actions/setup-comparator`.
 
-The Bench audit workflow checks the final source and contract inventory,
-builds/replays the library on pull requests and main pushes. Full corpus builds
-and replay, including all 334 benchmark interfaces, run daily at 04:00
-Asia/Singapore (20:00 UTC), and on manual runs with `full_audit=true` (the
-default). Each of the 64 corpus workers builds its complete dependencies, then
-checks axioms/specifications and runs official comparator replay. The exporter
-recursively includes the proof dependencies of each selected theorem.
+The Bench audit workflow uses three scopes:
 
-The daily run covers all 8,428 retained corpus modules, including helper
-theorems unused by public results. Its final gate requires the global job,
-draft build and all shards to succeed; failed, cancelled or skipped jobs fail
-it. PRs require the global gates and explicitly skip corpus/draft jobs. A PR
-pass does not claim an exhaustive per-module audit. Separate concurrency groups
-prevent PR or main pushes from cancelling a daily run. Before merging proof
-changes, run the complete applicable proof checks locally.
+| Scope | When | Checks |
+| --- | --- | --- |
+| `smoke` | PR and main pushes | Source/contract inventories, Python regressions, matrix-transpose Real/FP proofs and source regressions |
+| `build` | Daily at 04:00 Asia/Singapore | Smoke checks, every retained Lean module in 16 workers, all 334 imported interfaces |
+| `replay` | Sunday at 04:00 Asia/Singapore | Smoke checks, all interfaces, full corpus build and independent replay in 64 workers |
+
+Sunday's replay includes the daily build; the two UTC schedules do not overlap.
+Manual dispatch defaults to `mode=build`; `mode=replay` requests full replay and
+`mode=smoke` selects the PR checks. Each replay worker builds its complete
+dependencies, checks axioms/specifications and runs official comparator replay.
+The exporter recursively includes each selected theorem's proof dependencies.
+
+Both full scopes select every retained corpus module from the current inventory,
+including helper theorems unused by public results. Each build's source snapshot
+is checked after compilation, and replay checks that same snapshot again.
+The final gate requires the global job, interface build and all requested shards
+to succeed; failed, cancelled or skipped required jobs fail it. Smoke scope
+explicitly skips corpus/interface jobs. The job summary reports the scope and
+whether independent replay was requested. A smoke or build-only pass does not
+claim an exhaustive per-module replay or update proof acceptance. Separate
+concurrency groups prevent PR or main pushes from cancelling a scheduled run.
+Before merging proof changes, run the complete applicable proof checks locally.
 
 Local `scripts/bench/audit_tritonbench_g.sh` runs still cover all gates and the whole
 corpus by default. To reproduce the CI stages separately:
 
 ```bash
 scripts/bench/audit_tritonbench_g.sh --global-only
-# Daily full scope (run indices 0–63):
+# Weekly/manual full replay (run indices 0–63):
 AUDIT_TRUST_SHARD_COUNT=64 AUDIT_TRUST_SHARD_INDEX=0 scripts/bench/audit_trust.sh --final-inventory
 # Optional public-entry audit (run indices 0–15):
 AUDIT_TRUST_SHARD_COUNT=16 AUDIT_TRUST_SHARD_INDEX=0 scripts/bench/audit_trust.sh --ci-targets
