@@ -4,7 +4,8 @@ defaultTargets = ["TritonBenchGFinal"]
 [[require]]
 name = "veritile"
 git = "https://github.com/VeriInfra-Lab/VeriTile.git"
-rev = "f64f21ef6f3e1e8d55b5b22682bce3c4b368e7bd"
+rev = "ce15858d77c750c77f60e56d66ef9d1511e836af"
+subDir = "library"
 
 [[lean_lib]]
 name = "BugDetection"
@@ -22,7 +23,8 @@ weakLeanArgs = ["--tstack=65536"]
 
 [[lean_lib]]
 name = "BenchmarkExamples"
-globs = ["bench.examples.TritonBenchVectorAddition.+"]
+globs = ["bench.examples.+"]
+weakLeanArgs = ["--tstack=65536"]
 
 [[lean_lib]]
 name = "BenchmarkRegressions"

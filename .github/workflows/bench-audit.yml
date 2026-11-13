@@ -62,6 +62,10 @@ jobs:
           build-args: >-
             bench.tritonbench_g.matrix_transpose.RealCorrect
             bench.tritonbench_g.matrix_transpose.FPEquiv
+            bench.examples.VectorAdd.RealCorrect
+            bench.examples.VectorAdd.FPEquiv
+            bench.examples.FlatVectorAdd.RealCorrect
+            bench.examples.FlatVectorAdd.FPEquiv
             tests.lean.FPBgmvExpandSliceSource
             tests.lean.FPDecayCumsumSource
             tests.lean.FPDiagSsmTritonSource

@@ -1,0 +1,59 @@
+import bench.examples.StableLogSumExp.IO
+import bench.examples.StableLogSumExp.Contract
+import bench.examples.StableLogSumExp.Kernels
+import bench.examples.StableLogSumExp.Proofs.FP
+import VeriTile.Triton.Float.Kernel
+import VeriTile.Meta.StatementAudit
+
+/-!
+FP equivalence of optimizedLSEKernel and the unchanged directLSEKernel in
+Kernels.lean. Both use tl.log and libdevice.exp and store a scalar bf16 result.
+The conditional optimized preserves the product-log fallback near one and
+the log-exp fallback near zero and outside the cancellation interval.
+
+The contract records the finite/positive/nonzero intermediate operands used
+by the scalar derivation, an arbitrary shared reduction schedule, and support
+for fp32 comparisons. Branch outcomes are unrestricted. The row length is
+symbolic. The specification includes successful execution and a memory frame.
+
+Proofs/Unconditional.lean retains a scalar countermodel showing why the
+fallback branches cannot be removed under the admitted numerical rules.
+-/
+
+noncomputable section
+namespace VeriTile.Bench.Examples.StableLogSumExpFPEquiv
+open VeriTile.Bench.Examples.StableLogSumExp.Kernels
+open VeriTile Triton
+open StableLogSumExpFPContract
+open scoped VeriTile.Spec
+open StableLogSumExpFPExecution
+open SoftmaxStableFPContract (rowExpressions center rowPlan)
+open _root_.VeriTile.Triton.FP.Equational (Schedules)
+open FP.GuardExpression
+
+/-- Reference kernel under the common FP contract. Both programs use these
+numerical-domain checks and comparison requirements; only the optimized
+source uses the comparisons, and either Boolean result is allowed. -/
+def original (x y : RegionName) (B : Nat) : FP.Kernel₁ where
+  io := directIO x y B
+  profile := FP.fp32
+  domain := requirements x B
+  comparisons := [.lt .fp32 .real, .le .fp32 .real]
+
+/-- Same IO layout, precision and preconditions, with the optimized source. -/
+def optimized (x y : RegionName) (B : Nat) : FP.Kernel₁ :=
+  { original x y B with io := optimizedIO x y B }
+
+/-- Actual source-to-source equivalence from the fixed strict scalar theory
+and the numerical relaxations in `R`, including the conditional log rules. -/
+specification logsumexp_equiv (B : Nat) (hB : 0 < B) (R : FP.LogSumExp.Rules) :
+    optimized "x" "y" B ≡[R] original "x" "y" B := by
+  apply Spec.FloatingPoint.ofNumerical (lhs := optimized "x" "y" B)
+    (rhs := original "x" "y" B) (structural := fun _ _ => False) rfl rfl
+  exact candidate_equivalent B hB R
+
+#print_fp_assumptions logsumexp_equiv
+#guard_msgs (drop info) in
+#auditModuleAxioms
+
+end VeriTile.Bench.Examples.StableLogSumExpFPEquiv
