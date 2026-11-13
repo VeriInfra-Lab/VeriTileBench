@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "task": "rms_matmul_rbe",
+  "proof_inputs_identical": true,
+  "proof_inputs_sha256": "73036cfd25815fa2a6f2d6a23b278e816220d11b9bd09badeba89afe65445527",
+  "canonical_inventory_sha256": "d874101e9dc47a08163ae7873033277e49440b8ba443f7dbbfbdcdc547fe7869",
+  "module_count": 100,
+  "per_file_theorem_occurrences": 2030,
+  "baseline_unique_theorem_count": 1890,
+  "batch_unique_theorem_count": 1890,
+  "private_theorem_count": 374,
+  "batch_private_theorem_count": 374,
+  "proofs_directory_theorem_occurrences": 1899,
+  "additional_batch_theorems": [],
+  "per_file_inventories_identical": true,
+  "missing_theorems": [],
+  "per_file_trust_audits_passed": 100,
+  "all_theorem_axiom_audits_passed": 100,
+  "per_file_trust_audit_summaries_identical": true,
+  "audit_summaries_sha256": "70daf468cf760609ff4154f9465d1e0496dc4b88ba394f6fc983430a8805ab2a",
+  "baseline_accepted": true,
+  "batch_accepted": true,
+  "comparator_sha256": "bee6e2f6f3dd08f12fe759190748427d1fd3217605863d9c4dfe236fcc7b932f",
+  "old": {
+    "comparator_invocations": 100,
+    "wall_seconds": 6897.578126558103,
+    "sampled_peak_total_rss_bytes": 12472758272
+  },
+  "new": {
+    "comparator_invocations": 1,
+    "wall_seconds": 1042.1694587389939,
+    "sampled_peak_total_rss_bytes": 17789599744,
+    "audit_inventory_seconds": 812.9548489493318,
+    "batch_inventory_seconds": 21.603494226001203,
+    "comparator_seconds": 193.5953212850727
+  },
+  "wall_speedup": 6.618480390803284,
+  "measurement": {
+    "rss_method": "sum of driver descendants and processes in the private judge workspace; includes separate systemd services; shared pages can be counted repeatedly",
+    "sampling_interval_seconds": 0.1,
+    "old_maximum_sampling_gap_seconds": 0.17027249885722995,
+    "new_maximum_sampling_gap_seconds": 0.3044357872568071,
+    "cpu_affinity_count": 96,
+    "trials": 1,
+    "parallel_trials": false,
+    "cache": "Both runs start with copies of the same built dependency cache; fresh independent judge workspaces. Wall time includes snapshot preparation and cleanup.",
+    "boundary": "Local-host measurement; sampled aggregate RSS can count shared pages repeatedly. Not a GitHub runner capacity or speed guarantee."
+  },
+  "previous_batch_comparison": {
+    "per_file_inventories_identical": true,
+    "per_file_trust_audit_summaries_identical": true,
+    "batch_targets_identical": true,
+    "proof_inputs_identical": true,
+    "previous_wall_seconds": 1639.721317235846,
+    "previous_sampled_peak_total_rss_bytes": 12509712384,
+    "previous_audit_inventory_seconds": 1444.472282761708,
+    "wall_speedup_over_previous_batch": 1.5733730282404161,
+    "audit_inventory_speedup": 1.7768173529299363,
+    "audit_batch_size": 4,
+    "audit_build_invocations": 25,
+    "snapshot_seconds": 46.76308753620833
+  },
+  "inventory_file_sha256": "d90b2a0ca60c70625f2af111686e723cdd30aef095e269b7c8560e4b05b9425c",
+  "inventory_path": "validation/replay_batch/rms_matmul_rbe.theorems.json.gz",
+  "provenance": {
+    "baseline_per_file_commit": "9e4e6ed1ece1661073ff5de36195d44bff710c64",
+    "previous_batch_commit": "417dc425de567b0654db2dda82586e78aca2b755",
+    "measured_implementation_commit": "e03b84f7bf5f6066f715e81bdba72bad2c407f95",
+    "driver_sha256": {
+      "scripts/check_comparator_batch.py": "285a6e6c66a00bd4a75723cab604bf1ff84e5b57c8df5b1ef9f23f5082e8f663",
+      "scripts/check_comparator.py": "31e10c454fd139caa2d1fb6b5236b6611dc62416a68f565f857b4e6ea5f7e84c",
+      "scripts/comparator_common.py": "bc9f890a5e32178ec1937c0ab423fe9ce84ca4b2960d60390fc8fca95e330066",
+      "scripts/bench/measure_replay.py": "ebf43534e6aa597ed4ee0a3263e6a64ef4c6a9419882d9535dbcf251635279ea",
+      "scripts/bench/compare_replay.py": "fbdf396b7c0424f4b9b9b9747f4bbf7e8070e11627a811c3385fd77a8b0a3924",
+      "scripts/bench/audit_trust_prep.py": "f1c3c0f2e3a1a7d66936ae43e41aa702b7b7967d8200714afede71a42e5814da"
+    },
+    "frozen_proof_input_count": 10741,
+    "task_sources_changed": false,
+    "audit_batch_size": 4
+  },
+  "validation": {
+    "source_pairs": 4,
+    "python_tests": 751,
+    "official_comparator_integration_tests": 16,
+    "all_passed": true,
+    "scope": "RMS scheduling pilot; no corpus-wide enablement or new GPU experiments."
+  }
+}

@@ -15,7 +15,7 @@ import subprocess
 import sys
 import tempfile
 
-from comparator_common import comparator_command, require_tools, snapshot_project, write_config
+from comparator_common import AXIOMS, comparator_command, require_tools, snapshot_project, write_config
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -40,6 +40,7 @@ run_cmd do
   else
     names := selected
   names := names.qsort (·.toString < ·.toString)
+__AXIOM_AUDIT__
   let mut aliases : Array String := #[]
   for i in [:names.size] do
     let name := names[i]!
@@ -67,6 +68,23 @@ run_cmd do
     ("aliases", toJson aliases)
   ]
   liftIO <| IO.FS.writeFile __REPORT__ report.compress
+'''
+
+ALL_THEOREM_AXIOMS = r'''
+  let allowed : Array Name := __ALLOWED__
+  let mut pending := names
+  let mut seen : NameSet := {}
+  while !pending.isEmpty do
+    let name := pending.back!
+    pending := pending.pop
+    if seen.contains name then continue
+    seen := seen.insert name
+    let some info := kernelEnv.find? name
+      | throwError "Missing proof dependency: {name}"
+    if let .axiomInfo _ := info then
+      unless allowed.contains name do throwError "DISALLOWED axiom: {name}"
+    pending := pending ++ info.getUsedConstantsAsSet.toList.toArray
+  logInfo m!"Full theorem axiom audit: theorems={names.size}"
 '''
 
 
@@ -118,9 +136,8 @@ def library_targets(manifest):
     return sorted(modules), sorted(set(names))
 
 
-def check(workspace, source=None, trust=False, library=False):
-    state = prepare(workspace)
-    judge = workspace / 'project'
+def prepare_target(state, judge, source=None, trust=False, library=False, all_axioms=False):
+    """Write one audited inventory module without claiming proof acceptance."""
     logs = Path(state['logs'])
     if library:
         modules, selected = library_targets(judge / 'scripts/kernel-manifest.tsv')
@@ -145,19 +162,39 @@ def check(workspace, source=None, trust=False, library=False):
     selection = '#[' + ', '.join(f'{json.dumps(n)}.toName' for n in selected) + ']'
     footer = INVENTORY.replace('__SELECTED__', selection).replace(
         '__REPORT__', json.dumps(str(metadata)))
+    audit = ALL_THEOREM_AXIOMS.replace('__ALLOWED__', '#[' + ', '.join(
+        json.dumps(name) + '.toName' for name in AXIOMS) + ']') if all_axioms else ''
+    footer = footer.replace('__AXIOM_AUDIT__', audit)
     program = add_import(text, 'Lean') + '\n' + footer
     (judge / 'VeriTileComparator' / (tag + '.lean')).write_text(program)
     (job_logs / 'Source.lean').write_text(program)
+    return {'module': module, 'logs': job_logs, 'metadata': metadata,
+            'source': label, 'tag': tag}
+
+
+def build_inventory(judge, target):
+    """Run the existing per-module audits and discover every local theorem."""
+    job_logs = target['logs']
     # These are trusted repository sources, not an untrusted agent submission.
     # Elaboration discovers actual theorem objects, never regex-matched names.
     with (job_logs / 'build.log').open('w') as output:
-        build = subprocess.run(['lake', 'build', module], cwd=judge,
+        build = subprocess.run(['lake', 'build', target['module']], cwd=judge,
                                stdout=output, stderr=subprocess.STDOUT)
-    if build.returncode or not metadata.is_file():
+    if build.returncode or not target['metadata'].is_file():
         print((job_logs / 'build.log').read_text(), file=sys.stderr)
-        raise ValueError(f'{label}: elaboration/inventory failed; logs: {job_logs}')
-    inventory = json.loads(metadata.read_text())
-    shutil.copyfile(metadata, job_logs / 'targets.json')
+        raise ValueError(f'{target["source"]}: elaboration/inventory failed; logs: {job_logs}')
+    inventory = json.loads(target['metadata'].read_text())
+    shutil.copyfile(target['metadata'], job_logs / 'targets.json')
+    return inventory
+
+
+def check(workspace, source=None, trust=False, library=False):
+    state = prepare(workspace)
+    judge = workspace / 'project'
+    target = prepare_target(state, judge, source, trust, library)
+    inventory = build_inventory(judge, target)
+    job_logs, module = target['logs'], target['module']
+    label, tag = target['source'], target['tag']
     config = write_config(judge, inventory['aliases'], challenge=module, solution=module,
                           filename=f'.lake/comparator/{tag}/config.json')
     shutil.copyfile(config, job_logs / 'config.json')
