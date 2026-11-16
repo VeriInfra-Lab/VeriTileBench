@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "kind": "ci_shard_dependency_locality_validation",
+  "accepted": true,
+  "completed_at_utc": "2026-11-16T05:36:26.118758+00:00",
+  "parent_validation": {
+    "path": "validation/body_receipts/ci-responsibility.json",
+    "sha256": "c4986ee557be7c38d0dec788854f105ecdb9a7e320d6b64b04804ec815784b09"
+  },
+  "scope": {
+    "cases": 203,
+    "modules": 8549,
+    "public_goals": 521,
+    "shards": 64
+  },
+  "checks": {
+    "audit_source_tool_tests": 157,
+    "partition_module_order_and_complete_union": "PASS",
+    "public_goal_partition_coverage": "PASS",
+    "previous_31_module_single_shard_selection_unchanged": true,
+    "case_programs_and_proofs_changed": false
+  },
+  "dependency_locality": {
+    "modules": 8549,
+    "shards": 64,
+    "strided_import_closure": {
+      "sum": 174757,
+      "max": 3139
+    },
+    "contiguous_import_closure": {
+      "sum": 16685,
+      "max": 734
+    }
+  },
+  "current_inputs_sha256": {
+    "scripts/bench/affected.py": "a94f18c7b7090cd9bb6c4844b4b1816208d74d043849c049d14a2af767fb994d",
+    "scripts/test_bench_affected.py": "934e817e00dd5fb9904d44680007706aed49d13945c70e504ca02d9feff699c3",
+    "documents/bench/ci.md": "9dfbc542ad56b6ef19ca13127acd8676c3d99fc5fa25f75c20771a82dac058db"
+  },
+  "boundary": "Only worker partition boundaries change. Every selected module and public goal remains required. Import-closure counts are static dependency measurements, not measured wall-time speedups. Existing source-bound proof evidence and unchanged single-shard comparator replay retain their scope."
+}

@@ -25,8 +25,9 @@ Documentation changes need only the fast checks. If Git base history is missing,
 selection falls back to every verified case and regression; it never treats an
 unknown diff as empty. Manual dispatch without `full_audit` has no event base and
 uses this conservative fallback. A full manual dispatch uses the 64 daily shards. Large PR selections also split
-across up to 64 workers; all selected modules and public goals must be covered
-once across the successful shards.
+across up to 64 workers. Consecutive sorted module paths keep related proof
+files together and limit repeated dependency builds. All selected modules and
+public goals must be covered once across the successful shards.
 
 The plan artifact records changed paths, selected cases, public theorem names,
 module paths and source fingerprints. The proof job recomputes the plan and

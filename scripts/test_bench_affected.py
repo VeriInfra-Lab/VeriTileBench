@@ -200,7 +200,9 @@ class AffectedTests(unittest.TestCase):
                     self.assertIn(path, part['targets'])
                     goals.extend((path, name) for name in names)
         expected = [(p, n) for c in plan['cases'] for p, ns in c['public_theorems'].items() for n in ns]
-        self.assertEqual(sorted(selected), plan['targets'])
+        # Preserve adjacency as well as coverage, to avoid repeating most case
+        # dependency builds on every worker.
+        self.assertEqual(selected, plan['targets'])
         self.assertEqual(sorted(goals), sorted(expected))
         with self.assertRaises(ValueError):
             shard(plan, 0, 1)
