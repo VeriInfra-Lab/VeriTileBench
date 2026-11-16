@@ -12,6 +12,9 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+# One build command includes up to 32 targets and their cold dependencies.
+# This budget is separate from each file/batch's 30-minute proof-replay limit.
+BUILD_BATCH_TIMEOUT = 3600
 TOOL_TESTS = [
     'scripts.test_audit_source', 'scripts.test_audit_shards',
     'scripts.test_comparator_preflight', 'scripts.test_audit_process',
@@ -87,6 +90,15 @@ def require_replay(plan: dict, report: dict) -> None:
         raise ValueError('Missing public theorem replay: ' + repr(sorted(required - names)))
 
 
+def build_targets(data: dict, index: int = 0, count: int | None = None) -> list[str]:
+    from scripts.bench.affected import shard
+    part = shard(data, index, count if count is not None else data['shard_count'])
+    if not part['targets']:
+        raise ValueError('No affected build targets')
+    return ['VeriTile', 'VeriTile.Meta.StatementAudit', 'VeriTile.Meta.Disprove',
+            *(p[:-5].replace('/', '.') for p in part['targets'])]
+
+
 def verify_affected(plan_path: Path, results: Path, workspace: Path, index: int = 0,
                     count: int | None = None) -> None:
     from scripts.bench.affected import validate, shard
@@ -106,7 +118,7 @@ def verify_affected(plan_path: Path, results: Path, workspace: Path, index: int 
         targets = [p[:-5].replace('/', '.') for p in data['targets'][i:i + 32]]
         result, _ = run_logged(['lake', 'build', *targets], cwd=ROOT,
                               log=logs / f'{i // 32}.log', source='affected-proofs',
-                              stage='build', timeout=1800, heartbeat=30)
+                              stage='build', timeout=BUILD_BATCH_TIMEOUT, heartbeat=30)
         if result.returncode:
             raise ValueError('Affected proof build failed: ' + str(logs))
     if data['cases']:
@@ -164,6 +176,11 @@ def main() -> None:
     p.add_argument('--workspace', type=Path, required=True)
     p.add_argument('--shard-index', type=int, default=0)
     p.add_argument('--shard-count', type=int)
+    p = sub.add_parser('build-targets')
+    p.add_argument('--plan', type=Path, required=True)
+    p.add_argument('--shard-index', type=int, default=0)
+    p.add_argument('--shard-count', type=int)
+    p.add_argument('--github-output', type=Path)
     for name in ['checks', 'auditor', 'complete']:
         sub.add_parser(name)
     args = parser.parse_args()
@@ -181,6 +198,12 @@ def main() -> None:
         print(f"Selected {len(data['cases'])} cases and {len(data['targets'])} modules", file=sys.stderr)
     elif args.command == 'verify-affected':
         verify_affected(args.plan, args.results, args.workspace, args.shard_index, args.shard_count)
+    elif args.command == 'build-targets':
+        from scripts.bench.affected import validate
+        data = json.loads(args.plan.read_text())
+        validate(ROOT, data)
+        output({'build_args': ' '.join(build_targets(data, args.shard_index, args.shard_count))},
+               args.github_output)
     elif args.command == 'checks':
         run([sys.executable, '-B', '-m', 'unittest', 'discover', '-s', 'tests/python', '-p', 'test_*.py'])
         run([sys.executable, '-B', '-m', 'unittest', *TOOL_TESTS])

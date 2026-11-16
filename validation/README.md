@@ -2,6 +2,9 @@
 
 - `task_progress.json` selects the 184 current repaired tasks.
 - `source-correspondence.json` records pasted-body coverage and pending translations.
+- [`body_receipts/ci-cached-target-build.json`](body_receipts/ci-cached-target-build.json)
+  records exact shard builds inside the cached Lean setup, a separate cold-build
+  budget, and unchanged independent proof-replay limits.
 - [`body_receipts/ci-auditor-dependencies.json`](body_receipts/ci-auditor-dependencies.json)
   validates explicit auditor fixture builds and all 33 real rejection regressions
   after removing benchmark build caches from an isolated checkout.

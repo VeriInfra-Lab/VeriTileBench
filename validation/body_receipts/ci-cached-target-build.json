@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "kind": "ci_cached_target_build_validation",
+  "accepted": true,
+  "completed_at_utc": "2026-11-16T07:52:38.938616+00:00",
+  "parent_validation": {
+    "path": "validation/body_receipts/ci-auditor-dependencies.json",
+    "sha256": "ca9a7771723179f00b279521b28d3316f579e903d4301ad1f5ad967acc3d2ab0"
+  },
+  "issue": "A cold group of32selected modules plus dependencies hit the1800second build limit; the log reached3649of3657build jobs with no proof error. The Lean setup cache was saved before selected proof builds.",
+  "changes": {
+    "compile_group_timeout_seconds": 3600,
+    "independent_file_and_batch_replay_timeout_seconds": 1800,
+    "cached_setup_builds_exact_shard_targets": true,
+    "all_shared_cache_writers_include_locked_library": true,
+    "daily_setup_does_not_save_unbuilt_dependency_cache": true
+  },
+  "checks": {
+    "tool_tests": 159,
+    "exact_shard34_selected_modules_built": 134,
+    "local_build_jobs": 4033,
+    "workflow_yaml_and_shell_syntax": "PASS",
+    "case_source_or_proof_changes": false
+  },
+  "ci_evidence": {
+    "run": 43813737601,
+    "job": 133122713728,
+    "timeout_log_sha256": "195241dbc7c8a7fb5a27032662e5a269e67d2c873e8fa29f51fb20d79be65fd9",
+    "build_log_sha256": "07a2c07a635eaa560199cb8b0c8a6bdb558af6116167a48871c9c1cd5ea8c360"
+  },
+  "current_inputs_sha256": {
+    "scripts/bench/ci.py": "6d62715d7d6dd601f650dafe159e4890ac3a96dcc786d302c1c3fec9bfdade90",
+    "scripts/test_bench_ci.py": "ce03370a6bd8a8b3abb0f7d50154605b475a0e413059540931881b3b967c351f",
+    ".github/workflows/bench-audit.yml": "0feae4ab54d9f9f663bc591effca7d25783afc06648ab79df50044f19267123f",
+    ".github/workflows/pending-interfaces.yml": "cc71053677beff6442efc1067a946e7a4466d53172894f1db7b52c119e210e08",
+    "documents/bench/ci.md": "459cbc542426f7cc2c9a3f7b76eea5cfc86a82c6be8af2935a7deea9e65651e7"
+  },
+  "local_logs": {
+    "cache-build-tool-tests.log": {
+      "path": "/tmp/veritile-corpus-naming/ci-responsibility/cache-build-tool-tests.log",
+      "sha256": "e5ca791af5282c23cdf0ee1a076cfbbcd2d5b71f9a4e4b98a1b3d3ad93cf7406"
+    },
+    "cache-build-shard34-local.log": {
+      "path": "/tmp/veritile-corpus-naming/ci-responsibility/cache-build-shard34-local.log",
+      "sha256": "a893a7e29f5f60a7187a58b8463f3e6534f8b269cc5d4788c0c39b919ffa877a"
+    }
+  },
+  "boundary": "Compiled cache artifacts are not proof acceptance. Every selected file/public goal still requires the same independent axiom/specification audit and official comparator. No proof target, theorem condition or numerical assumption changes."
+}

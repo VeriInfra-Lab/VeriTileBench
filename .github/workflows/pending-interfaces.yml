@@ -47,7 +47,7 @@ jobs:
         run: sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
       - uses: ./.github/actions/build-lean
         with:
-          build-args: BugDetection PretrainKernels
+          build-args: VeriTile BugDetection PretrainKernels
       - name: Preserve pending obligations and validate recorded interfaces
         run: |
           python3 bench/bug_detection/check.py --verify-record

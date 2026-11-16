@@ -16,6 +16,19 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class BenchCITests(unittest.TestCase):
+    def test_cached_build_selection_matches_each_replayed_shard(self):
+        data = {'targets': ['bench/examples/A/Contract.lean',
+                            'bench/examples/A/Kernels.lean',
+                            'tests/lean/Regression.lean'], 'cases': [], 'shard_count': 2}
+        selected = []
+        for index in range(2):
+            targets = ci.build_targets(data, index)
+            self.assertEqual(targets[:3], ['VeriTile', 'VeriTile.Meta.StatementAudit', 'VeriTile.Meta.Disprove'])
+            selected.extend(t.replace('.', '/') + '.lean' for t in targets[3:])
+        self.assertEqual(selected, data['targets'])
+        with self.assertRaises(ValueError):
+            ci.build_targets(data, 0, 1)
+
     def test_auditor_builds_every_fixture_import_before_running_tests(self):
         imports = set(re.findall(r'import (bench\.[\w.]+)',
                       (ROOT / 'scripts/test_audit_gates.py').read_text()))
