@@ -722,11 +722,11 @@ class ReductionBodyCopyTests(unittest.TestCase):
 
 class FloatingCallBindingTests(unittest.TestCase):
     def test_all_full_matrix_and_layernorm_bodies_are_copied(self):
-        from scripts.bench.library_source import library_root
+        # Compare the benchmark-owned copies with their reviewed source snapshots.
         for name in ('AdamUpdateGridLaunch', 'FusedLayerNorm',
                      'HyperConnectionsDepth', 'HyperConnectionsWidth'):
             with self.subTest(example=name):
-                results = check_pinned_pairs(library_root(ROOT), Path('bench/examples') / name)
+                results = check_pinned_pairs(ROOT, Path('bench/examples') / name)
                 self.assertTrue(results)
                 self.assertTrue(all(r['mode'] == 'pasted_body' for r in results))
 

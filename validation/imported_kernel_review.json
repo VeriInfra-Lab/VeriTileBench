@@ -53899,7 +53899,7 @@
     "bench/pretrain_kernels/tasks/te_fused_attn_mla_thd_dv/Proofs/Backend.lean": "09415464d3e03083d4b58d7be07beb565f8a088764424799ce9be6790c9b899d",
     "bench/pretrain_kernels/tasks/te_fused_attn_mla_thd_dv/task.json": "ce9735151cf467d28fae4020d4a1399cf1e02ec6b5525665019c9f6d4a3fbbd8",
     "documents/bench/MAIN_THEOREM_CONVENTIONS.md": "659d0513f32f73dd9ae50da1f6bf6636858bc4e3070fd8d9bb4fec79c1b96f05",
-    "lakefile.toml": "c683d1fc167c8bcc72e60b081e8d9d295611f6402eb7457865d59462c1db674c",
+    "lakefile.toml": "5c1d5f825cbe0e36b98cc5ece9fb7be63987119cd1a4dbe03e82117067b7fc32",
     "scripts/bench/check_imported_kernel_review.py": "cf8bbf727a427a7db6d8dad40b9d7b59f7e7ef3691b6413ec138bb4adcdae387",
     "tests/lean/FPGuardedProgramIO.lean": "0fdd3d571fbb4343cf7340232e862484535e900d62005684d1db51d641553fc3"
   },
@@ -54085,5 +54085,17 @@
     "probes_unchanged": true,
     "case_proof_statuses_changed": false,
     "scope": "Optional dependency view and local example registration only; no case source, mathematical target, proof-completion or numerical-admission changes."
+  },
+  "shared_helpers_dependency_revalidation": {
+    "date": "2026-11-16",
+    "previous_core_revision": "ce15858d77c750c77f60e56d66ef9d1511e836af",
+    "core_revision": "9f3960b6b25c7660400e8326efe82d2e5a66fe24",
+    "reviewed_inputs_changed": [
+      "lakefile.toml"
+    ],
+    "reviewed_task_facts_unchanged": 334,
+    "shared_dependency_sources_unchanged": true,
+    "recorded_counterexamples_recomputed": true,
+    "scope": "Selected structural snapshot refreshed for the dependency pin. Existing proof, backend, numerical-admission and historical compilation records are retained."
   }
 }
