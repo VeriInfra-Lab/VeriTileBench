@@ -18,6 +18,11 @@ TOOL_TESTS = [
     'scripts.test_spec_sheets', 'scripts.test_coverage_review',
     'scripts.test_bench_ci', 'scripts.test_bench_affected',
 ]
+AUDITOR_TARGETS = [
+    'VeriTile.Meta.StatementAudit', 'VeriTile.Meta.Disprove',
+    'bench.examples.VectorAdd.Kernels',
+    'bench.tritonbench_g.softmax_triton1.Kernels',
+]
 
 
 def plan(root: Path, event: str, requested: str) -> dict:
@@ -129,6 +134,17 @@ def run(command: list[str]) -> None:
     subprocess.run(command, cwd=ROOT, check=True)
 
 
+def audit_regressions() -> None:
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    from scripts.comparator_common import require_tools
+    require_tools()
+    # Lean imports in the test fixtures need built oleans, including in a fresh
+    # checkout. Library-only bootstrap does not build local benchmark modules.
+    run(['lake', 'build', *AUDITOR_TARGETS])
+    run([sys.executable, '-B', '-m', 'unittest', 'scripts.test_audit_gates',
+         'scripts.test_check_comparator'])
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
@@ -170,11 +186,7 @@ def main() -> None:
         run([sys.executable, '-B', '-m', 'unittest', *TOOL_TESTS])
         run(['bash', 'scripts/bench/audit_tritonbench_g.sh', '--source-only'])
     elif args.command == 'auditor':
-        sys.path.insert(0, str(ROOT / 'scripts'))
-        from comparator_common import require_tools
-        require_tools()
-        run([sys.executable, '-B', '-m', 'unittest', 'scripts.test_audit_gates',
-             'scripts.test_check_comparator'])
+        audit_regressions()
     else:
         require_results(os.environ)
         print('All required benchmark CI gates passed')
