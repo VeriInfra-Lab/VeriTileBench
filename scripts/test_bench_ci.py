@@ -6,13 +6,32 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
+import re
 
 from scripts.bench.ci import plan, require_results, require_replay
+from scripts.bench import ci
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class BenchCITests(unittest.TestCase):
+    def test_auditor_builds_every_fixture_import_before_running_tests(self):
+        imports = set(re.findall(r'import (bench\.[\w.]+)',
+                      (ROOT / 'scripts/test_audit_gates.py').read_text()))
+        self.assertTrue(imports)
+        with mock.patch('scripts.comparator_common.require_tools'), mock.patch.object(ci, 'run') as run:
+            ci.audit_regressions()
+            build, tests = [call.args[0] for call in run.call_args_list]
+            self.assertEqual(build[:2], ['lake', 'build'])
+            self.assertLessEqual(imports, set(build[2:]))
+            self.assertIn('scripts.test_audit_gates', tests)
+        with mock.patch('scripts.comparator_common.require_tools'), mock.patch.object(ci, 'run') as run:
+            run.side_effect = subprocess.CalledProcessError(1, ['lake', 'build'])
+            with self.assertRaises(subprocess.CalledProcessError):
+                ci.audit_regressions()
+            self.assertEqual(run.call_count, 1)
+
     def test_full_audit_only_runs_daily_or_when_explicitly_dispatched(self):
         for event in ['pull_request', 'push', 'schedule', 'workflow_dispatch']:
             for requested in ['', 'false', 'true']:

@@ -2,6 +2,9 @@
 
 - `task_progress.json` selects the 184 current repaired tasks.
 - `source-correspondence.json` records pasted-body coverage and pending translations.
+- [`body_receipts/ci-auditor-dependencies.json`](body_receipts/ci-auditor-dependencies.json)
+  validates explicit auditor fixture builds and all 33 real rejection regressions
+  after removing benchmark build caches from an isolated checkout.
 - [`body_receipts/ci-shard-locality.json`](body_receipts/ci-shard-locality.json)
   checks contiguous shard coverage and import dependency locality; all proof
   targets and case sources remain unchanged.
