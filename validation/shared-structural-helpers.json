@@ -1,0 +1,1215 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "kind": "shared structural proof helper migration",
+  "source_repository": "https://github.com/VeriInfra-Lab/VeriTileBench",
+  "benchmark_base_commit": "b675436a005bb8c41b01abe81d8ace66d039e0e7",
+  "benchmark_source_commit": "83d6a8174bd98729e09e48e75f7bcf8f29d624db",
+  "core_revision": "9f3960b6b25c7660400e8326efe82d2e5a66fe24",
+  "proof_input_scope": "Lean source files, toolchain and Lake manifests; the metadata-only receipt is excluded.",
+  "proof_inputs_sha256": "783db11bf4e9f15e4d5347598a5788244bc212cb82112cffaeabeb89f7f3f22c",
+  "scope": {
+    "changed_proof_helpers": 17,
+    "affected_module_closure": 2699,
+    "public_entries_unchanged": 180,
+    "theorem_interfaces_unchanged": true,
+    "source_cases": 100,
+    "source_pairs": 314
+  },
+  "checks": {
+    "selected_and_additional_builds": "PASS",
+    "benchmark_ci_smoke_builds": "PASS",
+    "source_correspondence": "PASS",
+    "full_source_audit": "PASS",
+    "python_regressions": {
+      "tests": 751,
+      "status": "PASS"
+    },
+    "audit_source_shard_and_comparator_preflight_regressions": "PASS"
+  },
+  "official_comparator": {
+    "mode": "source-replay",
+    "modules": 234,
+    "accepted_modules": 234,
+    "theorem_occurrences": 874,
+    "comparator_sha256": "bee6e2f6f3dd08f12fe759190748427d1fd3217605863d9c4dfe236fcc7b932f",
+    "permitted_axioms": [
+      "propext",
+      "Quot.sound",
+      "Classical.choice"
+    ],
+    "trust_audits": "PASS",
+    "results": [
+      {
+        "source": "bench/tritonbench_g/attention_score/Contract.lean",
+        "source_sha256": "e099228026b5904e5543831fef1c1f6fd285adadff23f332c6ff57d1d5f085d5",
+        "theorem_count": 15
+      },
+      {
+        "source": "bench/tritonbench_g/attention_score/FPEquiv.lean",
+        "source_sha256": "8d2a8509f8feaf32ab604d01746f66ee5013d2b7fadbcc432ed70b378c3ec012",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/attention_score/RealCorrect.lean",
+        "source_sha256": "dc37e276d404a0e6aed6d6f656d67b9fa93844f60fc6257e8b03578ab7063096",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/block_sparse_attn/FPEquiv.lean",
+        "source_sha256": "435fa5271f99bfedbcb33d59e3c963d7dc57133fcf57d9b12aaf7ca0d0443988",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/block_sparse_attn/RealCorrect.lean",
+        "source_sha256": "74e14d7d24e5162a7236789a4c691eb8bd557b75615d9552d66b23df40a2761a",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/bmm_chunk_bwd/FPEquiv.lean",
+        "source_sha256": "325a47c5ae1e9e01fdfe6a500d84f832de3a1e8cf774d30d4098f7bf5593d03b",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/bmm_chunk_fwd/FPEquiv.lean",
+        "source_sha256": "f94a3eb12b1f0c6f27e37433ff23d41e09036891fbdc66099bb52afdbdf9d93b",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/bmm_chunk_fwd/Proofs/NativeReference.lean",
+        "source_sha256": "28c1a1beb5f1a204e6dae931e394e7f04b6b114bfc7e8b9dd8f1da42ee765290",
+        "theorem_count": 38
+      },
+      {
+        "source": "bench/tritonbench_g/cache_transform_triton/FPEquiv.lean",
+        "source_sha256": "663a5e650908b0754ac9cbfa4b3b5a899fbd73f8ae3688263e78737bd2f6ed79",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/cache_transform_triton/Proofs/Sources/Mathematical_IndexRewrite.lean",
+        "source_sha256": "17b5714684dce5d633ee4a8fca29d5e30b3640675e4df9b475a5f7a5375b024e",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/cache_transform_triton/RealCorrect.lean",
+        "source_sha256": "3ef76659953abcdc7b017791d21fd1a04bffb0cbf9f539e29d3d45711092cdff",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_bwd_dqkg/Contract.lean",
+        "source_sha256": "65a0248e1889d60485d8f8e6b1a77774c975f6f731fd7f027eb41f880e621522",
+        "theorem_count": 0
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_bwd_dqkg/FPEquiv.lean",
+        "source_sha256": "1df03898f1a7c56cd908c6a93ec88b649187d0b5fc7210e94812d8c01f4275e2",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_bwd_dqkg/RealCorrect.lean",
+        "source_sha256": "31b32df16090134bc2257b42dd1bcc4b89e0d2a1f480ba43cf58e0e1d806c4d3",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_delta_fwd/FPEquiv.lean",
+        "source_sha256": "325fddbd8b5f8c42c665c3eb29be01bff9a2ce7cc7600819744c05472f34200a",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_delta_fwd/RealCorrect.lean",
+        "source_sha256": "64a9210ef8c866c7ffb74b0d7a9c38a07bb477977eeca237cd42511fd52be464",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_gate_recurrence/Contract.lean",
+        "source_sha256": "7a27b80876c8f8f6c33e3864e78cf6458019668f6ee49906b73d7c0fa6898ce7",
+        "theorem_count": 8
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_gate_recurrence/FPEquiv.lean",
+        "source_sha256": "ac43b6da1d465f544af3ded5f522c33b6569b48201332f36c476eb893d9bd1b1",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_gate_recurrence/RealCorrect.lean",
+        "source_sha256": "0879b6429ab76418783e6f943880ce43c3c438944ec30eacbf6bc4c84d9806fc",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_gated_attention/FPEquiv.lean",
+        "source_sha256": "6351cb96235489b2b904c88537fb70522e994c9a699a2b9bcf55c0a56c760d52",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_gla_fwd/RealCorrect.lean",
+        "source_sha256": "174c42b00245eb29da67979309dcaf4f2b60432a813d250b886c08f4d2707223",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_gla_simple/Contract.lean",
+        "source_sha256": "4d714d16674777dbc9d412911fdb2501cd1dfec2ac986110158b01d23aaf9e3a",
+        "theorem_count": 0
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_gla_simple/FPEquiv.lean",
+        "source_sha256": "9a7b9e5ed028b49bba890c39425254ae68e3c4764b9fc2b44a1b0781221f920e",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_gla_simple/Proofs/Sources/PhysicalDirect.lean",
+        "source_sha256": "6724c8f8ca8678d6f19297a972790f4589647c21635bc23d7f97915c5bbd2ffa",
+        "theorem_count": 10
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_gla_simple/RealCorrect.lean",
+        "source_sha256": "09dfc85a9430c5be4decd021653c1b07c6e94c4a3065e6bc7fcefe7619754734",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_linear_attn/Contract.lean",
+        "source_sha256": "947311d589f27f9c1958ed843305c0d9f40abcf46611fb0dde577991fddf8745",
+        "theorem_count": 3
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_linear_attn/FPEquiv.lean",
+        "source_sha256": "d8e83a0ad6eacc214d80c3ade20a60c3f0f70d7218ae30b5582d06285ba86e72",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_linear_attn/RealCorrect.lean",
+        "source_sha256": "01eb33000efea2685f4d449391ca7d46ed684ad1921ba0bacbc23101e76adba3",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_retention/Contract.lean",
+        "source_sha256": "ca7d1b9941859b3882b2718af07b06a3a03320a95aecb98fa0830174626c6156",
+        "theorem_count": 0
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_retention/FPEquiv.lean",
+        "source_sha256": "0d07261a60bfd906b429962f57676e0b8dfd5cccb6b2704cdd8d86c9d98884f0",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_retention/RealCorrect.lean",
+        "source_sha256": "5adf6ae55cfd228c0c9be5c1038b5b4c2ab55cae48f3acbaef1e654c7562b404",
+        "theorem_count": 3
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_retention_ops/Contract.lean",
+        "source_sha256": "4093f97184aaabb96ac12f46a8fad015141285f63aae12d2111ce53d84423d9a",
+        "theorem_count": 0
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_retention_ops/FPEquiv.lean",
+        "source_sha256": "85975bd7fbe52eecaf5dd629b815ebdec7001f2431c3ebf04cdc3d8c896b718a",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/chunk_retention_ops/RealCorrect.lean",
+        "source_sha256": "9f93f352ac7a99b4578179918612cdc667916b9b479344f20c16706aebd6327f",
+        "theorem_count": 6
+      },
+      {
+        "source": "bench/tritonbench_g/context_attn_bloom/FPEquiv.lean",
+        "source_sha256": "ceb7ff4085241532da50484ce5d91df83747cc0d5698f4a7e144c06064353c60",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/context_attn_mistral/Contract.lean",
+        "source_sha256": "c7c86a95f27384ee5e846a482cba86804e52e2f6db1c185e308e8ea17533824b",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/context_attn_mistral/FPEquiv.lean",
+        "source_sha256": "0d3c9be8c36ac2882d42be75caeb7ef31402564204c161b2f38f6db026ea398e",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/cosine_compute/FPEquiv.lean",
+        "source_sha256": "056f8ba1ea2750fc3a0d49dba56222b7f2f99e90ddf8ba6e6a1488de752773a5",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/decay_cumsum/FPEquiv.lean",
+        "source_sha256": "c4b5864774ffd53eb9de4f0f3bd39a0c8dd29a4975aa86fc756fe048e31ac024",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/dequantize_matmul/FPEquiv.lean",
+        "source_sha256": "a7942ed478f24a192ee472999a960f1839ab985be8796b0d487bd0ef68945169",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/dequantize_matmul/RealCorrect.lean",
+        "source_sha256": "7cb77ab9e42fba74614aae574fd91e81919561728352a7549bcc938a9833ceea",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/destindex_copy/FPEquiv.lean",
+        "source_sha256": "c9f656fbff4bb46255f80e7a56add4b3690badd31603e4eee341a0f001a56afc",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/destindex_copy/Proofs/Mathematical_IndexRewrite.lean",
+        "source_sha256": "d8b9cd5ea6a69f995a7813b803ea20d085b6000531ba1c8c98e5a22b114572d8",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/destindex_copy/RealCorrect.lean",
+        "source_sha256": "853200d9fae52af5d796f2662c8c605f7de860cd9d34741bcda320436b297740",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/destindex_copy_kv1/FPEquiv.lean",
+        "source_sha256": "a69b8400c2d9452314b7dae7ce37d5359dd7a06ce50ee8d6431d086ae28a0f51",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/destindex_copy_kv1/RealCorrect.lean",
+        "source_sha256": "c903d803eced39beb76d3bee80f2fb0a4a03b25f1546101dab888bb3e1801cfb",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/destindex_copy_kv2/FPEquiv.lean",
+        "source_sha256": "b691a7386a468d9d4c29641efa04f0306ebd644023015abeaf6645e030e04612",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/destindex_copy_kv2/RealCorrect.lean",
+        "source_sha256": "644503eb3975165aeaf4bd394a4f0626df65e6e6b507e36c7cfbf29b00f4ce84",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/diag_ssm_triton/FPEquiv.lean",
+        "source_sha256": "811effcfa8494f8008376322260e87470e9654d76908d14c57181d6217d68363",
+        "theorem_count": 4
+      },
+      {
+        "source": "bench/tritonbench_g/dropout_triton/FPEquiv.lean",
+        "source_sha256": "3584b285e0457767530f0ada02e3e7aca2c46d7a36b19cc9ff03abde831b90e4",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/embedding_triton_kernel/FPEquiv.lean",
+        "source_sha256": "41c3b67e2588739f837c49d3c2fed438c3bf588aa4814fc70128cff6fe7a3723",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/embedding_triton_kernel/RealCorrect.lean",
+        "source_sha256": "303016356468304a756552db17f1af586b050ca96a16976af848b4479b048972",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/f8_conversion_utils/FPEquiv.lean",
+        "source_sha256": "691cf4372f5e480e17cd13c3a69fe4f050bba900d7fa366172b65578fbffffef",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/f8_conversion_utils/RealCorrect.lean",
+        "source_sha256": "e43a811ee0e36004fc176fab83a0285007670e42e338bdec5f05680029083135",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/fast_layernorm/FPEquiv.lean",
+        "source_sha256": "1dc70ed83153e91533ddfc72fd561d62e4181090b463d80316a6b2b376b5ea29",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/fast_layernorm/RealCorrect.lean",
+        "source_sha256": "9b9f646cdebd3536cb3e9651d1dd4f5e7684ae5d08582c3bef997d9e90640837",
+        "theorem_count": 3
+      },
+      {
+        "source": "bench/tritonbench_g/fast_rope_embedding/Contract.lean",
+        "source_sha256": "63fa4ae1977617449154b23f523941da537b80bc58e4c4d4d213eff3e50ad8c2",
+        "theorem_count": 14
+      },
+      {
+        "source": "bench/tritonbench_g/fast_rope_embedding/FPEquiv.lean",
+        "source_sha256": "5600afeaed01e4e58b658bd42bf413192fee34e037e3eb0d7e70f93acf2f2dd0",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/fast_rope_embedding/Proofs/InvocationBindings.lean",
+        "source_sha256": "526593f0afa37df1695f56699fb8a41dc0c867cca9c9afd1a9986cc1b3fca74c",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/fast_rope_embedding/RealCorrect.lean",
+        "source_sha256": "e9afc175eeb54a1dce9738cc1769950c08e061ae93270f869e46730c9b6caa3d",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/fused_recurrent_delta/FPEquiv.lean",
+        "source_sha256": "4d9f15eac3805cf989c969aec328ee91ce57ab6ff291bbebd22fe608b354ed40",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/fused_recurrent_delta/Proofs/Support/Whole.lean",
+        "source_sha256": "50e19aff8fa368398d6a3918c8a5f969e5966f8e7ca67bf5acb24bb0246e8c8b",
+        "theorem_count": 0
+      },
+      {
+        "source": "bench/tritonbench_g/fused_recurrent_delta/RealCorrect.lean",
+        "source_sha256": "5660dec9bcc7bb0f58eaf259dfc1e70bc4eecfcc15ffd6c8c46ad3be2bf9466b",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/fused_recurrent_retention/FPEquiv.lean",
+        "source_sha256": "67d4695b4923b689cb29e59d2833e49238a601bd1663193ac25e614a17f0e2ef",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/fused_recurrent_retention/Proofs/QuotedReady.lean",
+        "source_sha256": "cd97ab7bb55cd199f8e40a77f33e848dc09afd8d9181a1564493bfdecaa15132",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/fused_recurrent_retention/RealCorrect.lean",
+        "source_sha256": "d787e680054b6bb51607ac77c9fa4acc0075c37cde63615cf2f1dc5c9d5f2e47",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/fused_rotary_embedding/FPEquiv.lean",
+        "source_sha256": "f7947308086ee39a1039cd0598d972dbec6d505f1fdba95682611cbbedf4ba38",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/fused_rotary_embedding/RealCorrect.lean",
+        "source_sha256": "f402c24360775919d9c081280a37ec0d7c16c89019a0dd5778c30c5aa265d99f",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/geglu_tanh_triton/Proofs/Mathematical_FP.lean",
+        "source_sha256": "551a916a658da294c8ac13a794d9aca8e029e7e1460f35262d7aa6c200db1ec3",
+        "theorem_count": 6
+      },
+      {
+        "source": "bench/tritonbench_g/index_select_cat/FPEquiv.lean",
+        "source_sha256": "fc68f07651edb8bff800ebd285bc0b7262a416e021b83e86b119fc6e603f1bd1",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/index_select_cat/RealCorrect.lean",
+        "source_sha256": "4879665d7c95087fb48630b716cd79b7cb0eb2160d56b34a18d4f8f8f5d97a76",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/int4_matmul/FPEquiv.lean",
+        "source_sha256": "40bde0add63e52692314321bddd8799320c921cbc8d92070fa5b3f0127ab7af6",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/int4_matmul/RealCorrect.lean",
+        "source_sha256": "a5dc4b8d9b2203a347e9b2e16cb868d378d672ab443abd7582ce8f918568e1ef",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/int8_dequant_matmul/FPEquiv.lean",
+        "source_sha256": "01081b7da4f030d422e5d17c8b120b988064fe17370aabbc649de70c6bcd3756",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/int8_dequant_matmul/RealCorrect.lean",
+        "source_sha256": "0d7942f1e9acee79ad1b0dbe201a9cf13fabba9ecf9d520cee5fe7f23b317cd6",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/int8_matmul_kernel/Contract.lean",
+        "source_sha256": "4cc6f1c89328e5ccb955483924fa0d84796f7e9a2214d09e39a6610784755003",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/int8_matmul_kernel/FPEquiv.lean",
+        "source_sha256": "015f1ed92c3a86996dff949c4f5586003cb1395cdfc5482e9be343f1d1f36d11",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/int8_matmul_kernel/RealCorrect.lean",
+        "source_sha256": "9634cb6b2dd6421aae1ca118c6bf4be41b102e6f56d00739f107ff69ae42b27c",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/int8_matmul_quantization/FPEquiv.lean",
+        "source_sha256": "b54738c587c4376237c4d532c400109e14870b78324877a2505aa9469b98964d",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/int8_matmul_quantization/Proofs/Support/KernelEntryAdapters.lean",
+        "source_sha256": "0e7213682d517413249cf97d172a8bdfdf7539f9c9a979934ee4448ba4e5d4ce",
+        "theorem_count": 0
+      },
+      {
+        "source": "bench/tritonbench_g/int8_matmul_quantization/RealCorrect.lean",
+        "source_sha256": "8bcf34b935a63056050a9da8687e6962d1c8c4d4a41943798442327f736a2efa",
+        "theorem_count": 3
+      },
+      {
+        "source": "bench/tritonbench_g/int8_quantization/FPEquiv.lean",
+        "source_sha256": "543624e923c19c9a5de20b5be40c36b89b06a8fe0cd6db3d573fc064e777e6d0",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/int8_quantization/RealCorrect.lean",
+        "source_sha256": "89bb096f4dab5b77415a2337c86030bbe898d0302ba04752ff754d0a4617d3f2",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/int_scaled_matmul/FPEquiv.lean",
+        "source_sha256": "30728f00961459ecc5c3ee908547854e836403f3b4dc76a65b6d1980a4e35689",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/int_scaled_matmul/RealCorrect.lean",
+        "source_sha256": "13d3778987585ea4ea560144ac171d5b0c023201bbbc4f658c056ae2b1bec887",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/isfinite_kernel/FPEquiv.lean",
+        "source_sha256": "5dabaecd29bb9bad199a589f519746546017cc00e025175678df20bc4311a11f",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/isfinite_kernel/Proofs/Mathematical_MemoryProjection.lean",
+        "source_sha256": "531c561bf4241cfe91bb4455c02c94358883f8f6c2cbbe0e95c3960282a9efd5",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/isfinite_kernel/RealCorrect.lean",
+        "source_sha256": "c9063a343626f7abc880df4fd100172ba8fec546a6d26a9f4b2ed952f918cc50",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/iv_dependent_matmul/FPEquiv.lean",
+        "source_sha256": "8f7edae739abd0d51914ddb3d5d27975e23155c7e10cedda82dfee81e1bce326",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/iv_dependent_matmul/RealCorrect.lean",
+        "source_sha256": "05e761c6f44f04427ebcfa769aa6b0d13632c24154e93f11f88aa1cd29b46875",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/kcache_copy_triton/Proofs/Sources/Mathematical_TypedCopy.lean",
+        "source_sha256": "079cf29db3edd642704f5659700e4239fc689264feb54309f52f1db2c2a77284",
+        "theorem_count": 17
+      },
+      {
+        "source": "bench/tritonbench_g/kldiv_compute/FPEquiv.lean",
+        "source_sha256": "f7fe7beb02bfc4dd54767bc1d717f40b71333c2b61f80aeaee53b7ed9d0a118b",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/kldiv_compute/RealCorrect.lean",
+        "source_sha256": "2e45f41005c109b57d53ac81953520968aab281a451d5eae70bbe5d6857a5e98",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/kldiv_ops/FPEquiv.lean",
+        "source_sha256": "7052c8012be04940e2b7bf49c8b603b06da5f3a114f50077e2b6f72ca281601f",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/kldiv_triton/FPEquiv.lean",
+        "source_sha256": "baddb3013349346984552f966ad31f2dbb7b1f09af42940e000df3c418be5776",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/kldiv_triton/RealCorrect.lean",
+        "source_sha256": "4779d18c5b5e6ad577e63968ab42a59d2ba66671c3229ad79f812bbc01003be0",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/ksoftmax_triton/FPEquiv.lean",
+        "source_sha256": "8e5a04a7f9c7622991467965c0ae1dac4b5396470aae6e74385257efecb171ac",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/ksoftmax_triton/Proofs/Mathematical_BackwardFP.lean",
+        "source_sha256": "c330c2997e9d637764b5e2f13c360d4cc32bf82ced263991e27dda91b9d20de2",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/ksoftmax_triton/RealCorrect.lean",
+        "source_sha256": "4e7209b47d091a428e95b34e5e9db4e60c4f287cfe2d5ddc22de2f1901a7f61f",
+        "theorem_count": 3
+      },
+      {
+        "source": "bench/tritonbench_g/layer_norm_fwd/FPEquiv.lean",
+        "source_sha256": "bf009bb13de90f9a840d17061373bfe2e6b7fce6de429ce61cbe28c2b84bbf6f",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/layer_norm_fwd/Proofs/TypedSupport.lean",
+        "source_sha256": "8ecc8c6910b1e343337b325631e09230c485945f8993c2d9a12d7009d141e336",
+        "theorem_count": 6
+      },
+      {
+        "source": "bench/tritonbench_g/layer_norm_fwd/RealCorrect.lean",
+        "source_sha256": "a397d9878a02185bf613c330c72918592f8004880b3f05ff273bb14b2a78fda0",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/layer_norm_liger/Contract.lean",
+        "source_sha256": "e42c9b1887350efcaec0d67f3fd281ecead3f01438e29108277ac930e1cbbfc4",
+        "theorem_count": 63
+      },
+      {
+        "source": "bench/tritonbench_g/layer_norm_liger/FPEquiv.lean",
+        "source_sha256": "d58b7abce6dd46bc0d233f9304c63694a62eca01b94fa9f7a6dea6e53da99a32",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/layer_norm_liger/RealCorrect.lean",
+        "source_sha256": "e2f7efd1d0bcec1b5f9c8be79cb837cd22deb7de2315e69e1a84d4859a3e5bb0",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/layer_norm_ops/FPEquiv.lean",
+        "source_sha256": "446dd54b07956674ea3dabe8addb324dfd5678ca60ade9dc69aba532e33dc0b7",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/layer_norm_ops/Proofs/MemoryHelpers.lean",
+        "source_sha256": "5977dfecad19387af9880e4742e7cae05950c76f6b5b9e3c3540ae443b13d152",
+        "theorem_count": 4
+      },
+      {
+        "source": "bench/tritonbench_g/layer_norm_ops/RealCorrect.lean",
+        "source_sha256": "933a2f6fe53c2f65a60565f327d092a6825df1e1860f875d8850ed27a5dbf5a5",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/layer_norm_triton/FPEquiv.lean",
+        "source_sha256": "ebb8429994e26bad8d970542a015b787e647e0ba6e11fde2e9bf11e2ece8f9f5",
+        "theorem_count": 3
+      },
+      {
+        "source": "bench/tritonbench_g/layer_norm_triton/RealCorrect.lean",
+        "source_sha256": "3529ec8d0ad64be088e9d81e96dd54b14fd5e09218080846df73779cecdc92a3",
+        "theorem_count": 3
+      },
+      {
+        "source": "bench/tritonbench_g/layernorm_fwd_triton/FPEquiv.lean",
+        "source_sha256": "6319ab1d7abab877d0d7267b29774c2910a17f21c544929c9cfd34c31f7ef999",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/layernorm_fwd_triton/Proofs/Mathematical_FPOutput.lean",
+        "source_sha256": "0024fd58214e1d72a3a09118d78da2cf4f9404bf7ac1853e0b32160ea6890b99",
+        "theorem_count": 13
+      },
+      {
+        "source": "bench/tritonbench_g/layernorm_fwd_triton/Proofs/SourceOutput.lean",
+        "source_sha256": "16f942926a1d8b700896a944840452d7adeb8177268591864c4f4972640656c8",
+        "theorem_count": 44
+      },
+      {
+        "source": "bench/tritonbench_g/layernorm_fwd_triton/RealCorrect.lean",
+        "source_sha256": "1742312d1f9c90c29a08d177a5608427a29e0940129bd29cb43a24d697045f4b",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/lightning_attention/Contract.lean",
+        "source_sha256": "d9687b22ea2949401652ae27444515f21a75671e93cc707366e3e2bcac156a2f",
+        "theorem_count": 0
+      },
+      {
+        "source": "bench/tritonbench_g/lightning_attention/FPEquiv.lean",
+        "source_sha256": "b58d8b036b39968b7dbe2ba971f4e3bb229c8aae9185d2102c51c54764465924",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/lightning_attention/RealCorrect.lean",
+        "source_sha256": "e6a3cdcd19ad20192d37ed917e747e6de2dba14f60cff111cbbd78a5765b5606",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/llama_ff_triton/Contract.lean",
+        "source_sha256": "1c087d623bc968528361ffb83641f43368443ec2fe40a88f2b8b49e3b49ec1cd",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/llama_ff_triton/FPEquiv.lean",
+        "source_sha256": "ae38ba44cb0e11c77a33f84278fa44db50d9f01c6a0a2607912c6187ff69ab26",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/llama_ff_triton/RealCorrect.lean",
+        "source_sha256": "df2d3c439cffdba6228b2b31aebaf0cba4367ff933b6cf4bfe49e8a44a68a892",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/log_softmax/FPEquiv.lean",
+        "source_sha256": "5a280831cbdf5c3685191e3c87ac7ff14a5de4d9605bd265f8b70d821d88d455",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/log_softmax/RealCorrect.lean",
+        "source_sha256": "e2fb59ae0278483e5b962b8e98f1d5e3244651fc727d292546f6616f7bc72506",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/lora_expand_gemv/Contract.lean",
+        "source_sha256": "8397546244aa72e04b1831751b6475cfc787782b7fd78cb65e9316fed698f6e9",
+        "theorem_count": 39
+      },
+      {
+        "source": "bench/tritonbench_g/lora_expand_gemv/FPEquiv.lean",
+        "source_sha256": "0a88b8ab2cc0b423e893725a658b6822875e18b050e2b84526b52148c3570eed",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/lora_expand_gemv/Proofs/MetadataStorage.lean",
+        "source_sha256": "22bb9aab1b4e9393f1ff8e04f9e969dcf7fc45fd71567fade88da304a249f0eb",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/lora_expand_gemv/Proofs/Sources/Selected.lean",
+        "source_sha256": "9b9b655208da91a692301747de2a2e66b5ab39dbfa9e72a397b566bbdd9319e8",
+        "theorem_count": 0
+      },
+      {
+        "source": "bench/tritonbench_g/lora_expand_gemv/RealCorrect.lean",
+        "source_sha256": "81d46d3fba7bfab766d5320856f7fbccb26d169e0d3abe8a7973c288e076724b",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/masked_select/FPEquiv.lean",
+        "source_sha256": "b35e39a936a4270aa99aeca3e8a604b18b9bdf299a5025da0903545a204ddc18",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/masked_select/RealCorrect.lean",
+        "source_sha256": "58d4b562421c48586c7458a76eb8f81e6f8741f5929eb39047275a0ef81d059e",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_dequant_int4/FPEquiv.lean",
+        "source_sha256": "647fd004ecfa4f67989b77fc2142cc0ec979814194148c4c7ccbcb5ba295e2c3",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_dequant_int4/RealCorrect.lean",
+        "source_sha256": "99b19617da1a2a462a3d4a6df3490760feaca94f0cc5e67dfe2cb197333a81d8",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_dequantize/Contract.lean",
+        "source_sha256": "40376949e20ff1d5f22e34e73ab991012b8d79fbbcd7b4fdb7f88b1ab887f1f7",
+        "theorem_count": 37
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_dequantize/FPEquiv.lean",
+        "source_sha256": "fead2d94b89dbfce6c2dffd0093bb087b91d5c13cca0fff9c3a71ab87e87e580",
+        "theorem_count": 4
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_dequantize/RealCorrect.lean",
+        "source_sha256": "f5196f6203fdddbb4e09662a9093ea64822a1dd173de8a81b60199d13e9fad0a",
+        "theorem_count": 4
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_dequantize_int4/Contract.lean",
+        "source_sha256": "f008c2b3f8dace5188662d203a7416e12186e887f0d4dec08aeff4e6d6f5902e",
+        "theorem_count": 42
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_dequantize_int4/FPEquiv.lean",
+        "source_sha256": "3b886e340fa9f901b588259b34387715442d17eb8d6a6f757b04badaa4e31dd5",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_dequantize_int4/RealCorrect.lean",
+        "source_sha256": "9910403151ec7c0f096da6cc18019a6b09ee27d4318e5ab102f85e9be0b05487",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_kernel/FPEquiv.lean",
+        "source_sha256": "d20d6c621db34fa2d00694f2a83d3eef2473531f9edd2affa931832755fabdd1",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_kernel/RealCorrect.lean",
+        "source_sha256": "9fc599584e9300f194eb381649f9104e7bc622b13e9487d1f3cad9434e85616d",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_leakyrelu/FPEquiv.lean",
+        "source_sha256": "3f416d6a3234c0faac53cf52375f755cfdffa2cdb93399cc4aff5cb667ef3577",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_leakyrelu/RealCorrect.lean",
+        "source_sha256": "186b1ce7d9d8a4b95bcee15b7bd8de2830e8e22e69c7dda48c395a9548bf6ea1",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_leakyrelu_fp8/FPEquiv.lean",
+        "source_sha256": "88b19e1cdee9fb471096f2b6464a3b0589f2688245de1c3c129111f75f87c2fa",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_leakyrelu_fp8/RealCorrect.lean",
+        "source_sha256": "bae68cf2f57d7549c59d8d831f1ca37c03ff0c23b02ea661603c1aaa02c6050a",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_persistent_triton/Contract.lean",
+        "source_sha256": "54d6dc3f4fdc5c363905de05dc88885eb7312ddccab13af8792954ccce969ec8",
+        "theorem_count": 5
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_persistent_triton/FPEquiv.lean",
+        "source_sha256": "cfe442e46bef5bf2c4a481aa0c259e2a8a215b3b6d73f078b380b1b7b244d291",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_persistent_triton/RealCorrect.lean",
+        "source_sha256": "a283570c1451b8956d7aa9dff31d80be12338052b054033e8a7adf66c5f5920f",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_triton1/Contract.lean",
+        "source_sha256": "b18af6d01e46f57de039da6e521f0280db2f8a74322623d0f482a7f53609b8bd",
+        "theorem_count": 20
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_triton1/FPEquiv.lean",
+        "source_sha256": "9c452d75495103c68f3ae7c0e126a8b6e6fc6b1d996053e0330fdf5e117ffb65",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_triton1/RealCorrect.lean",
+        "source_sha256": "0b7a24601b9bfc19cab55ba32ecae230cf089e9b713491ed3362d717a0697d12",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_triton2/Contract.lean",
+        "source_sha256": "fa4086b1002366fdeecb7d18a858deb3c71a5a17d873dee4efd2c56f964574e8",
+        "theorem_count": 17
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_triton2/FPEquiv.lean",
+        "source_sha256": "cb38e50582af77d48bc1d962b51baaaeebb930942845602dc9cf81332b6aea92",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_triton2/RealCorrect.lean",
+        "source_sha256": "74c0e86cbac8b0ed7b841d223be6e1bbb2d6319d6219bdf2c791a3b583fc271c",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_triton_autotune/Contract.lean",
+        "source_sha256": "df41ee0d487cff89ca3ce04a7b298616d4845fb4c3d90fc88c17a83623aec71f",
+        "theorem_count": 29
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_triton_autotune/FPEquiv.lean",
+        "source_sha256": "3b46bbc33d4c11601ccc58f609a9421f764e2da48fc3f09da36df77f8ae20967",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matmul_triton_autotune/RealCorrect.lean",
+        "source_sha256": "07455ae974a81d5d5f3c0568e4a1dfa08d223466c44a6a120da7c393a5b3185b",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matrix_vector_multip/FPEquiv.lean",
+        "source_sha256": "6fb6ffcdeefd451abdc7289c7e8b6d13fa42192d3f09a0db449a4d11c7bdf675",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/matrix_vector_multip/RealCorrect.lean",
+        "source_sha256": "058a7d5ee9267df548ac9ef1cfcc90215755b975a32ed6822b22679a8c832691",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/mixed_sparse_attention/FPEquiv.lean",
+        "source_sha256": "8631d6f3f871b78904026c471ade03fd80ebe9430adc9cb1db8b80dac4e277c6",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/mixed_sparse_attention/RealCorrect.lean",
+        "source_sha256": "26c866efcd94dad9670cc48832b72c07bb600d810bbc8f2d73b166d86b7bc466",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/nested_loops_processing/FPEquiv.lean",
+        "source_sha256": "3d4591ece5a12e255328d1b4e5e2f8bf5b8a6432024d83d315278e3872a8eade",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/nested_loops_processing/RealCorrect.lean",
+        "source_sha256": "df4ad0b620366fa0b71a26caf46b3c126107b1f9e23bdeec864026d04599b2a1",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/pow_scalar_tensor/FPEquiv.lean",
+        "source_sha256": "0a29628c1906ab3f92a1d024eb5bc7ad9fd6ab757aa9cb99b82bded2869f1bed",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/pow_scalar_tensor/Proofs/SafetySteps.lean",
+        "source_sha256": "af95ef9f573fd1160a73358654b63ab6e3e395261b8e6eac0d1010fe76358513",
+        "theorem_count": 0
+      },
+      {
+        "source": "bench/tritonbench_g/pow_scalar_tensor/RealCorrect.lean",
+        "source_sha256": "567d56d1a8278643cc1359b0f18e5beeb118b9edd7b8ac4c3a574599831a9629",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/quant_transpose_kernel/FPEquiv.lean",
+        "source_sha256": "4aa0fb163670ac0668b820a3a290f34e178c64e24ed5217f23e534fd874e9693",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/quant_transpose_kernel/RealCorrect.lean",
+        "source_sha256": "530c8370494bef2e6cb40668376403d607f9581bf1a6564f0372d8cae68d0d33",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/quantize_copy_kv/FPEquiv.lean",
+        "source_sha256": "41709e2b4fa8d4e81ffbe8682e61e6f987315d1ca69e5f254bb5850ffa875b5d",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/quantize_copy_kv/RealCorrect.lean",
+        "source_sha256": "140a770d3977a083a113194979230a833a2bf82f5c4c8692ccf76aa7e0143bfb",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/quantize_kv_copy/FPEquiv.lean",
+        "source_sha256": "a22cd0e649c00bb47ff4d1c06a1a3c6866b90196ad1bcb7ec048db9b8a1fc9e8",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/quantize_kv_copy/RealCorrect.lean",
+        "source_sha256": "46cc4806f3d23e7381399ca88029abacb5b06e62d0ba0b6492aabf0c257b51f8",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/quantize_kv_transform/FPEquiv.lean",
+        "source_sha256": "0bfad3a1d8f4188399569d2c5467341f0cc08272b42f2b343732de4735043ac5",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/quantize_kv_transform/RealCorrect.lean",
+        "source_sha256": "7f17b7300fb313929f19497c613113f8b88c310fff8bdfc293921af5308e1df2",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/rbe_triton_transform/Contract.lean",
+        "source_sha256": "0efaf038b81cae185057e6b2ffbc7a55283785136254370899f3b9c3906ee408",
+        "theorem_count": 36
+      },
+      {
+        "source": "bench/tritonbench_g/rbe_triton_transform/FPEquiv.lean",
+        "source_sha256": "1d119a8df68e1cd86377cbc2f49b7a2f94dcfa4fd0f2e442f82fdb551d845c8e",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rbe_triton_transform/RealCorrect.lean",
+        "source_sha256": "7484da7bffacbd4de123c965c9b8b9e2e2783f9ffe4dcb8cfd02270ba999a69a",
+        "theorem_count": 3
+      },
+      {
+        "source": "bench/tritonbench_g/relu_strided_buffer/FPEquiv.lean",
+        "source_sha256": "74219cc4589ec08a6ac06b0159ca98931413f6ef0eee15dce52e21d28fad7d5d",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/relu_strided_buffer/RealCorrect.lean",
+        "source_sha256": "b6e7aaba2814d627c7e59c174ce4dc12dcfd8799a729e0d6cd75d3e9ad5339ad",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rms_matmul_rbe/FPEquiv.lean",
+        "source_sha256": "87eafe389b836275167235c87b2953654a20493f77a0267a55dc4d9c5b84f691",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/rms_matmul_rbe/RealCorrect.lean",
+        "source_sha256": "76df51973c9a599ccc3cc4e9d7a37ac96292d401dd44c31d6ef42e0a6bb1542f",
+        "theorem_count": 5
+      },
+      {
+        "source": "bench/tritonbench_g/rms_rbe_matmul/FPEquiv.lean",
+        "source_sha256": "4352987c07debcc4d040125ef6dfa6f7643bce4dc7de3806e812577fcc7caebc",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rms_rbe_matmul/RealCorrect.lean",
+        "source_sha256": "6f5d4ddb7a210ad8968b938752b666bf4b444ac2a729cd52fd3f1cce7be725c1",
+        "theorem_count": 4
+      },
+      {
+        "source": "bench/tritonbench_g/rmsnorm_fused/FPEquiv.lean",
+        "source_sha256": "1eac0b82123e896c4d746d904b3d64e26a53fa075898067865f0ddf1f9acdc06",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rmsnorm_implementation/FPEquiv.lean",
+        "source_sha256": "f7004cd4c12d7f3ab92f0924115d1ec28be1c509ac6e205174019c16330fc361",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rmsnorm_triton/FPEquiv.lean",
+        "source_sha256": "58178d86803552287dbb9ad91062171415c4e71353086d701fff66a448972558",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rope_backward_transform/FPEquiv.lean",
+        "source_sha256": "af2c0c483a9d5bff3b5258b8df4c476484ad27efca283b7241c888796d786a20",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rope_backward_transform/RealCorrect.lean",
+        "source_sha256": "e9714fc1ee156e1aff01c8a13d7a9cea7caf63c80134a1be98abcd7b0135b2f2",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rope_embedding/FPEquiv.lean",
+        "source_sha256": "193940dfc77d6a900b1f350306fcb5ff3a7d674fbc7ca7cce0b501e3db8e3de1",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rope_embedding/RealCorrect.lean",
+        "source_sha256": "529453e501d462e1d465075ba0b5fb4e4f7fbe0bf990ca543a83f99ee74b8129",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rope_transform/FPEquiv.lean",
+        "source_sha256": "be9fae416cc2412b4f95b9c9eadeaa54484604f35a47b1b5b6b9086cfe703366",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rope_transform/RealCorrect.lean",
+        "source_sha256": "7d07ecb03bd8379259a42093401c753655fa32aca24b685947383a401c13444f",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rotary_emb/FPEquiv.lean",
+        "source_sha256": "d48cb28f0e1f1c0ab319fe0089e3538c2bd08070dc81d7cd5586e13ac0dd5561",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rotary_emb/RealCorrect.lean",
+        "source_sha256": "e05356aa8a68e442f274a97f1c2460764e9cb98d4a86a627b244e9f29d6f8fb7",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rotary_emb_nopad/FPEquiv.lean",
+        "source_sha256": "d78880696777bef7a32469faeb5c9b055f61a5284533e95e1ef975baa2b20ed8",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/rotary_emb_nopad/RealCorrect.lean",
+        "source_sha256": "078aaa62a6812a059033ab725339fa252ca069f96fa30648d7696bc4db0368c1",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/rotary_transform/FPEquiv.lean",
+        "source_sha256": "a753416d69d1ec1068ce7f2096f56c58bb56a37efc33270627f0cf1fbccec4d4",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rotary_transform/RealCorrect.lean",
+        "source_sha256": "4f62a0b576179cdc3ae9413ade7f4df1eb63bceed717e7d07c46fa96df7029f6",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rotary_transform_ops/FPEquiv.lean",
+        "source_sha256": "33136c18081bab441c1c695d9b70a9d73d2d8d8efdf59026f38bec61afff3e52",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/rotary_transform_ops/RealCorrect.lean",
+        "source_sha256": "85e6c2d2dfb45c89ac3ba51da429b39088f4686e3c8bcfd5a04c03a90939d788",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/sin_computation/FPEquiv.lean",
+        "source_sha256": "3b2103b044a31da0ad53e34e1d2510d3ee063be8df93b21ea33eaed53e81f117",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/sin_kernel/FPEquiv.lean",
+        "source_sha256": "fb5f07217f07bdecbfdaa717ffbb9ea4b44c87106a05007ca194bc15e10c0556",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/softmax_flaggems/RealCorrect.lean",
+        "source_sha256": "2f1ecf16738e3eace6008013fd47170f066f8a8539211960472edaf10580d44f",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/streamk_matmul/FPEquiv.lean",
+        "source_sha256": "3fc3aef8f091e8821bffe5e71e59288c5dc377976842c2c8ab14a7d33ab2dbb6",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/streamk_matmul/RealCorrect.lean",
+        "source_sha256": "7a196725d160994780b714bea33ac80c8ed19a52e901ee1762051aedaa7ec864",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/swiglu_backward/FPEquiv.lean",
+        "source_sha256": "0093ce02d8a79df9524083f8fc7cbb1ce65379a92967615bda7a99de0e1ac232",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/swiglu_fwd/FPEquiv.lean",
+        "source_sha256": "912999303d0eb0f7f6780037e03a6dbd389604f456a9387b8bc7d32fdf8d1862",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/swiglu_triton/FPEquiv.lean",
+        "source_sha256": "c7c4bf697a6d19197483d9bf7a443262f59c2045b4af5581e7db51232529dfd5",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/token_attn_mistral/FPEquiv.lean",
+        "source_sha256": "08a6d2d4971ccd6bd67e070b3736211dc1e335cb040ac0186f08fecb3ba8892c",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/token_attn_mistral/Proofs/Contract.lean",
+        "source_sha256": "f8f1ee312e9b9349cab8a559f1254b65cbde2b752a6b65e2a570cfba34f1a709",
+        "theorem_count": 41
+      },
+      {
+        "source": "bench/tritonbench_g/token_attn_mistral/RealCorrect.lean",
+        "source_sha256": "ea2a56ac37899868e23788f509bb8fa851e7c5d857258864acff36c97e25126c",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/token_attn_reduceV/FPEquiv.lean",
+        "source_sha256": "a8f2e89442b8139136eab8f94bfc90e5446d3fe487f7f77a654a87b00a361bd2",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/token_attn_reduceV/Proofs/Contract.lean",
+        "source_sha256": "76b36c3975e9cf4deae59f0358c7b904c1ac67eb12ebc5ee37ed7b7fe2ea9b14",
+        "theorem_count": 41
+      },
+      {
+        "source": "bench/tritonbench_g/token_attn_reduceV/Proofs/Mathematical_FPContract.lean",
+        "source_sha256": "78428f0bd8d34647d5fef5deec47b41e49c6c47b6663cb16a09e01485865b5d0",
+        "theorem_count": 3
+      },
+      {
+        "source": "bench/tritonbench_g/token_attn_reduceV/RealCorrect.lean",
+        "source_sha256": "ad46298b1f7d1067a60e2b59ae4b106f87bf875a183ecd48bc10fbc35fc79a56",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/token_softmax_bloom/FPEquiv.lean",
+        "source_sha256": "083f34a682a533fdacc2cd215aaade0e433ba1d3653418a89dc31effb5587309",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/token_softmax_bloom/Proofs/KernelRewrite.lean",
+        "source_sha256": "f8c04edd56dbfc5a9d6b93c2be1dcd5c6e31b8141012aa53c05431e557c5cbd7",
+        "theorem_count": 13
+      },
+      {
+        "source": "bench/tritonbench_g/token_softmax_bloom/RealCorrect.lean",
+        "source_sha256": "ca9a69a3d4cfc46600b609025eda5edf8a36503eba23877cf3b3985412979ddb",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/token_softmax_llama/FPEquiv.lean",
+        "source_sha256": "9c13fb4ea1fa35719ebac2f665f81628db9ada263a7db0790cd686ed1c8ac13a",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/token_softmax_llama/RealCorrect.lean",
+        "source_sha256": "105b5803953b62e963c887ef431ebb98cce1bf00a43bcc2c05beed7684dc1d56",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/triton_conv2d_fwd/FPEquiv.lean",
+        "source_sha256": "6a445fb92c1dd8d1f3ed203e79ca1fd81a925a8e811f286317e8706b09ad2bae",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/triton_conv2d_fwd/RealCorrect.lean",
+        "source_sha256": "5bc3705b22219661829b79fa670e82f414f3cb4e42112366762f627a10456ad4",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/triton_matmul/Contract.lean",
+        "source_sha256": "1a4969883336fc4653a38c00eef3bbfa4635bf3fb6be127d273c33433aa94b77",
+        "theorem_count": 0
+      },
+      {
+        "source": "bench/tritonbench_g/triton_matmul/FPEquiv.lean",
+        "source_sha256": "e2a90df5b9af3ac469fdf03c7025ac05d6f70e8dc3adb946de581af2d92d1f5e",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/triton_matmul/RealCorrect.lean",
+        "source_sha256": "2ff29129b65a3140ece27907dec50dbd2e193b8a528d6ca0c8590ca6a04d3664",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/triton_softmax/FPEquiv.lean",
+        "source_sha256": "c982be1dd0237d18664463c4cb746e220e468f3d2d797f0bdd4bf0bd18233d92",
+        "theorem_count": 1
+      },
+      {
+        "source": "bench/tritonbench_g/triton_softmax/Proofs/Mathematical_IndexRewrite.lean",
+        "source_sha256": "280f7f9971852ca7486d829c36697cfef84f88bb8c0355309e07a55bdb3afaac",
+        "theorem_count": 2
+      },
+      {
+        "source": "bench/tritonbench_g/triton_softmax/RealCorrect.lean",
+        "source_sha256": "12d35690804b3ee04ac92790ad291a1b6948279299792a1b3ed4c6feb7b9440b",
+        "theorem_count": 1
+      },
+      {
+        "source": "tests/lean/ChunkLinearPastedBody.lean",
+        "source_sha256": "d8b30d585c1b7cc99f89a7462dba170259b1d82d4f03d1e5850d5df0335a2ed0",
+        "theorem_count": 4
+      },
+      {
+        "source": "tests/lean/FPChunkGatedSource.lean",
+        "source_sha256": "6e7c6681d0b98af2f6935a1ad3f66e5d6b728e4ce8770c6531ee9801f0e6ddc1",
+        "theorem_count": 9
+      },
+      {
+        "source": "tests/lean/IntScaledMatmulPadding.lean",
+        "source_sha256": "34c723868f1cc48c293ee5f37ea73e3526507ca3657e3c7668073e47b67a3788",
+        "theorem_count": 10
+      },
+      {
+        "source": "tests/lean/MatmulTritonSource.lean",
+        "source_sha256": "e59970e6f5cc5b10e822afabf8fae26e15adfe717a55417e62864b699e9cc97d",
+        "theorem_count": 5
+      },
+      {
+        "source": "tests/lean/MatrixVectorSource.lean",
+        "source_sha256": "22d6c92990e51b895820a8747d676e99317f5249ee82fb55d6f545ad511f4457",
+        "theorem_count": 5
+      },
+      {
+        "source": "tests/lean/RawBodySurface.lean",
+        "source_sha256": "b2dddbf638c4a7cef136f71d2e6f4f3011178a8b4558cc70fdfb4f1911e339f6",
+        "theorem_count": 7
+      },
+      {
+        "source": "tests/lean/RepairSourceBridges.lean",
+        "source_sha256": "6f031f2800ce02215de2f3613a7370f228efb2212cf339376ae970235f6c5fde",
+        "theorem_count": 0
+      },
+      {
+        "source": "tests/lean/TokenAttnReduceVSignedMetadata.lean",
+        "source_sha256": "9b2b78a16fc003c01025df1cc2d403409805d668034535fd8d9406486939f589",
+        "theorem_count": 9
+      }
+    ]
+  }
+}
