@@ -101,9 +101,15 @@ jobs:
           path: ${{ runner.temp }}/affected-plan
       - name: Make room for proof replay
         run: sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
+      - name: Read this shard's exact build selection
+        id: targets
+        run: >-
+          python3 -B scripts/bench/ci.py build-targets
+          --plan "$RUNNER_TEMP/affected-plan/affected-plan.json"
+          --shard-index ${{ matrix.shard }} --github-output "$GITHUB_OUTPUT"
       - uses: ./.github/actions/build-lean
         with:
-          build-args: VeriTile.Meta.StatementAudit VeriTile.Meta.Disprove
+          build-args: ${{ steps.targets.outputs.build_args }}
       - uses: ./.github/actions/setup-comparator
       - name: Build and independently replay the complete affected selection
         run: >-
@@ -138,7 +144,7 @@ jobs:
         run: sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
       - uses: ./.github/actions/build-lean
         with:
-          build-args: VeriTile.Meta.StatementAudit VeriTile.Meta.Disprove
+          build-args: VeriTile VeriTile.Meta.StatementAudit VeriTile.Meta.Disprove
       - uses: ./.github/actions/setup-comparator
       - name: Reject injected axioms, missed headlines and circular specifications
         run: python3 -B scripts/bench/ci.py auditor
@@ -182,6 +188,7 @@ jobs:
           test: false
           lint: false
           use-mathlib-cache: false
+          use-github-cache: false
       - name: Fetch Mathlib cache with bounded network retries
         env:
           MATHLIB_CACHE_GET_URL: https://cache.mathlib.org/mathlib4

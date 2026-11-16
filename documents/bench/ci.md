@@ -38,7 +38,13 @@ A successful build alone does not accept a case. Auxiliary, private and generate
 theorems remain in the inventory.
 
 All proof replays use bounded batches, 30-minute file/batch limits and 30-second
-progress messages. Coverage incompatibility can fall back to complete individual
+progress messages. Compilation groups of up to 32 modules have a separate
+60-minute budget, including cold dependencies. The cached Lean setup builds the
+shard's exact targets before saving artifacts; the replay stage rechecks those
+targets against the same plan. Compiled artifacts never replace proof replay.
+All jobs that save the shared Lean cache include the locked library build, so a
+small audit bootstrap cannot populate an incomplete dependency cache first.
+Coverage incompatibility can fall back to complete individual
 replay; a comparator rejection or timeout fails the job. Failed proof jobs retain
 diagnostics for seven days. The required `TritonBench-G audit complete` status
 fails on a failed, cancelled or unexpectedly skipped planned job.
