@@ -223,7 +223,11 @@ def shard(plan: dict, index: int, count: int) -> dict:
     """Partition every module exactly once; keep each public goal with its file."""
     if count != plan['shard_count'] or not 0 <= index < count:
         raise ValueError('Affected shard configuration differs from the plan')
-    paths = plan['targets'][index::count]
+    # Sorted paths keep a case's proof files together. Round-robin file slices
+    # spread nearly every case across workers and repeatedly build its closure.
+    start = len(plan['targets']) * index // count
+    stop = len(plan['targets']) * (index + 1) // count
+    paths = plan['targets'][start:stop]
     selected = set(paths)
     cases = []
     for case in plan['cases']:

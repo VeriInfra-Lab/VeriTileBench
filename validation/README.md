@@ -2,6 +2,9 @@
 
 - `task_progress.json` selects the 184 current repaired tasks.
 - `source-correspondence.json` records pasted-body coverage and pending translations.
+- [`body_receipts/ci-shard-locality.json`](body_receipts/ci-shard-locality.json)
+  checks contiguous shard coverage and import dependency locality; all proof
+  targets and case sources remain unchanged.
 - [`body_receipts/ci-responsibility.json`](body_receipts/ci-responsibility.json)
   records core/Bench CI scope, dependency selection and partition coverage,
   a fresh 31-module proof replay, and separate pending interface checks.
