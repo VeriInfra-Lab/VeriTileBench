@@ -75,7 +75,7 @@ else:
     def project(self, root, source):
         (root / 'scripts' / 'bench').mkdir(parents=True)
         (root / 'bench/tritonbench_g/fixture').mkdir(parents=True)
-        for name in ('check_comparator.py', 'check_comparator_batch.py', 'comparator_common.py', 'check-artifact.sh', 'source_axioms.py'):
+        for name in ('check_comparator.py', 'check_comparator_batch.py', 'comparator_common.py', 'audit_process.py', 'check-artifact.sh', 'source_axioms.py'):
             shutil.copyfile(ROOT / 'scripts' / name, root / 'scripts' / name)
         for name in ('audit_trust_prep.py', 'audit_source.py', 'check_ports.sh', 'audit_trust.sh', 'check_worker_results.py', 'port_layout.py'):
             shutil.copyfile(ROOT / 'scripts' / 'bench' / name, root / 'scripts' / 'bench' / name)
@@ -124,7 +124,7 @@ else:
                 command = ['python3', 'scripts/check_comparator.py', '--file',
                            'bench/tritonbench_g/fixture/Fixture.lean']
             result = subprocess.run(command, cwd=root, text=True, capture_output=True,
-                                    timeout=120, env={**os.environ, **(env or {})})
+                                    timeout=120, env={**os.environ, 'AUDIT_TRUST_REPLAY': 'individual', **(env or {})})
             reports = [json.loads(p.read_text()) for p in root.glob('Logs/*/*/result.json')]
             inventories = [json.loads(p.read_text()) for p in root.glob('Logs/*/*/targets.json')]
             return result, reports, inventories
@@ -185,9 +185,9 @@ theorem append_literal : "abc" ++ "def" = "abcdef" := by decide
                     'axiom injected : False\ntheorem target : False := injected\n',
                     script=script, library=script is None)
                 self.assertNotEqual(result.returncode, 0)
-                self.assertEqual(len(reports), 1, result.stdout + result.stderr)
-                self.assertFalse(reports[0]['accepted'])
-                self.assertIn('Illegal axiom detected', result.stderr)
+                self.assertFalse(any(report['accepted'] for report in reports))
+                self.assertTrue('Illegal axiom detected' in result.stderr or
+                                'DISALLOWED axiom' in result.stderr, result.stdout + result.stderr)
 
     def test_realized_private_match_equations_are_replayed(self):
         result, reports, inventories = self.run_check('''
@@ -250,7 +250,7 @@ theorem chosen : model.choose (some 7) = 7 := by simp [model]
         self.assertIn('Official comparator is required', result.stderr)
         self.assertEqual(reports, [])
 
-    def run_batch(self, source, extra=None):
+    def run_batch(self, source, extra=None, *, all_reports=False, files_mode=False):
         with tempfile.TemporaryDirectory(prefix='veritile-batch-regression-') as temp:
             root = Path(temp)
             self.project(root, source)
@@ -261,10 +261,17 @@ theorem chosen : model.choose (some 7) = 7 := by simp [model]
                 path = root / 'bench/tritonbench_g/fixture' / name
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(body)
+            arguments = ['--task', 'fixture']
+            if files_mode:
+                selected = root / 'selected.txt'
+                selected.write_text('\n'.join(p.relative_to(root).as_posix() for p in sorted(
+                    (root/'bench/tritonbench_g/fixture').rglob('*.lean'))) + '\n')
+                arguments = ['--files-from', str(selected), '--batch-size', '2']
             result = subprocess.run(['python3', 'scripts/check_comparator_batch.py',
-                                     '--task', 'fixture'], cwd=root, text=True,
+                                     *arguments], cwd=root, text=True,
                                     capture_output=True, timeout=180)
-            reports = [json.loads(p.read_text()) for p in root.glob('Logs/*/Batch_*/result.json')]
+            reports = [json.loads(p.read_text()) for p in root.glob(
+                'Logs/*/*/result.json' if all_reports else 'Logs/*/Batch_*/result.json')]
             return result, reports
 
     def test_batch_covers_private_generated_and_unimported_helpers(self):
@@ -311,14 +318,62 @@ private theorem «a.b» : True := True.intro
         self.assertFalse(any(report['accepted'] for report in reports))
         self.assertIn('DISALLOWED axiom', result.stderr)
 
-    def test_batch_rejects_unsupported_hygienic_names_instead_of_skipping(self):
+    def test_hygienic_targets_receive_complete_individual_replay(self):
         result, reports = self.run_batch('''
 macro "batchFixtureTheorem" : command => `(theorem generatedBatch : True := True.intro)
 batchFixtureTheorem
-''')
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertFalse(any(report['accepted'] for report in reports))
-        self.assertIn('Hygienic source-copy targets require individual replay', result.stderr)
+''', all_reports=True, files_mode=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        selection, = (r for r in reports if r['mode'] == 'selected-files-batch-replay')
+        self.assertTrue(selection['accepted'])
+        self.assertEqual(len(selection['individual']), 1)
+        self.assertTrue(any('._hyg' in name for name in selection['individual'][0]['theorems']))
+        self.assertIn('individual-required', result.stdout)
+
+    def test_selected_files_include_zero_and_unused_private_targets(self):
+        result, reports = self.run_batch('theorem target : True := True.intro\n', {
+            'Proofs/Unused.lean': 'private theorem unused : True := True.intro\n',
+            'Kernels.lean': 'def value : Nat := 3\n'}, all_reports=True, files_mode=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        selection, = (r for r in reports if r['mode'] == 'selected-files-batch-replay')
+        actual = [f for r in selection['batches'] for f in r['modules']]
+        actual += [r['source'] for r in selection['individual']]
+        self.assertCountEqual(actual, selection['files'])
+        self.assertEqual(len(actual), 3)
+        self.assertTrue(any('.unused' in name for r in selection['batches']
+                            for names in r['modules'].values() for name in names))
+
+    def test_module_header_uses_individual_replay_in_batch_selection(self):
+        source=(ROOT/'bench/tritonbench_g/fast_layernorm/Proofs/Settings.lean').read_text()
+        result,reports=self.run_batch(source,all_reports=True,files_mode=True)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        selection,=(r for r in reports if r['mode']=='selected-files-batch-replay')
+        self.assertEqual(len(selection['individual']),1)
+        self.assertEqual(selection['batches'],[])
+        self.assertTrue(selection['individual'][0]['all_theorems_axioms_checked'])
+        self.assertTrue(any('.nextPower_covers' in n for n in selection['individual'][0]['theorems']))
+
+    def test_timeout_cleans_up_real_systemd_service(self):
+        sys.path.insert(0, str(ROOT/'scripts'))
+        from scripts.audit_process import AuditTimeout, run_logged, service_unit
+        from scripts.bench.measure_replay import sample
+        from unittest.mock import patch
+        import contextlib
+        import io
+        unit = service_unit()
+        observed = set()
+        with tempfile.TemporaryDirectory() as temp, contextlib.redirect_stdout(io.StringIO()):
+            def observe(*args, **kwargs):
+                _, services = sample(os.getpid(), Path(temp))
+                observed.update(services)
+            with patch('scripts.audit_process.progress', side_effect=observe), self.assertRaises(AuditTimeout):
+                run_logged(['systemd-run', '--user', '--pipe', '--wait', '--collect',
+                            '--unit='+unit, '--working-directory='+temp, 'sleep', '60'],
+                           cwd=temp, log=Path(temp)/'unit.log',
+                           source='timeout.lean', stage='replay', unit=unit, timeout=1, heartbeat=.1)
+        self.assertTrue(any(unit in path.split('/') for path in observed), observed)
+        result = subprocess.run(['systemctl', '--user', 'is-active', unit], capture_output=True)
+        self.assertNotEqual(result.returncode, 0, 'timed-out comparator service remains active')
 
 
 if __name__ == '__main__':

@@ -100,7 +100,7 @@ def cReference {A : Type} [Inhabited A] (ops : Ops A) (p : Kernels.CachedLayout)
   if s.pids 0<p.Q_HEAD_NUM then
     cBranch ops p s Bool.false (cBranch ops p s Bool.true s) else s
 
-#specNonCircular uValue avoiding [Kernels.uncachedKernel,uncachedExecution]
-#specNonCircular cValue avoiding [Kernels.cachedKernel,cachedExecution]
+#specNonCircular uValue avoiding [Kernels.rotary_embedding_kernel,uncachedExecution]
+#specNonCircular cValue avoiding [Kernels.fused_rotary_embedding_kernel_v2Kernel,cachedExecution]
 end
 end VeriTile.Bench.Repairs.RotaryEmbNopad.Typed

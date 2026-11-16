@@ -38,7 +38,7 @@ theorem run_prelude {α : Type} [Inhabited α] (M : Algebra α)
     (abi : SourceABI) (p : KernelArgs) (s : State α) :
     run M (SourceParts.prelude abi p) s = some (prepared p s) := by
   rw [common]
-  simp [SourceParts.prelude,SourceParts.outer,kernel,primaryHalf,sourceFace,sourceHalfSingle323232,Pasted.originalKernel,Pasted.candidateKernel,
+  simp [SourceParts.prelude,SourceParts.outer,kernel,primaryHalf,sourceFace,sourceHalfSingle323232,Pasted._sgmv_expand_slice_kernel_repairedKernel,Pasted._sgmv_expand_slice_kernel_index_reuseKernel,
     ComputeKernel.surfaceBody,ScalarFormat.dtype,LowFormat.scalar,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,Option.bind,ComputeDType.eraseDType,
     numeric,bop,numericLt,numericLe,numericEq,integralFloorDiv,integralMod,Region.cast,

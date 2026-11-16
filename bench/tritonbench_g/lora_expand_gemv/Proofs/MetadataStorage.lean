@@ -9,10 +9,10 @@ set_option maxRecDepth 40000
 /-- Both supported signed metadata storage widths select the same integer
 channel in the model. The checked caller separately bounds formed offsets. -/
 theorem original_metadata_widths (input weight output : OutputFormat) :
-    originalKernel input weight output .i32 = originalKernel input weight output .i64 := by rfl
+    _bgmv_expand_kernel input weight output .i32 = _bgmv_expand_kernel input weight output .i64 := by rfl
 
 theorem candidate_metadata_widths (input weight output : OutputFormat) :
-    candidateKernel input weight output .i32 = candidateKernel input weight output .i64 := by rfl
+    _bgmv_expand_unit_split_kernel input weight output .i32 = _bgmv_expand_unit_split_kernel input weight output .i64 := by rfl
 
 #axiomsClean original_metadata_widths
 #axiomsClean candidate_metadata_widths

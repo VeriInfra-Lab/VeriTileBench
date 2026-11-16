@@ -23,7 +23,7 @@ def finishRun {α : Type} [Inhabited α] (M : Algebra α) (p : Parameters) (flag
   all_goals
     refine ⟨?_,?_⟩
     swap
-    simp [forwardFinish,forwardTemplate,KernelDSL.forward,KernelDSL.forwardDefault,forwardKernel,forwardCandidateKernel,KernelDSL.forwardLog,ComputeKernel.surfaceBody,run,step,evalExpr,
+    simp [forwardFinish,forwardTemplate,KernelDSL.forward,KernelDSL.forwardDefault,_kldiv_kernel_forwardKernel,_kldiv_kernel_forward_index_commutedKernel,KernelDSL.forwardLog,ComputeKernel.surfaceBody,run,step,evalExpr,
       evalComputeOp,evalOp_unfold,Option.bind,Algebra.withDefaultPrecision,resolvePrecision,
       ComputeDType.eraseDType,State.setReg,numeric,numericEq,numericLt,natLt,
       FP.Structural.bop,store,Region.cast,hr,h.o,h.sum]

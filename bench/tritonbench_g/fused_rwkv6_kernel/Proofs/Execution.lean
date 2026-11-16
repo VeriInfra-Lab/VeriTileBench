@@ -94,7 +94,7 @@ def entry (M : Algebra α) (c : Shape) (s : State α) :
   all_goals
     refine ⟨?_,?_⟩
     swap
-    simp [parts,kernel,originalKernel,ComputeKernel.surfaceBody,Triton.Source.dynamicRange?,
+    simp [parts,kernel,fused_recurrent_rwkv6_fwd_kernel,ComputeKernel.surfaceBody,Triton.Source.dynamicRange?,
     Option.map,Option.getD,run,FP.Structural.step,evalExpr,evalComputeOp,evalOp_unfold,
     evalOffsets,boundaryZero,Option.bind,engine,Algebra.withDefaultPrecision,
     resolvePrecision,ComputeDType.eraseDType,numeric,integralMod,numericLt,natLt,

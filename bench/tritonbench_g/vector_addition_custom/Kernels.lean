@@ -16,7 +16,7 @@ def blockSize : Nat := 16
 def gridCount (n : Nat) : Nat := (n + 15) / 16
 
 /-- Authoritative original source with explicit FP32 memory and arithmetic tags. -/
-def add_kernel (X Y O : RegionName) (n_elements BLOCK_SIZE : Nat) : ComputeKernel :=
+def _add_kernel (X Y O : RegionName) (n_elements BLOCK_SIZE : Nat) : ComputeKernel :=
   let A : RegionName := X
   let B : RegionName := Y
   let C : RegionName := O
@@ -32,7 +32,7 @@ def add_kernel (X Y O : RegionName) (n_elements BLOCK_SIZE : Nat) : ComputeKerne
   }
 
 /-- Existing ADD-COMMUTE candidate, retaining the original statement placement. -/
-def add_commuted_kernel (X Y O : RegionName) (n_elements BLOCK_SIZE : Nat) : ComputeKernel :=
+def _add_commuted_kernel (X Y O : RegionName) (n_elements BLOCK_SIZE : Nat) : ComputeKernel :=
   let A : RegionName := X
   let B : RegionName := Y
   let C : RegionName := O
@@ -47,12 +47,12 @@ def add_commuted_kernel (X Y O : RegionName) (n_elements BLOCK_SIZE : Nat) : Com
     tl.store(C + offs, b + a, mask=offs < size)
   }
 
-def originalKernel (n : Nat) : ComputeKernel := add_kernel "x" "y" "out" n blockSize
+def originalKernel (n : Nat) : ComputeKernel := _add_kernel "x" "y" "out" n blockSize
 
-def commutedKernel (n : Nat) : ComputeKernel := add_commuted_kernel "x" "y" "out" n blockSize
+def commutedKernel (n : Nat) : ComputeKernel := _add_commuted_kernel "x" "y" "out" n blockSize
 
 /-- Historical finite-interpreter name; this is the same canonical DSL source. -/
 abbrev fp32Kernel (X Y O : RegionName) (n : Nat) : ComputeKernel :=
-  add_kernel X Y O n blockSize
+  _add_kernel X Y O n blockSize
 
 end VeriTile.Bench.Repairs.VectorAdditionCustom.Contiguous

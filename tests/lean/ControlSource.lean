@@ -41,7 +41,7 @@ def atomicSource : Program := source_program triton {
 
 /-- The replacement and expected old word stay distinct, and the barrier
 remains a separate event after the spin loop. -/
-theorem complete_cas_operands : SourceAdapter.decode { reductionSource with body := atomicSource } = .ok [
+theorem complete_cas_operands : SourceAdapter.decode { spinning_lock_kernelSource with body := atomicSource } = .ok [
     .whileLoop (.casNe (.offset (.base .locks) (.variable "next_pid"))
       (.literal 1) (.literal 7) (.literal 1)) [.pass],
     .blockBarrier] := rfl
@@ -54,7 +54,7 @@ def wrongPrecision : Program := source_program triton {
 }
 
 theorem changed_precision_rejected :
-    rejected (SourceAdapter.decode { reductionSource with body := wrongPrecision }) = Bool.true := rfl
+    rejected (SourceAdapter.decode { spinning_lock_kernelSource with body := wrongPrecision }) = Bool.true := rfl
 
 /-- Importing the control frontend must also keep ordinary masked source
 bodies parseable through the shared load/store keyword grammar. -/

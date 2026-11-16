@@ -32,7 +32,7 @@ theorem before_step_safe [Inhabited α] (M : Algebra α) (c : Geometry)
     stepSafe (engine (reverseMul M)) bounds st s ↔ stepSafe (engine M) bounds st s := by
   cases hasBias <;> cases useSoftplus
   all_goals
-    simp [before, Source.prefixBefore, kernel, sourceKernel, ComputeKernel.surfaceBody]
+    simp [before, Source.prefixBefore, kernel, _chunk_cumsum_fwd_kernel, ComputeKernel.surfaceBody]
     repeat' apply And.intro
     all_goals intro bounds s
     all_goals simp [traceSafeList_unfold, stepSafe_unfold, safeOp_unfold, safeCompute_unfold,
@@ -46,7 +46,7 @@ theorem after_step_safe [Inhabited α] (M : Algebra α) (c : Geometry)
     stepSafe (engine (reverseMul M)) bounds st s ↔ stepSafe (engine M) bounds st s := by
   cases hasBias <;> cases useSoftplus
   all_goals
-    simp [after, before, Source.prefixBefore, kernel, sourceKernel, ComputeKernel.surfaceBody]
+    simp [after, before, Source.prefixBefore, kernel, _chunk_cumsum_fwd_kernel, ComputeKernel.surfaceBody]
     repeat' apply And.intro
     all_goals intro bounds s
     all_goals simp [traceSafeList_unfold, stepSafe_unfold, safeOp_unfold, safeCompute_unfold,

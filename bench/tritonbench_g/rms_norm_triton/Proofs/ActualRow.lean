@@ -66,7 +66,7 @@ def sourceRun [Inhabited α] (mdl : Algebra α) (c : Layout) (epsilon : α)
     { t : State α // run (engine mdl) (source c).surfaceBody (entry epsilon pid s) = some t } := by
   refine ⟨?_, ?_⟩
   swap
-  simp (maxSteps := 500000) [source, runtimeKernel, VeriTile.Bench.TritonBenchG.RmsNormTriton.rawKernel, ComputeKernel.surfaceBody,
+  simp (maxSteps := 500000) [source, runtimeKernel, VeriTile.Bench.TritonBenchG.RmsNormTriton.rms_norm_kernel, ComputeKernel.surfaceBody,
     run, step, evalExpr, evalComputeOp, evalOp_unfold, store, Option.bind,
     engine, Algebra.withDefaultPrecision, resolvePrecision, ComputeDType.eraseDType,
     numeric, bop, natLt, rowState, entry, ofFloat, toFloat,

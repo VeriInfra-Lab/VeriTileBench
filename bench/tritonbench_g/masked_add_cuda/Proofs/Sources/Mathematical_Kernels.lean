@@ -5,6 +5,6 @@ open VeriTile.Triton
 
 def integer_kernel (storage : MaskStorage) (candidate : Bool)
     (g p m : RegionName) (n : Nat) (a : ℝ) (B : Nat) : ComputeKernel :=
-  if candidate then VeriTile.Bench.Repairs.MaskedAddCuda.commutedKernel storage g p m n a B
-  else VeriTile.Bench.Repairs.MaskedAddCuda.sourceKernel storage g p m n a B
+  if candidate then VeriTile.Bench.Repairs.MaskedAddCuda.commuted_masked_addKernel storage g p m n a B
+  else VeriTile.Bench.Repairs.MaskedAddCuda.masked_add_kernel storage g p m n a B
 end VeriTile.Bench.TritonBenchG.MaskedAddCuda

@@ -32,6 +32,8 @@ class AuditAggregateTests(unittest.TestCase):
         for path, label, failure in [
             ('scripts/bench/final_inventory.py', 'inventory', 'FAIL_INVENTORY'),
             ('scripts/bench/check_body_corpus.py', 'body', 'FAIL_BODY'),
+            ('scripts/bench/check_source_naming.py', 'naming', 'FAIL_NAMING'),
+            ('scripts/bench/replay_body_migrations.py', 'targets', 'FAIL_TARGETS'),
             ('scripts/bench/check_imported_kernel_review.py', 'review', 'FAIL_REVIEW')]:
             (self.root / path).write_text(
                 'import os\nfrom pathlib import Path\n'
@@ -43,7 +45,7 @@ class AuditAggregateTests(unittest.TestCase):
         self.env = {key: value for key, value in os.environ.items()
                     if not key.startswith(('AUDIT_TRUST_', 'FAIL_'))}
         self.env['PATH'] = str(tools) + os.pathsep + self.env['PATH']
-        self.source_calls = ['inventory', 'body', 'review']
+        self.source_calls = ['inventory', 'body', 'naming', 'targets', 'review']
 
     def run_aggregate(self, args=(), env=None):
         calls = self.root / 'calls'
@@ -74,7 +76,7 @@ class AuditAggregateTests(unittest.TestCase):
 
     def test_source_failures_fail_all_modes(self):
         for args in [(), ('--global-only',), ('--source-only',)]:
-            for failure in ['FAIL_INVENTORY', 'FAIL_BODY', 'FAIL_REVIEW']:
+            for failure in ['FAIL_INVENTORY', 'FAIL_BODY', 'FAIL_NAMING', 'FAIL_TARGETS', 'FAIL_REVIEW']:
                 with self.subTest(args=args, failure=failure):
                     result, calls = self.run_aggregate(args, {failure: '1'})
                     self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -159,6 +161,8 @@ p = argparse.ArgumentParser()
 p.add_argument('--file', required=True)
 p.add_argument('--trust', action='store_true', required=True)
 p.add_argument('--workspace', required=True)
+p.add_argument('--timeout')
+p.add_argument('--heartbeat')
 a = p.parse_args()
 with Path('calls').open('a') as log:
     log.write(a.file + '\\n')
@@ -178,6 +182,7 @@ raise SystemExit(1 if a.file == os.environ.get('FAIL_TARGET') else 0)
         self.env = {key: value for key, value in os.environ.items()
                     if not key.startswith('AUDIT_TRUST_')}
         self.env['AUDIT_TRUST_JOBS'] = '2'
+        self.env['AUDIT_TRUST_REPLAY'] = 'individual'
 
     def run_audit(self, env=None, args=()):
         calls = self.root / 'calls'
@@ -286,6 +291,54 @@ raise SystemExit(1 if a.file == os.environ.get('FAIL_TARGET') else 0)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('incomplete worker results', result.stderr)
         self.assertEqual(calls, [])
+
+
+class BatchAuditShardTests(AuditShardTests):
+    """Production selection/accounting with only proof execution substituted."""
+    def setUp(self):
+        super().setUp()
+        self.env['AUDIT_TRUST_REPLAY'] = 'batch'
+        (self.root / 'scripts/check_comparator_batch.py').write_text('''
+import argparse, json, os
+from pathlib import Path
+p=argparse.ArgumentParser()
+p.add_argument('--files-from', type=Path)
+p.add_argument('--results', type=Path)
+p.add_argument('--workspace')
+p.add_argument('--batch-size')
+p.add_argument('--audit-batch-size')
+p.add_argument('--file-timeout')
+p.add_argument('--batch-timeout')
+p.add_argument('--heartbeat')
+a=p.parse_args()
+files=a.files_from.read_text().splitlines()
+for file in files:
+    with Path('calls').open('a') as log: log.write(file+'\\n')
+    if file==os.environ.get('MUTATE_TARGET'): Path(file).write_text('-- changed source\\n')
+if os.environ.get('FAIL_TARGET') in files: raise SystemExit(1)
+rows=[{'source':f,'mode':'source-replay','accepted':True,'comparator_exit':0,
+       'all_theorems_axioms_checked':True} for f in files]
+if os.environ.get('OMIT_MODULE'):rows=rows[1:]
+if os.environ.get('DUPLICATE_MODULE'):rows.append(rows[0])
+a.results.write_text(json.dumps({'mode':'selected-files-batch-replay','accepted':True,
+    'files':files,'module_count':len(files),'all_theorems_axioms_checked':True,
+    'batches':[],'individual':rows}))
+print('Audit progress: scheduling fixture',flush=True)
+''')
+
+    def test_missing_shard_results_fail_closed(self):
+        (self.root / 'scripts/check_comparator_batch.py').write_text('raise SystemExit(0)\n')
+        result, calls=self.run_audit()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(calls, [])
+
+    def test_missing_or_duplicate_accepted_modules_fail_closed(self):
+        for flag in ['OMIT_MODULE','DUPLICATE_MODULE']:
+            with self.subTest(flag=flag):
+                result,calls=self.run_audit({flag:'1'})
+                self.assertNotEqual(result.returncode,0,result.stdout+result.stderr)
+                self.assertIn('incomplete worker results',result.stderr)
+                self.assertCountEqual(calls,self.targets)
 
 
 class CatalogAuditShardTests(AuditShardTests):

@@ -7,7 +7,7 @@ open scoped VeriTile.Triton.MaskedKernelIO₁
 noncomputable section
 
 def sinIO (X O : RegionName) (n : Nat) : MaskedKernelIO₁ where
-  kernel := sourceKernel X O n blockSize
+  kernel := sin_kernel X O n blockSize
   projection := by rfl
   inp := X
   out := O

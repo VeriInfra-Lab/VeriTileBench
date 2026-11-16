@@ -21,7 +21,7 @@ theorem forward (M : Algebra α) (h : Call) (epsilon : α) (s : State α)
   cases mode : h.gemma
   all_goals
     simp (config := {maxSteps:=500000}) [TraceSafe,Kernels.forwardRuntime,
-      Kernels.regularRuntimeKernel,Kernels.gemmaRuntimeKernel,RuntimeForward.Source.bind,mode,
+      Kernels._rms_layernorm_forwardKernel,Kernels._gemma_rms_layernorm_forwardKernel,RuntimeForward.Source.bind,mode,
       ComputeKernel.surfaceBody,traceSafeList_unfold,stepSafe_unfold,safeExpr_unfold,
       safeCompute_unfold,safeOp_unfold,safeAddress_unfold,safeMask_unfold,addressSafe_unfold,
       maskActive_unfold,run,step,evalExpr,evalComputeOp,evalOp_unfold,evalOffsets,evalDeltas,
@@ -38,7 +38,7 @@ theorem backward (M : Algebra α) (h : Call) (s : State α) (bounds : RegionName
     TraceSafe (engine M) bounds (Kernels.backward h) s := by
   cases mode : h.gemma
   all_goals
-    simp (config := {maxSteps:=500000}) [TraceSafe,Kernels.backward,Kernels.inputGradientKernel,mode,
+    simp (config := {maxSteps:=500000}) [TraceSafe,Kernels.backward,Kernels._rms_layernorm_backwardKernel,mode,
       ComputeKernel.surfaceBody,traceSafeList_unfold,stepSafe_unfold,safeExpr_unfold,
       safeCompute_unfold,safeOp_unfold,safeAddress_unfold,safeMask_unfold,addressSafe_unfold,
       maskActive_unfold,run,step,evalExpr,evalComputeOp,evalOp_unfold,evalOffsets,evalDeltas,

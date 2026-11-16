@@ -28,7 +28,7 @@ def sourceSignature : CallSignature where
   readPorts := ["X","DY"]
   writePorts := ["DX"]
 
-def sourceKernel (X DY DX : RegionName) (s : Strides) (N B : Nat) : ComputeKernel :=
+def _l2_norm_bwd_kernel_repairedKernel (X DY DX : RegionName) (s : Strides) (N B : Nat) : ComputeKernel :=
   let BLOCK_N : Nat := B
   let stride_x_row_value : Int := s.xRow
   let stride_x_col_value : Int := s.xCol
@@ -58,7 +58,7 @@ def sourceKernel (X DY DX : RegionName) (s : Strides) (N B : Nat) : ComputeKerne
     tl.store(DX + cols * stride_dx_col, dx, mask=mask)
   }
 
-def indexCommutedKernel (X DY DX : RegionName) (s : Strides) (N B : Nat) : ComputeKernel :=
+def _l2_norm_bwd_kernel_index_commutedKernel (X DY DX : RegionName) (s : Strides) (N B : Nat) : ComputeKernel :=
   let BLOCK_N : Nat := B
   let stride_x_row_value : Int := s.xRow
   let stride_x_col_value : Int := s.xCol
@@ -89,9 +89,9 @@ def indexCommutedKernel (X DY DX : RegionName) (s : Strides) (N B : Nat) : Compu
   }
 
 def source (s : Strides) (N B : Nat) : ComputeKernel :=
-  sourceKernel "X" "DY" "DX" s N B
+  _l2_norm_bwd_kernel_repairedKernel "X" "DY" "DX" s N B
 
 def indexCommuted (s : Strides) (N B : Nat) : ComputeKernel :=
-  indexCommutedKernel "X" "DY" "DX" s N B
+  _l2_norm_bwd_kernel_index_commutedKernel "X" "DY" "DX" s N B
 
 end VeriTile.Bench.Repairs.L2NormBwd

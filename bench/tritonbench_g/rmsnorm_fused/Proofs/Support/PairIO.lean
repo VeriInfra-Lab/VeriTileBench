@@ -6,9 +6,9 @@ open VeriTile Triton FP.ProfiledRewrite
 noncomputable section
 
 def assumptions : Spec.Assumptions FP.GuardedFragment := []
-def original (X Y W : RegionName) (N B : Nat) : Program := ⟨sourceKernel X Y W N B, []⟩
+def original (X Y W : RegionName) (N B : Nat) : Program := ⟨rms_norm_fwd_fusedKernel X Y W N B, []⟩
 def addressCommuted (X Y W : RegionName) (N B : Nat) : Program :=
-  ⟨addressCommutedKernel X Y W N B, []⟩
+  ⟨rms_norm_fwd_fused_index_commutedKernel X Y W N B, []⟩
 
 end
 end VeriTile.Bench.Repairs.RmsnormFused.SourcePair

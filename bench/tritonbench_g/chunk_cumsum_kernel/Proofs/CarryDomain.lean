@@ -64,7 +64,7 @@ theorem body_next (ops : FPRow.Ops α) (input output : RegionName) (T BT pid q :
       Ready ops input T BT pid (q+1) xs t := by
   have values := loaded_values ops input T BT pid q xs s ready hfull
   obtain ⟨hp,hz,reads⟩ := ready
-  simp (config := {maxSteps := 300000}) [FPIndexBridge.parts,FPRow.parts,repairedKernel,
+  simp (config := {maxSteps := 300000}) [FPIndexBridge.parts,FPRow.parts,chunk_global_cumsum_scalar_kernel_repairedKernel,
     ComputeKernel.surfaceBody,Source.intRange?,run,step,evalExpr,
     evalComputeOp,evalOp_unfold,evalOffsets,store,Option.bind,engine,Algebra.withDefaultPrecision,
     resolvePrecision,FPRow.Ops.algebra,ComputeDType.eraseDType,numeric,numericLt,bop,ofFloat,toFloat,
@@ -95,7 +95,7 @@ theorem site_iff (ops : FPRow.Ops α) (D : FP.Guarded.Domain α)
   have values := loaded_values ops input T BT pid q xs s ready hfull
   obtain ⟨hp,hz,_⟩ := ready
   simp (config := {maxSteps := 300000}) [Rewrite.additionSite,Rewrite.parts,FPIndexBridge.parts,FPRow.parts,
-    repairedKernel,Source.prefixBefore,ComputeKernel.surfaceBody,Source.intRange?,Site.Holds,
+    chunk_global_cumsum_scalar_kernel_repairedKernel,Source.prefixBefore,ComputeKernel.surfaceBody,Source.intRange?,Site.Holds,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,evalOffsets,Option.bind,
     engine,Algebra.withDefaultPrecision,resolvePrecision,FPRow.Ops.algebra,
     ComputeDType.eraseDType,numeric,numericLt,bop,ofFloat,toFloat,
@@ -122,7 +122,7 @@ private theorem prelude_ready (ops : FPRow.Ops α) (input output : RegionName)
     (reads : ∀ j,j<T → (s.mem input (s.pids 0*T+j)).read .fp32=xs j)
     (ran : run (engine ops.algebra) (FPIndexBridge.parts input output T BT).before s=some first) :
     Ready ops input T BT (s.pids 0) 0 xs first := by
-  simp [FPIndexBridge.parts,FPRow.parts,repairedKernel,ComputeKernel.surfaceBody,Source.intRange?,
+  simp [FPIndexBridge.parts,FPRow.parts,chunk_global_cumsum_scalar_kernel_repairedKernel,ComputeKernel.surfaceBody,Source.intRange?,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,Option.bind,
     engine,Algebra.withDefaultPrecision,resolvePrecision,FPRow.Ops.algebra] at ran
   subst first

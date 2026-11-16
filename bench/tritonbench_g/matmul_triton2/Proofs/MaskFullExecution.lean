@@ -21,7 +21,7 @@ def epilogueExecution (rest : Algebra α) (P : Core.Primitives α) (p : Core.Par
   refine ⟨?_,?_⟩
   swap
   simp [epilogue,VeriTile.Bench.Repairs.MatmulTriton2.KernelOnly.maskHoisted,VeriTile.Bench.Repairs.MatmulTriton2.KernelOnly.arguments,
-    VeriTile.Bench.Repairs.MatmulTriton2.KernelOnly.maskHoistedBody,ComputeKernel.surfaceBody,ComputeKernel.withScalarArguments,
+    VeriTile.Bench.Repairs.MatmulTriton2.KernelOnly.matmul_kernel_mask_hoistedKernel,ComputeKernel.surfaceBody,ComputeKernel.withScalarArguments,
     ScalarArgument.integer,ScalarArgument.statement,run,step,evalExpr,evalComputeOp,evalOp_unfold,
     evalOffsets,store,numeric,bop,natLt,numericEq,ComputeDType.eraseDType,
     ofFloat,toFloat,FloatDType.numericDType,FloatDType.toTileDType,Region.cast,Option.bind,

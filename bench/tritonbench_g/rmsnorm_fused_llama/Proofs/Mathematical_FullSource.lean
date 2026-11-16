@@ -77,7 +77,7 @@ theorem body_decomp (X Y W : RegionName) (stride N B : Nat) (eps : ℝ) :
         ++ [Stmt.forRange "off" 0 N B (varBody N B)]
         ++ post N B eps
         ++ [Stmt.forRange "off" 0 N B (writeBody W N B)] := by
-  simp [mathSource, typedKernel, VeriTile.Bench.Repairs.RmsnormFusedLlama.runtimeKernel,
+  simp [mathSource, typedKernel, VeriTile.Bench.Repairs.RmsnormFusedLlama._rms_norm_fwd_fusedKernel,
     ComputeKernel.withScalarArguments, ScalarArgument.statement, ScalarArgument.fp32,
     ComputeKernel.eraseDType, ComputeKernel.surfaceBody, ComputeKernel.toAlgKernel,
     ComputeKernel.toAlgorithm?, ComputeKernel.fromKernelBody,

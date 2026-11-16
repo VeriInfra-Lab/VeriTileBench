@@ -1,7 +1,21 @@
 # Validation records
 
-- `task_progress.json` selects the 183 current repaired tasks.
+- `task_progress.json` selects the 184 current repaired tasks.
 - `source-correspondence.json` records pasted-body coverage and pending translations.
+- [`body_receipts/ci-responsibility.json`](body_receipts/ci-responsibility.json)
+  records core/Bench CI scope, dependency selection and partition coverage,
+  a fresh 31-module proof replay, and separate pending interface checks.
+- [`body_receipts/gate-ci-fixes.json`](body_receipts/gate-ci-fixes.json)
+  records the required-refutation and trailing-comment guards, local CI checks,
+  complete regression replay and unchanged case proof evidence.
+- [`body_receipts/source-naming-deep-review.json`](body_receipts/source-naming-deep-review.json)
+  records complete bidirectional source coverage, explicit Python candidate origins,
+  current proof connections and replay, and preservation of the unchanged auxiliary proofs.
+- [`body_receipts/source-naming-replay.json`](body_receipts/source-naming-replay.json)
+  records the Python/Lean naming checks and complete Real/FP proof replay at its recorded source snapshot
+  for 184 TritonBench-G tasks and 19 example groups. It covers every owned auxiliary
+  module and all affected regression modules; the compressed theorem inventory
+  beside it retains per-module names and additional batch targets.
 - [`body_receipts/source-authoring-replay.json`](body_receipts/source-authoring-replay.json)
   records the full comparator replay of all 183 TritonBench-G tasks and 19 examples
   at source commit `98d4130aa`: 8,468 case modules and 293 shared checks passed,

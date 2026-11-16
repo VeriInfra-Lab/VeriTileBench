@@ -18,7 +18,7 @@ def callSignature : CallSignature where
   readPorts := ["in_ptr0","in_ptr1","in_ptr2"]
   writePorts := ["out_ptr0","in_out_ptr0","out_ptr1"]
 
-def originalKernel (in_out_ptr0 in_ptr0 in_ptr1 in_ptr2 out_ptr0 out_ptr1 : RegionName)
+def triton_red_fused_native_layer_norm_0Kernel (in_out_ptr0 in_ptr0 in_ptr1 in_ptr2 out_ptr0 out_ptr1 : RegionName)
     (xnumel rnumel RBLOCK : Nat) (tree : DSL.WelfordSource.Tree RBLOCK) : ComputeKernel :=
   let XBLOCK : Nat := 1
   with_triton_call callSignature call_args [xnumel := xnumel,rnumel := rnumel]
@@ -88,7 +88,7 @@ def originalKernel (in_out_ptr0 in_ptr0 in_ptr1 in_ptr2 out_ptr0 out_ptr1 : Regi
         tl.store(out_ptr1 + (r1 + (rnumel * x0)), tmp21, rmask)
   }
 
-def hoistedKernel (in_out_ptr0 in_ptr0 in_ptr1 in_ptr2 out_ptr0 out_ptr1 : RegionName)
+def triton_red_fused_native_layer_norm_hoistedKernel (in_out_ptr0 in_ptr0 in_ptr1 in_ptr2 out_ptr0 out_ptr1 : RegionName)
     (xnumel rnumel RBLOCK : Nat) (tree : DSL.WelfordSource.Tree RBLOCK) : ComputeKernel :=
   let XBLOCK : Nat := 1
   with_triton_call callSignature call_args [xnumel := xnumel,rnumel := rnumel]
@@ -172,11 +172,11 @@ noncomputable section
 
 def kernel (X W Bias Y Mean Rstd : RegionName) (S D B : Nat)
     (tree : ReductionTree B) : ComputeKernel :=
-  Pasted.originalKernel Rstd X W Bias Mean Y S D B (sourceTree tree)
+  Pasted.triton_red_fused_native_layer_norm_0Kernel Rstd X W Bias Mean Y S D B (sourceTree tree)
 
 def hoisted (X W Bias Y Mean Rstd : RegionName) (S D B : Nat)
     (tree : ReductionTree B) : ComputeKernel :=
-  Pasted.hoistedKernel Rstd X W Bias Mean Y S D B (sourceTree tree)
+  Pasted.triton_red_fused_native_layer_norm_hoistedKernel Rstd X W Bias Mean Y S D B (sourceTree tree)
 
 #guard_msgs (drop info) in
 #auditModuleAxioms

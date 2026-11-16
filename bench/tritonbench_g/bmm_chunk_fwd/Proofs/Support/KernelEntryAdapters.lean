@@ -19,7 +19,7 @@ def mainIndexCommuted
       stride_out_batch stride_out_chunk stride_out_head stride_outm stride_outn
       stride_seq_idx_batch stride_seq_idx_seqlen
       BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K : Nat) (IS_CAUSAL HAS_SEQ_IDX : Bool) : ComputeKernel :=
-indexCommutedKernel .fp32 .fp32 out_dtype .fp32 a_ptr b_ptr out_ptr seq_idx_ptr seqlen chunk_size K ngroups stride_a_batch stride_a_seqlen stride_a_head stride_ak stride_b_batch stride_b_seqlen stride_b_head stride_bk stride_out_batch stride_out_chunk stride_out_head stride_outm stride_outn stride_seq_idx_batch stride_seq_idx_seqlen BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K IS_CAUSAL HAS_SEQ_IDX
+_bmm_chunk_fwd_kernel_repaired_candidateKernel .fp32 .fp32 out_dtype .fp32 a_ptr b_ptr out_ptr seq_idx_ptr seqlen chunk_size K ngroups stride_a_batch stride_a_seqlen stride_a_head stride_ak stride_b_batch stride_b_seqlen stride_b_head stride_bk stride_out_batch stride_out_chunk stride_out_head stride_outm stride_outn stride_seq_idx_batch stride_seq_idx_seqlen BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K IS_CAUSAL HAS_SEQ_IDX
 
 def bindMain (version : Bool) (h : Host.Call) (c : Host.Config) :=
   (if version then mainIndexCommuted else mainSource)
@@ -52,7 +52,7 @@ theorem fp32Source_eq (h : Host.Call) (c : Host.Config)
 /-- The actual final 32 by 64 cleanup source. Int64 casts have the same
 mathematical erasure as main; NativeCleanup proves finite source arithmetic. -/
 def clearUpperKernel (Out : RegionName) (chunk_size chunk_heads : Nat) : ComputeKernel :=
-  VeriTile.Bench.Repairs.BmmChunkFwd.clearUpperKernel .fp32 Out chunk_size chunk_heads 32 64
+  VeriTile.Bench.Repairs.BmmChunkFwd._clear_causal_upperKernel .fp32 Out chunk_size chunk_heads 32 64
 
 #axiomsClean fp32Source_eq
 end Kernels

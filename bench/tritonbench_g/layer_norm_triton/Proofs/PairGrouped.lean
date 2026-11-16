@@ -48,8 +48,8 @@ theorem body_safe_iff (m : Model α) (s t : State α) (stride M N G B group row 
       (t.setReg "row" .int [] (fun _ => (row : Int))) := by
   obtain ⟨hmem,hu,hgroup,hcols,hmask,hdwp,hdbp,hdw,hdb⟩ := h
   by_cases same : row=group <;>
-    simp [body,kernel,TypedSource.groupedBackwardCandidateKernel,groupedBackwardCandidateKernel,SourceGrouped.body,SourceGrouped.code,
-      TypedSource.groupedBackwardKernel,groupedBackwardKernel,ComputeKernel.surfaceBody,
+    simp [body,kernel,TypedSource.groupedBackwardCandidateKernel,_layer_norm_bwd_dx_fused_candidateKernel,SourceGrouped.body,SourceGrouped.code,
+      TypedSource.groupedBackwardKernel,_layer_norm_bwd_dx_fusedKernel,ComputeKernel.surfaceBody,
       Safety.traceSafeList_unfold,Safety.stepSafe_unfold,Safety.safeAlg_unfold,
       Safety.safeExpr_unfold,Safety.safeCompute_unfold,Safety.safeOp_unfold,
       Safety.safeAddress_unfold,Safety.safeMask_unfold,Safety.addressSafe_unfold,Safety.maskActive_unfold,

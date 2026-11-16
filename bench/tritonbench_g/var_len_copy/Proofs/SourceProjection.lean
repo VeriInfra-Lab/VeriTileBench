@@ -12,7 +12,7 @@ set_option linter.unusedSimpArgs false
 
 theorem sourceProjection : Source.originalKernel.eraseDType.toAlgorithm? =
     Except.ok Source.originalKernel.eraseDType.toAlgKernel := by
-  simp [Source.originalKernel, Source.kernel,Source.bodyKernel,Source.commutedBodyPastedKernel, Source.blockSize,
+  simp [Source.originalKernel, Source.kernel,Source.var_len_copy_kernel_triton_repairedKernel,Source.var_len_copy_kernel_triton_commutedKernel, Source.blockSize,
     ComputeKernel.surfaceBody, ComputeKernel.eraseDType,
     ComputeKernel.toAlgorithm?, ComputeKernel.toAlgKernel, ComputeKernel.fromKernelBody,
     ComputeStmt.listToAlgorithm?, ComputeStmt.toAlgorithm?, ComputeExpr.toAlgorithm?,

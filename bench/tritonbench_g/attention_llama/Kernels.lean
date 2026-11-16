@@ -12,7 +12,7 @@ def halfSignature : CallSignature where
   readPorts := ["Q","K","V"]
   writePorts := ["Out"]
 
-def halfKernel
+def FP16._fwd_kernel
     (Q K V Out : RegionName)
     (stride_qz stride_qh stride_qm stride_qk
       stride_kz stride_kh stride_kn stride_kk
@@ -102,7 +102,7 @@ def halfKernel
     tl.store(out_ptrs, acc, offs_m[:, None] < H)
   }
 
-def carryFirstHalfKernel
+def FP16._fwd_kernel_carry_firstKernel
     (Q K V Out : RegionName)
     (stride_qz stride_qh stride_qm stride_qk
       stride_kz stride_kh stride_kn stride_kk
@@ -199,7 +199,7 @@ def bytesSignature : CallSignature where
   readPorts := ["Q","K","V"]
   writePorts := ["Out"]
 
-def bytesKernel
+def UInt8._fwd_kernel
     (Q K V Out : RegionName)
     (stride_qz stride_qh stride_qm stride_qk
       stride_kz stride_kh stride_kn stride_kk
@@ -289,7 +289,7 @@ def bytesKernel
     tl.store(out_ptrs, acc, offs_m[:, None] < H)
   }
 
-def carryFirstBytesKernel
+def UInt8._fwd_kernel_carry_firstKernel
     (Q K V Out : RegionName)
     (stride_qz stride_qh stride_qm stride_qk
       stride_kz stride_kh stride_kn stride_kk

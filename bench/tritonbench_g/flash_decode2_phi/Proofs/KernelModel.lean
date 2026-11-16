@@ -20,7 +20,7 @@ def run {α : Type} [Inhabited α] (A : Algebra α) (c : Call)
 theorem source (c : Call) :
     FlashDecode2.kernel c.val.masked (Checked.heads c.val) (Checked.capacity c.val) (Checked.width c.val)
       c.val.blockSeq (Checked.block c.val) =
-    phiKernel (Checked.heads c.val) (Checked.capacity c.val) (Checked.width c.val)
+    Phi._fwd_kernel_flash_decode_stage2Kernel (Checked.heads c.val) (Checked.capacity c.val) (Checked.width c.val)
       c.val.blockSeq (Checked.block c.val) := by
   simp only [FlashDecode2.kernel,c.property]; rfl
 

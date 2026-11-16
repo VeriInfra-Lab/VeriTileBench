@@ -10,7 +10,7 @@ def callSignature (dtype out_dtype : FloatDType) : CallSignature where
   scalars := []
   constexpr := ["T","BT"]
 
-def repairedKernel (dtype out_dtype : FloatDType) (s o : RegionName) (T BT : Nat) : ComputeKernel :=
+def chunk_global_cumsum_scalar_kernel_repairedKernel (dtype out_dtype : FloatDType) (s o : RegionName) (T BT : Nat) : ComputeKernel :=
   with_triton_signature (callSignature dtype out_dtype) in triton {
     i_bh = tl.program_id(0)
     b_z = tl.zeros([], dtype=tl.float32)
@@ -25,7 +25,7 @@ def repairedKernel (dtype out_dtype : FloatDType) (s o : RegionName) (T BT : Nat
         tl.store(p_o, b_o.to(p_o.dtype.element_ty), mask=times < T)
   }
 
-def sumLeftKernel (dtype out_dtype : FloatDType) (s o : RegionName) (T BT : Nat) : ComputeKernel :=
+def chunk_global_cumsum_scalar_kernel_sum_leftKernel (dtype out_dtype : FloatDType) (s o : RegionName) (T BT : Nat) : ComputeKernel :=
   with_triton_signature (callSignature dtype out_dtype) in triton {
     i_bh = tl.program_id(0)
     b_z = tl.zeros([], dtype=tl.float32)

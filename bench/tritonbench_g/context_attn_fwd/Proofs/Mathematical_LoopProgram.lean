@@ -98,7 +98,7 @@ def body (p : Layout) (r : Regions) (swapped : Bool) (scale : ℝ) : List Stmt :
 theorem source (p : Layout) (r : Regions) (swapped : Bool) (scale : ℝ) :
     body p r swapped scale = keys p r ++ scores p swapped scale ++ stats p ++ values p r := by
   cases swapped
-  all_goals simp only [body,lower,parts,mathematical,kernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd.originalKernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.scaleFirst,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.scaleFirst,VeriTile.Bench.Repairs.ContextAttnFwd.scaleFirstKernel,ComputeKernel.surfaceBody,
+  all_goals simp only [body,lower,parts,mathematical,kernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_int8kvKernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.scaleFirst,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.scaleFirst,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_scale_firstKernel,ComputeKernel.surfaceBody,
     Bool.false_eq_true,↓reduceIte,String.reduceEq,Option.map,Option.getD,Except.toOption,
     Source.intRange?,Source.prefixBefore,List.length_cons,List.length_nil,
     ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,
@@ -111,7 +111,7 @@ theorem source (p : Layout) (r : Regions) (swapped : Bool) (scale : ℝ) :
   all_goals simp only [Op.eraseDType.eq_def,MemAccess.eraseDType.eq_def,MaskOpt.eraseDType.eq_def,
     VeriTile.Triton.eraseDType,NumericDType.eraseDType,IntegralDType.eraseDType,ComparableDType.eraseDType,
     Region.cast_cast,Region.cast_id,eraseDType_float,FloatDType.toTileDType]
-  all_goals rfl
+  all_goals norm_num <;> exact ⟨rfl,rfl,rfl⟩
 
 #guard_msgs (drop info) in
 #auditModuleAxioms

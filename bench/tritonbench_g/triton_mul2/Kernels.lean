@@ -21,7 +21,7 @@ def inplaceSignature : CallSignature where
   readPorts := ["ptr"]
   writePorts := ["ptr"]
 
-def sourceKernel (X O : RegionName) (n B : Nat) : ComputeKernel :=
+def mul2_kernel (X O : RegionName) (n B : Nat) : ComputeKernel :=
   let in_ptr0 := X
   let out_ptr := O
   let n_elements := n
@@ -37,7 +37,7 @@ def sourceKernel (X O : RegionName) (n B : Nat) : ComputeKernel :=
     tl.store(out_ptr + offsets, output, mask=mask)
   }
 
-def inplaceSourceKernel (X : RegionName) (n B : Nat) : ComputeKernel :=
+def mul2_inplace_kernel (X : RegionName) (n B : Nat) : ComputeKernel :=
   let ptr := X
   let n_elements := n
   let BLOCK_SIZE := B
@@ -52,7 +52,7 @@ def inplaceSourceKernel (X : RegionName) (n B : Nat) : ComputeKernel :=
     tl.store(ptr + offsets, output, mask=mask)
   }
 
-def commutedSourceKernel (X O : RegionName) (n B : Nat) : ComputeKernel :=
+def mul2_commuted_kernel (X O : RegionName) (n B : Nat) : ComputeKernel :=
   let in_ptr0 := X
   let out_ptr := O
   let n_elements := n
@@ -68,7 +68,7 @@ def commutedSourceKernel (X O : RegionName) (n B : Nat) : ComputeKernel :=
     tl.store(out_ptr + offsets, output, mask=mask)
   }
 
-def inplaceCommutedSourceKernel (X : RegionName) (n B : Nat) : ComputeKernel :=
+def mul2_inplace_commuted_kernel (X : RegionName) (n B : Nat) : ComputeKernel :=
   let ptr := X
   let n_elements := n
   let BLOCK_SIZE := B

@@ -19,10 +19,10 @@ def reference {α : Type} (M : Algebra α) (x : α) : α :=
 
 def execution {α : Type} [Inhabited α] (M : Algebra α)
     (n B : Nat) (s : State α) :
-    {t : State α // FP.Structural.exec (backend M) (fp32Kernel n B) s = some t} := by
+    {t : State α // FP.Structural.exec (backend M) (square_kernel n B) s = some t} := by
   refine ⟨?_, ?_⟩
   swap
-  simp [fp32Kernel, VeriTile.Bench.Repairs.SquareMatrix.fp32Kernel, VeriTile.Bench.Repairs.SquareMatrix.indexCommutedKernel,
+  simp [square_kernel, VeriTile.Bench.Repairs.SquareMatrix.square_kernel, VeriTile.Bench.Repairs.SquareMatrix.square_index_commuted_kernel,
     FP.Structural.exec, ComputeKernel.surfaceBody, run, step, evalExpr,
     evalComputeOp, evalOp_unfold, Option.bind, numericLt, natLt, bop, store, ComputeDType.eraseDType, numeric, backend]
   rfl
@@ -112,7 +112,7 @@ theorem expected_cell {α : Type} [Inhabited α] (M : Algebra α)
 
 theorem complete_correct {α : Type} [Inhabited α] (M : Algebra α)
     (n B : Nat) (s : State α) :
-    ∃ t, FP.Structural.exec (backend M) (fp32Kernel n B) s=some t ∧
+    ∃ t, FP.Structural.exec (backend M) (square_kernel n B) s=some t ∧
       t.mem=expectedMemory M n B s :=
   ⟨(execution M n B s).val,(execution M n B s).property,execution_memory M n B s⟩
 
@@ -127,7 +127,7 @@ def runPrefix {α : Type} [Inhabited α] (M : Algebra α)
     (n B rows : Nat) (s : State α) : Nat → Option (State α)
   | 0 => some s
   | k+1 => (runPrefix M n B rows s k).bind fun t =>
-      FP.Structural.exec (backend M) (fp32Kernel n B) (programState s t.mem rows k)
+      FP.Structural.exec (backend M) (square_kernel n B) (programState s t.mem rows k)
 
 def prefixMemory {α : Type} [Inhabited α] (M : Algebra α)
     (n : Nat) (s : State α) (k : Nat) : RegionName → Nat → Cell α :=
@@ -161,7 +161,7 @@ theorem prefix_correct {α : Type} [Inhabited α] (M : Algebra α)
     · simp only [runPrefix,hr,Option.bind_some]; exact he
     · rw [hf,hm,reference_step M n B rows s k cover]
 
-#specNonCircular reference avoiding [fp32Kernel,execution,runPrefix]
+#specNonCircular reference avoiding [square_kernel,execution,runPrefix]
 #axiomsClean complete_correct
 #axiomsClean prefix_correct
 #guard_msgs (drop info) in

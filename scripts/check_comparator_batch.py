@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Opt-in task batch replay; retain the existing per-module trust audits.
+"""Bounded batch replay with complete per-module trust audits.
 
 Every per-file inventory is retained. Its target union is resolved in the
 original imported environment, supplemented by every original-module theorem.
 Lazy equation theorems can change module attribution under combined imports.
 """
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 import hashlib
 import json
 from pathlib import Path
@@ -16,7 +18,8 @@ import sys
 import tempfile
 import time
 
-from check_comparator import ROOT, build_inventory, prepare, prepare_target
+from check_comparator import ROOT, build_inventory, prepare, prepare_target, replay_target
+from audit_process import DEFAULT_TIMEOUT, positive_seconds, progress, run_logged, service_unit
 from comparator_common import comparator_command, write_config
 from scripts.bench.audit_source import lean_code_mask
 
@@ -84,7 +87,7 @@ run_cmd do
 '''
 
 
-def task_files(root, task):
+def task_files(root, task, *, allow_individual=False):
     if not re.fullmatch(r'[A-Za-z_][A-Za-z_0-9]*', task):
         raise ValueError('Expected one TritonBench-G task name')
     directory = root / 'bench/tritonbench_g' / task
@@ -99,8 +102,8 @@ def task_files(root, task):
         if any(not re.fullmatch(r'[A-Za-z_][A-Za-z_0-9]*', part)
                for part in file[:-5].split('/')):
             raise ValueError('Unsupported Lean module name: ' + file)
-        if re.search(r'^\s*module\s*$', lean_code_mask((root / file).read_text()), re.M):
-            raise ValueError('Batch pilot requires ordinary modules; use individual replay: ' + file)
+        if not allow_individual and re.search(r'^\s*module\s*$', lean_code_mask((root / file).read_text()), re.M):
+            raise ValueError('Batch imports require ordinary modules; use individual replay: ' + file)
     return files
 
 
@@ -167,83 +170,83 @@ def require_batch_targets(reference, inventory):
     return sorted(original - requested)
 
 
-def require_sources(state, judge, task, files):
-    if task_files(ROOT, task) != files or task_files(judge, task) != files:
+def selected_files(root, files):
+    if not files or len(set(files)) != len(files):
+        raise ValueError('Selected files must be nonempty and unique')
+    for file in files:
+        if not isinstance(file, str):
+            raise ValueError('Invalid selected Lean module: ' + str(file))
+        path = root / file
+        if (not file.endswith('.lean') or Path(file).is_absolute() or
+                any(part in {'', '.', '..'} for part in file.split('/')) or
+                not path.resolve().is_relative_to(root.resolve()) or not path.is_file()):
+            raise ValueError('Invalid selected Lean module: ' + str(file))
+    return list(files)
+
+
+def require_sources(state, judge, files, task=None):
+    selected_files(ROOT, files)
+    selected_files(judge, files)
+    if task is not None and (task_files(ROOT, task, allow_individual=True) != files or
+                             task_files(judge, task, allow_individual=True) != files):
         raise ValueError('Task membership changed during batch audit')
     hashes = json.loads((Path(state['logs']) / 'inputs.json').read_text())
     for name, expected in hashes.items():
         if hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != expected:
             raise ValueError('Source changed during batch audit: ' + name)
+    judge_inputs = Path(state['judge_inputs'])
+    if hashlib.sha256(judge_inputs.read_bytes()).hexdigest() != state['judge_inputs_sha256']:
+        raise ValueError('Judge source fingerprint changed during batch audit')
+    for name, expected in json.loads(judge_inputs.read_text()).items():
+        if hashlib.sha256((judge / name).read_bytes()).hexdigest() != expected:
+            raise ValueError('Judge source changed during batch audit: ' + name)
+    if hashlib.sha256(Path(state['comparator']).read_bytes()).hexdigest() != state['comparator_sha256']:
+        raise ValueError('Comparator binary changed during batch audit')
 
 
-def build_inventories(judge, targets, batch_size=2):
-    """Build bounded waves, retaining each compiler's own audit log.
-
-    Lake's aggregate stdout also replays dependency logs. Its per-module trace
-    keeps messages attached to the compiler that actually produced them.
-    Never attribute a different file's successful audit to the current file.
-    """
+def build_inventories(judge, targets, batch_size=2, timeout=DEFAULT_TIMEOUT, heartbeat=30):
+    """Bound parallel audit compilers; each file owns its trace and deadline."""
     if batch_size < 1:
         raise ValueError('Audit batch size must be positive')
     inventories = []
-    for start in range(0, len(targets), batch_size):
-        wave = targets[start:start + batch_size]
-        if batch_size == 1:
-            inventories.append(build_inventory(judge, wave[0]))
-            continue
-        log = wave[0]['logs'].parent / f'audit-wave-{start // batch_size:04d}.log'
-        with log.open('w') as output:
-            result = subprocess.run(['lake', 'build', *(t['module'] for t in wave)],
-                                    cwd=judge, stdout=output, stderr=subprocess.STDOUT)
-        if result.returncode:
-            print(log.read_text(), file=sys.stderr)
-            raise ValueError('Audit wave build failed; logs: ' + str(log))
-        for target in wave:
-            trace = judge / '.lake/build/lib/lean' / Path(*target['module'].split('.')).with_suffix('.trace')
-            if not trace.is_file() or not target['metadata'].is_file():
-                raise ValueError('Missing per-module audit trace or inventory: ' + target['source'])
-            entries = json.loads(trace.read_text())['log']
-            if any(entry['level'] == 'error' for entry in entries):
-                raise ValueError('Per-module compiler trace contains an error: ' + target['source'])
-            (target['logs'] / 'build.log').write_text(
-                '\n'.join(entry['message'] for entry in entries) + '\n')
-            shutil.copyfile(trace, target['logs'] / 'build.trace.json')
-            shutil.copyfile(target['metadata'], target['logs'] / 'targets.json')
-            inventories.append(json.loads(target['metadata'].read_text()))
-        print(f'Audit wave: {start + len(wave)}/{len(targets)} modules built', flush=True)
+    cancel = threading.Event()
+    with ThreadPoolExecutor(max_workers=batch_size) as workers:
+        for start in range(0, len(targets), batch_size):
+            wave = targets[start:start+batch_size]
+            futures = {workers.submit(build_inventory, judge, target, timeout, heartbeat, cancel): i
+                       for i, target in enumerate(wave)}
+            found = {}
+            try:
+                for future in as_completed(futures):
+                    found[futures[future]] = future.result()
+            except BaseException:
+                cancel.set()
+                for future in futures:
+                    future.cancel()
+                raise
+            inventories.extend(found[i] for i in range(len(wave)))
+            progress('wave-complete', source='audit-selection', stage='audit-compile',
+                     completed=start+len(wave), total=len(targets))
     return inventories
 
 
-def check_task(workspace, task, audit_batch_size=2):
-    if audit_batch_size < 1:
-        raise ValueError('Audit batch size must be positive')
+def validate_audit(target, inventory):
+    text = (target['logs'] / 'build.log').read_text()
+    if ('Axiom audit:' not in text or 'Spec audit:' not in text or
+            (not target.get('requires_individual') and
+             f'Full theorem axiom audit: theorems={len(inventory["theorems"])}' not in text)):
+        raise ValueError('Missing per-module trust audit: ' + target['source'])
+
+
+def replay_batch(state, judge, files, targets, inventories, *, task=None,
+                 timeout=DEFAULT_TIMEOUT, heartbeat=30):
     start = time.monotonic()
-    files = task_files(ROOT, task)
-    state = prepare(workspace)
-    judge = workspace / 'project'
-    require_sources(state, judge, task, files)
-    logs = Path(tempfile.mkdtemp(prefix='Batch_' + task + '-', dir=state['logs']))
-    snapshot_done = time.monotonic()
-    reference = {}
-    per_file = []
-    targets = [prepare_target(state, judge, ROOT / file, trust=True, all_axioms=True)
-               for file in files]
-    inventories = build_inventories(judge, targets, audit_batch_size)
-    for file, target, inventory in zip(files, targets, inventories, strict=True):
-        if any('._hyg' in name for name in inventory['theorems']):
-            raise ValueError('Hygienic source-copy targets require individual replay in this pilot: ' + file)
-        audit_log = (target['logs'] / 'build.log').read_text()
-        if ('Axiom audit:' not in audit_log or 'Spec audit:' not in audit_log or
-                f'Full theorem axiom audit: theorems={len(inventory["theorems"])}' not in audit_log):
-            raise ValueError('Missing per-module trust audit: ' + file)
-        original_module = file[:-5].replace('/', '.')
-        reference[file] = [canonical_name(name, target['module'], original_module)
-                           for name in inventory['theorems']]
-        per_file.append({'file': file, 'inventory': str(target['logs'] / 'targets.json'),
-                         'audit_log': str(target['logs'] / 'build.log')})
-        print(f'Audit inventory: {file}: {len(reference[file])} theorem(s)', flush=True)
+    label = task or files[0].split('/')[2]
+    logs = Path(tempfile.mkdtemp(prefix='Batch_' + label + '-', dir=state['logs']))
+    reference = {file: [canonical_name(name, target['module'], file[:-5].replace('/', '.'))
+                        for name in inventory['theorems']]
+                 for file, target, inventory in zip(files, targets, inventories, strict=True)}
     (logs / 'reference.json').write_text(json.dumps(reference, indent=2) + '\n')
-    audit_done = time.monotonic()
     modules = [file[:-5].replace('/', '.') for file in files]
     metadata = logs / 'targets.json'
     source = ('import Lean\n' + ''.join('import ' + module + '\n' for module in modules) +
@@ -256,59 +259,175 @@ def check_task(workspace, task, audit_batch_size=2):
     module = 'VeriTileComparator.' + tag
     (judge / 'VeriTileComparator' / (tag + '.lean')).write_text(source)
     (logs / 'Source.lean').write_text(source)
-    with (logs / 'build.log').open('w') as output:
-        result = subprocess.run(['lake', 'build', module], cwd=judge,
-                                stdout=output, stderr=subprocess.STDOUT)
+    progress('batch-members', source=label, stage='batch-inventory', files=files)
+    result, _ = run_logged(['lake', 'build', module], cwd=judge, log=logs / 'build.log',
+        source=label, stage='batch-inventory', timeout=timeout, heartbeat=heartbeat)
     if result.returncode or not metadata.is_file():
-        print((logs / 'build.log').read_text(), file=sys.stderr)
         raise ValueError('Batch inventory build failed; logs: ' + str(logs))
     inventory = json.loads(metadata.read_text())
     additional = require_batch_targets(reference, inventory)
-    discovered = {file: sorted(names) for file, names in reference.items()}
-    require_sources(state, judge, task, files)
     config = write_config(judge, inventory['aliases'], challenge=module, solution=module,
                           filename=f'.lake/comparator/{tag}.json')
     shutil.copyfile(config, logs / 'config.json')
     replay_start = time.monotonic()
-    with (logs / 'comparator.log').open('w') as output:
-        result = subprocess.run(comparator_command(judge, state['comparator'], config),
-                                stdout=output, stderr=subprocess.STDOUT)
-    require_sources(state, judge, task, files)
-    report = {**state, 'mode': 'task-batch-replay', 'task': task,
-              'module_count': len(files), 'theorem_count': sum(map(len, discovered.values())),
+    remaining = timeout-(replay_start-start)
+    if remaining <= 0:
+        raise ValueError('Batch inventory exhausted the replay deadline: ' + label)
+    unit = service_unit()
+    result, _ = run_logged(comparator_command(judge, state['comparator'], config, unit=unit),
+        cwd=judge, log=logs / 'comparator.log', source=label, stage='batch-replay',
+        timeout=remaining, heartbeat=heartbeat, unit=unit)
+    report = {**state, 'mode': 'task-batch-replay' if task else 'file-batch-replay', 'task': label,
+              'module_count': len(files), 'theorem_count': sum(map(len, reference.values())),
               'unique_theorem_count': len(inventory['theorems']),
               'batch_targets': inventory['theorems'], 'owned_modules': inventory['owned_modules'],
               'additional_targets': additional, 'all_theorems_axioms_checked': True,
-              'coverage_matches': True, 'modules': discovered, 'per_file_audits': per_file,
+              'coverage_matches': True, 'modules': reference,
+              'per_file_audits': [{'file': file, 'inventory': str(target['logs'] / 'targets.json'),
+                                  'audit_log': str(target['logs'] / 'build.log')}
+                                 for file, target in zip(files, targets, strict=True)],
               'comparator_exit': result.returncode, 'accepted': result.returncode == 0,
-              'evidence_dir': str(logs), 'wall_seconds': time.monotonic() - start,
-              'snapshot_seconds': snapshot_done - start,
-              'audit_batch_size': audit_batch_size,
-              'audit_build_invocations': (len(files) + audit_batch_size - 1) // audit_batch_size,
-              'audit_inventory_seconds': audit_done - start,
-              'batch_inventory_seconds': replay_start - audit_done,
-              'comparator_seconds': time.monotonic() - replay_start}
+              'evidence_dir': str(logs), 'wall_seconds': time.monotonic()-start,
+              'batch_inventory_seconds': replay_start-start,
+              'comparator_seconds': time.monotonic()-replay_start}
     (logs / 'result.json').write_text(json.dumps(report, indent=2) + '\n')
     if result.returncode:
-        print((logs / 'comparator.log').read_text(), file=sys.stderr)
         raise ValueError('Official comparator rejected batch; logs: ' + str(logs))
     print(f'Batch comparator: {len(files)} modules, {report["theorem_count"]} theorem occurrences, '
-          f'{report["unique_theorem_count"]} unique targets accepted; logs: {logs}')
+          f'{report["unique_theorem_count"]} unique targets accepted; logs: {logs}', flush=True)
     return report
+
+
+def replay_groups(files, batch_size):
+    if batch_size < 1:
+        raise ValueError('Replay batch size must be positive')
+    groups, current, key = [], [], None
+    for file in files:
+        parts = file.split('/')
+        owner = tuple(parts[:2] if parts[:2] == ['tests', 'lean'] else parts[:3])
+        if current and (owner != key or len(current) >= batch_size):
+            groups.append(current); current = []
+        current.append(file); key = owner
+    if current:
+        groups.append(current)
+    return groups
+
+
+def check_files(workspace, files, *, task=None, audit_batch_size=2, batch_size=32,
+                file_timeout=DEFAULT_TIMEOUT, batch_timeout=DEFAULT_TIMEOUT,
+                heartbeat=30, results=None):
+    file_timeout, batch_timeout = positive_seconds(file_timeout), positive_seconds(batch_timeout)
+    heartbeat = positive_seconds(heartbeat)
+    if audit_batch_size < 1 or batch_size < 1:
+        raise ValueError('Audit and replay batch sizes must be positive')
+    start = time.monotonic()
+    files = selected_files(ROOT, files)
+    progress('selection', source=task or 'explicit-files', stage='snapshot', modules=len(files))
+    state = prepare(workspace)
+    judge = workspace / 'project'
+    require_sources(state, judge, files, task)
+    snapshot_done = time.monotonic()
+    targets = [prepare_target(state, judge, ROOT / file, trust=True, all_axioms=True) for file in files]
+    inventories = build_inventories(judge, targets, audit_batch_size, file_timeout, heartbeat)
+    for target, inventory in zip(targets, inventories, strict=True):
+        validate_audit(target, inventory)
+    audit_done = time.monotonic()
+    for target in targets:
+        target['remaining_seconds'] = file_timeout-target.get('audit_seconds', 0)
+    lookup = {file: (target, inventory) for file, target, inventory in zip(files, targets, inventories, strict=True)}
+    individual, compatible = [], []
+    for file in files:
+        target, inventory = lookup[file]
+        if (any(not re.fullmatch(r'[A-Za-z_][A-Za-z_0-9]*', part) for part in file[:-5].split('/')) or
+                re.search(r'^\s*module\s*$', lean_code_mask((ROOT / file).read_text()), re.M) or
+                any('._hyg' in name for name in inventory['theorems'])):
+            individual.append(file)
+            progress('individual-required', source=file, stage='selection',
+                     reason='standalone path, module header or source-copy hygienic theorem names')
+        else:
+            compatible.append(file)
+    groups = replay_groups(compatible, batch_size)
+    accepted = []
+    batches = []
+    for group in groups:
+        group_targets, group_inventories = zip(*(lookup[file] for file in group), strict=True)
+        remaining = min(t['remaining_seconds'] for t in group_targets)
+        group_start = time.monotonic()
+        # A batch timeout or failed comparator is an audit failure. Only combined
+        # import/coverage incompatibility may use the complete individual path.
+        try:
+            report = replay_batch(state, judge, group, group_targets, group_inventories,
+                task=task, timeout=min(batch_timeout, remaining), heartbeat=heartbeat)
+        except ValueError as error:
+            if not str(error).startswith('Batch inventory build failed'):
+                raise
+            for target in group_targets:
+                target['remaining_seconds'] -= time.monotonic()-group_start
+            progress('individual-fallback', source=group[0], stage='batch-inventory',
+                     files=group, reason=str(error))
+            individual.extend(group)
+        else:
+            accepted.extend(group); batches.append(report)
+            for file in group:
+                print('  ok    ' + file, file=sys.stderr, flush=True)
+    fallbacks = []
+    for file in individual:
+        target, inventory = lookup[file]
+        report = replay_target(state, judge, target, inventory,
+                               target['remaining_seconds'], heartbeat)
+        accepted.append(file); fallbacks.append(report)
+        print('  ok    ' + file, file=sys.stderr, flush=True)
+    if len(accepted) != len(files) or set(accepted) != set(files):
+        raise ValueError('Batch worker coverage differs from the explicit selection')
+    require_sources(state, judge, files, task)
+    logs = Path(tempfile.mkdtemp(prefix='Selection_', dir=state['logs']))
+    report = {**state, 'mode': 'selected-files-batch-replay', 'accepted': True,
+              'files': files, 'module_count': len(files),
+              'theorem_occurrences': sum(len(i['theorems']) for i in inventories),
+              'batches': batches, 'individual': fallbacks, 'all_theorems_axioms_checked': True,
+              'snapshot_seconds': snapshot_done-start, 'audit_inventory_seconds': audit_done-snapshot_done,
+              'audit_batch_size': audit_batch_size, 'audit_build_invocations': len(files),
+              'wall_seconds': time.monotonic()-start, 'file_timeout_seconds': file_timeout,
+              'batch_timeout_seconds': batch_timeout, 'evidence_dir': str(logs)}
+    (logs / 'result.json').write_text(json.dumps(report, indent=2) + '\n')
+    if results:
+        results.write_text(json.dumps(report, indent=2) + '\n')
+    progress('accepted', source=task or 'explicit-files', stage='complete',
+             modules=len(files), batches=len(batches), individual=len(fallbacks),
+             elapsed_seconds=report['wall_seconds'], evidence_dir=str(logs))
+    return report
+
+
+def check_task(workspace, task, audit_batch_size=2, **kwargs):
+    files = task_files(ROOT, task, allow_individual=True)
+    return check_files(workspace, files, task=task, audit_batch_size=audit_batch_size,
+                       batch_size=len(files), **kwargs)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--task', required=True)
+    selection = parser.add_mutually_exclusive_group(required=True)
+    selection.add_argument('--task')
+    selection.add_argument('--files-from', type=Path)
     parser.add_argument('--workspace', type=Path)
-    parser.add_argument('--audit-batch-size', type=int, default=2,
-                        help='audited modules per Lake build wave (default: 2; 1 retains the serial path)')
+    parser.add_argument('--results', type=Path)
+    parser.add_argument('--audit-batch-size', type=int, default=2)
+    parser.add_argument('--batch-size', type=int, default=32)
+    parser.add_argument('--file-timeout', type=positive_seconds, default=DEFAULT_TIMEOUT)
+    parser.add_argument('--batch-timeout', type=positive_seconds, default=DEFAULT_TIMEOUT)
+    parser.add_argument('--heartbeat', type=positive_seconds, default=30)
     args = parser.parse_args()
+    files = (task_files(ROOT, args.task, allow_individual=True) if args.task else
+             args.files_from.read_text().splitlines())
+    options = dict(task=args.task, audit_batch_size=args.audit_batch_size,
+                   batch_size=len(files) if args.task else args.batch_size,
+                   file_timeout=args.file_timeout, batch_timeout=args.batch_timeout,
+                   heartbeat=args.heartbeat, results=args.results)
     if args.workspace:
-        check_task(args.workspace.resolve(), args.task, args.audit_batch_size)
+        check_files(args.workspace.resolve(), files, **options)
     else:
         with tempfile.TemporaryDirectory(prefix='veritile-batch-') as temp:
-            check_task(Path(temp), args.task, args.audit_batch_size)
+            check_files(Path(temp), files, **options)
 
 
 if __name__ == '__main__':

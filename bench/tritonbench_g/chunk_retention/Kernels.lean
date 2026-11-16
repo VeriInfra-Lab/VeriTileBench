@@ -17,7 +17,7 @@ def forwardHSignature : CallSignature where
   readPorts := ["k","v","initial_state"]
   writePorts := ["h","final_state"]
 
-def forwardHKernel (k v h initial_state final_state : RegionName)
+def chunk_retention_fwd_kernel_hKernel (k v h initial_state final_state : RegionName)
         (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d s_h_h s_h_t : Nat) (H T K V BT BK BV NT : Nat) (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : ComputeKernel :=
   with_triton_call forwardHSignature call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, s_vo_h := s_vo_h, s_vo_t := s_vo_t, s_vo_d := s_vo_d, s_h_h := s_h_h, s_h_t := s_h_t] in triton {
     i_k, i_v, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2).to(tl.int64)
@@ -61,7 +61,7 @@ def forwardOSignature : CallSignature where
   readPorts := ["q","k","v","h"]
   writePorts := ["o"]
 
-def forwardOKernel (q k v h o : RegionName)
+def chunk_retention_fwd_kernel_oKernel (q k v h o : RegionName)
         (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d s_h_h s_h_t : Nat) (scale : ℝ) (H T K V BT BK BV : Nat) : ComputeKernel :=
   with_triton_call forwardOSignature call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, s_vo_h := s_vo_h, s_vo_t := s_vo_t, s_vo_d := s_vo_d, s_h_h := s_h_h, s_h_t := s_h_t, scale := scale] in triton {
     i_v, i_t, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2).to(tl.int64)
@@ -96,7 +96,7 @@ def forwardOKernel (q k v h o : RegionName)
     tl.store(p_o, b_o.to(p_o.dtype.element_ty), boundary_check=(0, 1))
   }
 
-def forwardOScaleFirstKernel (q k v h o : RegionName)
+def chunk_retention_fwd_kernel_o_candidateKernel (q k v h o : RegionName)
         (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d s_h_h s_h_t : Nat) (scale : ℝ) (H T K V BT BK BV : Nat) : ComputeKernel :=
   with_triton_call forwardOSignature call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, s_vo_h := s_vo_h, s_vo_t := s_vo_t, s_vo_d := s_vo_d, s_h_h := s_h_h, s_h_t := s_h_t, scale := scale] in triton {
     i_v, i_t, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2).to(tl.int64)
@@ -138,7 +138,7 @@ def backwardQKVSignature : CallSignature where
   readPorts := ["q","k","v","h","do","dh"]
   writePorts := ["dq","dk","dv"]
 
-def backwardQKVKernel  (q k v h «do» dh dq dk dv : RegionName)
+def chunk_retention_bwd_kernel_dqkvKernel  (q k v h «do» dh dq dk dv : RegionName)
         (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d s_h_h s_h_t : Nat) (scale : ℝ) (H T K V BT BK BV NT : Nat) : ComputeKernel :=
   with_triton_call backwardQKVSignature call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, s_vo_h := s_vo_h, s_vo_t := s_vo_t, s_vo_d := s_vo_d, s_h_h := s_h_h, s_h_t := s_h_t, scale := scale] in triton {
     i_k, i_t, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2).to(tl.int64)
@@ -205,7 +205,7 @@ def backwardHSignature : CallSignature where
   readPorts := ["q","do","d_ht"]
   writePorts := ["dh"]
 
-def backwardHKernel (q «do» dh d_ht : RegionName)
+def chunk_retention_bwd_kernel_dhKernel (q «do» dh d_ht : RegionName)
     (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d s_h_h s_h_t : Nat)
     (scale : ℝ) (H T K V BT BK BV NT : Nat) (USE_FINAL_GRAD : Bool) : ComputeKernel :=
   with_triton_call backwardHSignature call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, s_vo_h := s_vo_h, s_vo_t := s_vo_t, s_vo_d := s_vo_d, s_h_h := s_h_h, s_h_t := s_h_t, scale := scale] in triton {

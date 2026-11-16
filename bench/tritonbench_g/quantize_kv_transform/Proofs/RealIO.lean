@@ -33,7 +33,7 @@ theorem implements (rest : Algebra ℝ) (p : Parameters) (positive : 0 < p.colum
   · intro t h ht
     exact scales t ⟨h.val, lt_of_lt_of_le h.isLt headCover⟩ ht h.isLt
 
-#specNonCircular mathematical avoiding [sourceKernel, FP.Structural.exec, KernelGrid.run]
+#specNonCircular mathematical avoiding [_fwd_kernel_destindex_copy_quantize_kvKernel, FP.Structural.exec, KernelGrid.run]
 #axiomsClean implements
 #guard_msgs (drop info) in
 #auditModuleAxioms

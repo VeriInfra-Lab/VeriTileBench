@@ -17,7 +17,7 @@ def prefixExecution {α : Type} [Inhabited α] (M : Algebra α) (D : DotAcc α)
   cases st <;>
     (refine ⟨?_,?_⟩
      swap
-     simp [setup,typed,VeriTile.Bench.TritonBenchG.TritonMatmul.Repair.Source.call,VeriTile.Bench.TritonBenchG.TritonMatmul.Repair.Source.rawKernel,dtype,
+     simp [setup,typed,VeriTile.Bench.TritonBenchG.TritonMatmul.Repair.Source.call,VeriTile.Bench.TritonBenchG.TritonMatmul.Repair.Source.matmul_kernel_repairedKernel,dtype,
        ComputeKernel.withScalarArguments,ScalarArgument.integer,ScalarArgument.statement,
        ComputeKernel.surfaceBody,run,step,stepAlg,evalExpr,evalComputeOp,evalOp_unfold,
        evalOffsets,store,numeric,bop,natLt,numericLt,numericLe,numericEq,

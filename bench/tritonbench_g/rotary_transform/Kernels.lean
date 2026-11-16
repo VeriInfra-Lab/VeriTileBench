@@ -26,7 +26,7 @@ def opsScalarSignature (wideCu wideOffset : Bool) : CallSignature where
   scalars := [("SEQLEN_OFFSETS",.integer),("seqlen",.integer),("rotary_dim",.integer),("seqlen_ro",.integer),("stride_out_batch",.integer),("stride_out_seqlen",.integer),("stride_out_nheads",.integer),("stride_out_headdim",.integer),("stride_x_batch",.integer),("stride_x_seqlen",.integer),("stride_x_nheads",.integer),("stride_x_headdim",.integer)]
   constexpr := ["BLOCK_K","IS_SEQLEN_OFFSETS_TENSOR","IS_VARLEN","INTERLEAVED","CONJUGATE","BLOCK_M"]
 
-def originalTensorKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS SEQLEN_OFFSETS : RegionName) (seqlen : Int) (nheads rotary_dim seqlen_ro CACHE_KEY_SEQLEN stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
+def TensorOffsets.rotary_kernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS SEQLEN_OFFSETS : RegionName) (seqlen : Int) (nheads rotary_dim seqlen_ro CACHE_KEY_SEQLEN stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
   let IS_SEQLEN_OFFSETS_TENSOR := Bool.true
   with_triton_call (tensorSignature wideCu wideOffset) call_args [seqlen := seqlen, nheads := nheads, rotary_dim := rotary_dim, seqlen_ro := seqlen_ro, CACHE_KEY_SEQLEN := CACHE_KEY_SEQLEN, stride_out_batch := stride_out_batch, stride_out_seqlen := stride_out_seqlen, stride_out_nheads := stride_out_nheads, stride_out_headdim := stride_out_headdim, stride_x_batch := stride_x_batch, stride_x_seqlen := stride_x_seqlen, stride_x_nheads := stride_x_nheads, stride_x_headdim := stride_x_headdim] in triton {
     pid_m = tl.program_id(axis=0)
@@ -88,7 +88,7 @@ def originalTensorKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS SE
         tl.store(OUT, out, mask=(rm[:, None] < seqlen) & (rk[None, :] < rotary_dim))
 }
 
-def originalScalarKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS : RegionName) (SEQLEN_OFFSETS : Int) (seqlen : Int) (nheads rotary_dim seqlen_ro CACHE_KEY_SEQLEN stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
+def ScalarOffsets.rotary_kernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS : RegionName) (SEQLEN_OFFSETS : Int) (seqlen : Int) (nheads rotary_dim seqlen_ro CACHE_KEY_SEQLEN stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
   let IS_SEQLEN_OFFSETS_TENSOR := Bool.false
   with_triton_call (scalarSignature wideCu wideOffset) call_args [SEQLEN_OFFSETS := SEQLEN_OFFSETS, seqlen := seqlen, nheads := nheads, rotary_dim := rotary_dim, seqlen_ro := seqlen_ro, CACHE_KEY_SEQLEN := CACHE_KEY_SEQLEN, stride_out_batch := stride_out_batch, stride_out_seqlen := stride_out_seqlen, stride_out_nheads := stride_out_nheads, stride_out_headdim := stride_out_headdim, stride_x_batch := stride_x_batch, stride_x_seqlen := stride_x_seqlen, stride_x_nheads := stride_x_nheads, stride_x_headdim := stride_x_headdim] in triton {
     pid_m = tl.program_id(axis=0)
@@ -150,7 +150,7 @@ def originalScalarKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS : 
         tl.store(OUT, out, mask=(rm[:, None] < seqlen) & (rk[None, :] < rotary_dim))
 }
 
-def opsOriginalTensorKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS SEQLEN_OFFSETS : RegionName) (seqlen : Int) (rotary_dim seqlen_ro stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
+def Ops.TensorOffsets.rotary_kernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS SEQLEN_OFFSETS : RegionName) (seqlen : Int) (rotary_dim seqlen_ro stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
   let IS_SEQLEN_OFFSETS_TENSOR := Bool.true
   with_triton_call (opsTensorSignature wideCu wideOffset) call_args [seqlen := seqlen, rotary_dim := rotary_dim, seqlen_ro := seqlen_ro, stride_out_batch := stride_out_batch, stride_out_seqlen := stride_out_seqlen, stride_out_nheads := stride_out_nheads, stride_out_headdim := stride_out_headdim, stride_x_batch := stride_x_batch, stride_x_seqlen := stride_x_seqlen, stride_x_nheads := stride_x_nheads, stride_x_headdim := stride_x_headdim] in triton {
     pid_m = tl.program_id(axis=0)
@@ -181,28 +181,54 @@ def opsOriginalTensorKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS
         X = X + (rm[:, None] * stride_x_seqlen + rk_half[None, :] * stride_x_headdim)
         COS = COS + (rm_cs[:, None] * rotary_dim_half + rk_half[None, :])
         SIN = SIN + (rm_cs[:, None] * rotary_dim_half + rk_half[None, :])
-        cos = tl.load(COS, mask=(rm_cs[:, None] < seqlen_ro) & (rk_half[None, :] < rotary_dim_half), other=1.0).to(tl.float32)
-        sin = tl.load(SIN, mask=(rm_cs[:, None] < seqlen_ro) & (rk_half[None, :] < rotary_dim_half), other=0.0).to(tl.float32)
-        x0 = tl.load(X, mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half), other=0.0).to(tl.float32)
-        x1 = tl.load(X + rotary_dim_half * stride_x_headdim, mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half), other=0.0).to(tl.float32)
+        cos = tl.load(
+            COS, mask=(rm_cs[:, None] < seqlen_ro) & (rk_half[None, :] < rotary_dim_half), other=1.0
+        ).to(tl.float32)
+        sin = tl.load(
+            SIN, mask=(rm_cs[:, None] < seqlen_ro) & (rk_half[None, :] < rotary_dim_half), other=0.0
+        ).to(tl.float32)
+        x0 = tl.load(
+            X, mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half), other=0.0
+        ).to(tl.float32)
+        x1 = tl.load(
+            X + rotary_dim_half * stride_x_headdim,
+            mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half),
+            other=0.0,
+        ).to(tl.float32)
         if CONJUGATE:
             sin = -sin
         o0 = x0 * cos - x1 * sin
         o1 = x0 * sin + x1 * cos
         OUT = OUT + (rm[:, None] * stride_out_seqlen + rk_half[None, :] * stride_out_headdim)
         tl.store(OUT, o0, mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half))
-        tl.store(OUT + rotary_dim_half * stride_out_headdim, o1, mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half))
+        tl.store(
+            OUT + rotary_dim_half * stride_out_headdim,
+            o1,
+            mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half),
+        )
     else:
-        rk_swap = rk + ((rk + 1) % 2) * 2 - 1
+        rk_swap = rk + ((rk + 1) % 2) * 2 - 1  # 1, 0, 3, 2, 5, 4, ...
         rk_repeat = tl.arange(0, BLOCK_K) // 2
         X0 = X + (rm[:, None] * stride_x_seqlen + rk[None, :] * stride_x_headdim)
         X1 = X + (rm[:, None] * stride_x_seqlen + rk_swap[None, :] * stride_x_headdim)
         COS = COS + (rm_cs[:, None] * rotary_dim_half + rk_repeat[None, :])
         SIN = SIN + (rm_cs[:, None] * rotary_dim_half + rk_repeat[None, :])
-        cos = tl.load(COS, mask=(rm_cs[:, None] < seqlen_ro) & (rk_repeat[None, :] < rotary_dim_half), other=1.0).to(tl.float32)
-        sin = tl.load(SIN, mask=(rm_cs[:, None] < seqlen_ro) & (rk_repeat[None, :] < rotary_dim_half), other=0.0).to(tl.float32)
-        x0 = tl.load(X0, mask=(rm[:, None] < seqlen) & (rk[None, :] < rotary_dim), other=0.0).to(tl.float32)
-        x1 = tl.load(X1, mask=(rm[:, None] < seqlen) & (rk_swap[None, :] < rotary_dim), other=0.0).to(tl.float32)
+        cos = tl.load(
+            COS,
+            mask=(rm_cs[:, None] < seqlen_ro) & (rk_repeat[None, :] < rotary_dim_half),
+            other=1.0,
+        ).to(tl.float32)
+        sin = tl.load(
+            SIN,
+            mask=(rm_cs[:, None] < seqlen_ro) & (rk_repeat[None, :] < rotary_dim_half),
+            other=0.0,
+        ).to(tl.float32)
+        x0 = tl.load(X0, mask=(rm[:, None] < seqlen) & (rk[None, :] < rotary_dim), other=0.0).to(
+            tl.float32
+        )
+        x1 = tl.load(
+            X1, mask=(rm[:, None] < seqlen) & (rk_swap[None, :] < rotary_dim), other=0.0
+        ).to(tl.float32)
         if CONJUGATE:
             sin = -sin
         x0_cos = x0 * cos
@@ -212,7 +238,7 @@ def opsOriginalTensorKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS
         tl.store(OUT, out, mask=(rm[:, None] < seqlen) & (rk[None, :] < rotary_dim))
 }
 
-def opsOriginalScalarKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS : RegionName) (SEQLEN_OFFSETS : Int) (seqlen : Int) (rotary_dim seqlen_ro stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
+def Ops.ScalarOffsets.rotary_kernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS : RegionName) (SEQLEN_OFFSETS : Int) (seqlen : Int) (rotary_dim seqlen_ro stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
   let IS_SEQLEN_OFFSETS_TENSOR := Bool.false
   with_triton_call (opsScalarSignature wideCu wideOffset) call_args [SEQLEN_OFFSETS := SEQLEN_OFFSETS, seqlen := seqlen, rotary_dim := rotary_dim, seqlen_ro := seqlen_ro, stride_out_batch := stride_out_batch, stride_out_seqlen := stride_out_seqlen, stride_out_nheads := stride_out_nheads, stride_out_headdim := stride_out_headdim, stride_x_batch := stride_x_batch, stride_x_seqlen := stride_x_seqlen, stride_x_nheads := stride_x_nheads, stride_x_headdim := stride_x_headdim] in triton {
     pid_m = tl.program_id(axis=0)
@@ -243,28 +269,54 @@ def opsOriginalScalarKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS
         X = X + (rm[:, None] * stride_x_seqlen + rk_half[None, :] * stride_x_headdim)
         COS = COS + (rm_cs[:, None] * rotary_dim_half + rk_half[None, :])
         SIN = SIN + (rm_cs[:, None] * rotary_dim_half + rk_half[None, :])
-        cos = tl.load(COS, mask=(rm_cs[:, None] < seqlen_ro) & (rk_half[None, :] < rotary_dim_half), other=1.0).to(tl.float32)
-        sin = tl.load(SIN, mask=(rm_cs[:, None] < seqlen_ro) & (rk_half[None, :] < rotary_dim_half), other=0.0).to(tl.float32)
-        x0 = tl.load(X, mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half), other=0.0).to(tl.float32)
-        x1 = tl.load(X + rotary_dim_half * stride_x_headdim, mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half), other=0.0).to(tl.float32)
+        cos = tl.load(
+            COS, mask=(rm_cs[:, None] < seqlen_ro) & (rk_half[None, :] < rotary_dim_half), other=1.0
+        ).to(tl.float32)
+        sin = tl.load(
+            SIN, mask=(rm_cs[:, None] < seqlen_ro) & (rk_half[None, :] < rotary_dim_half), other=0.0
+        ).to(tl.float32)
+        x0 = tl.load(
+            X, mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half), other=0.0
+        ).to(tl.float32)
+        x1 = tl.load(
+            X + rotary_dim_half * stride_x_headdim,
+            mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half),
+            other=0.0,
+        ).to(tl.float32)
         if CONJUGATE:
             sin = -sin
         o0 = x0 * cos - x1 * sin
         o1 = x0 * sin + x1 * cos
         OUT = OUT + (rm[:, None] * stride_out_seqlen + rk_half[None, :] * stride_out_headdim)
         tl.store(OUT, o0, mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half))
-        tl.store(OUT + rotary_dim_half * stride_out_headdim, o1, mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half))
+        tl.store(
+            OUT + rotary_dim_half * stride_out_headdim,
+            o1,
+            mask=(rm[:, None] < seqlen) & (rk_half[None, :] < rotary_dim_half),
+        )
     else:
-        rk_swap = rk + ((rk + 1) % 2) * 2 - 1
+        rk_swap = rk + ((rk + 1) % 2) * 2 - 1  # 1, 0, 3, 2, 5, 4, ...
         rk_repeat = tl.arange(0, BLOCK_K) // 2
         X0 = X + (rm[:, None] * stride_x_seqlen + rk[None, :] * stride_x_headdim)
         X1 = X + (rm[:, None] * stride_x_seqlen + rk_swap[None, :] * stride_x_headdim)
         COS = COS + (rm_cs[:, None] * rotary_dim_half + rk_repeat[None, :])
         SIN = SIN + (rm_cs[:, None] * rotary_dim_half + rk_repeat[None, :])
-        cos = tl.load(COS, mask=(rm_cs[:, None] < seqlen_ro) & (rk_repeat[None, :] < rotary_dim_half), other=1.0).to(tl.float32)
-        sin = tl.load(SIN, mask=(rm_cs[:, None] < seqlen_ro) & (rk_repeat[None, :] < rotary_dim_half), other=0.0).to(tl.float32)
-        x0 = tl.load(X0, mask=(rm[:, None] < seqlen) & (rk[None, :] < rotary_dim), other=0.0).to(tl.float32)
-        x1 = tl.load(X1, mask=(rm[:, None] < seqlen) & (rk_swap[None, :] < rotary_dim), other=0.0).to(tl.float32)
+        cos = tl.load(
+            COS,
+            mask=(rm_cs[:, None] < seqlen_ro) & (rk_repeat[None, :] < rotary_dim_half),
+            other=1.0,
+        ).to(tl.float32)
+        sin = tl.load(
+            SIN,
+            mask=(rm_cs[:, None] < seqlen_ro) & (rk_repeat[None, :] < rotary_dim_half),
+            other=0.0,
+        ).to(tl.float32)
+        x0 = tl.load(X0, mask=(rm[:, None] < seqlen) & (rk[None, :] < rotary_dim), other=0.0).to(
+            tl.float32
+        )
+        x1 = tl.load(
+            X1, mask=(rm[:, None] < seqlen) & (rk_swap[None, :] < rotary_dim), other=0.0
+        ).to(tl.float32)
         if CONJUGATE:
             sin = -sin
         x0_cos = x0 * cos
@@ -274,7 +326,7 @@ def opsOriginalScalarKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS
         tl.store(OUT, out, mask=(rm[:, None] < seqlen) & (rk[None, :] < rotary_dim))
 }
 
-def candidateTensorKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS SEQLEN_OFFSETS : RegionName) (seqlen : Int) (nheads rotary_dim seqlen_ro CACHE_KEY_SEQLEN stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
+def TensorOffsets.rotary_kernel_index_cseKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS SEQLEN_OFFSETS : RegionName) (seqlen : Int) (nheads rotary_dim seqlen_ro CACHE_KEY_SEQLEN stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
   let IS_SEQLEN_OFFSETS_TENSOR := Bool.true
   with_triton_call (tensorSignature wideCu wideOffset) call_args [seqlen := seqlen, nheads := nheads, rotary_dim := rotary_dim, seqlen_ro := seqlen_ro, CACHE_KEY_SEQLEN := CACHE_KEY_SEQLEN, stride_out_batch := stride_out_batch, stride_out_seqlen := stride_out_seqlen, stride_out_nheads := stride_out_nheads, stride_out_headdim := stride_out_headdim, stride_x_batch := stride_x_batch, stride_x_seqlen := stride_x_seqlen, stride_x_nheads := stride_x_nheads, stride_x_headdim := stride_x_headdim] in triton {
     pid_m = tl.program_id(axis=0)
@@ -336,7 +388,7 @@ def candidateTensorKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS S
         tl.store(OUT, out, mask=(rm[:, None] < seqlen) & (rk[None, :] < rotary_dim))
 }
 
-def candidateScalarKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS : RegionName) (SEQLEN_OFFSETS : Int) (seqlen : Int) (nheads rotary_dim seqlen_ro CACHE_KEY_SEQLEN stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
+def ScalarOffsets.rotary_kernel_index_cseKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS : RegionName) (SEQLEN_OFFSETS : Int) (seqlen : Int) (nheads rotary_dim seqlen_ro CACHE_KEY_SEQLEN stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
   let IS_SEQLEN_OFFSETS_TENSOR := Bool.false
   with_triton_call (scalarSignature wideCu wideOffset) call_args [SEQLEN_OFFSETS := SEQLEN_OFFSETS, seqlen := seqlen, nheads := nheads, rotary_dim := rotary_dim, seqlen_ro := seqlen_ro, CACHE_KEY_SEQLEN := CACHE_KEY_SEQLEN, stride_out_batch := stride_out_batch, stride_out_seqlen := stride_out_seqlen, stride_out_nheads := stride_out_nheads, stride_out_headdim := stride_out_headdim, stride_x_batch := stride_x_batch, stride_x_seqlen := stride_x_seqlen, stride_x_nheads := stride_x_nheads, stride_x_headdim := stride_x_headdim] in triton {
     pid_m = tl.program_id(axis=0)
@@ -398,7 +450,7 @@ def candidateScalarKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS :
         tl.store(OUT, out, mask=(rm[:, None] < seqlen) & (rk[None, :] < rotary_dim))
 }
 
-def xorTensorKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS SEQLEN_OFFSETS : RegionName) (seqlen : Int) (rotary_dim seqlen_ro stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
+def Ops.TensorOffsets.rotary_kernel_xorKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS SEQLEN_OFFSETS : RegionName) (seqlen : Int) (rotary_dim seqlen_ro stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
   let IS_SEQLEN_OFFSETS_TENSOR := Bool.true
   with_triton_call (opsTensorSignature wideCu wideOffset) call_args [seqlen := seqlen, rotary_dim := rotary_dim, seqlen_ro := seqlen_ro, stride_out_batch := stride_out_batch, stride_out_seqlen := stride_out_seqlen, stride_out_nheads := stride_out_nheads, stride_out_headdim := stride_out_headdim, stride_x_batch := stride_x_batch, stride_x_seqlen := stride_x_seqlen, stride_x_nheads := stride_x_nheads, stride_x_headdim := stride_x_headdim] in triton {
     pid_m = tl.program_id(axis=0)
@@ -486,7 +538,7 @@ def xorTensorKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS SEQLEN_
         tl.store(OUT, out, mask=(rm[:, None] < seqlen) & (rk[None, :] < rotary_dim))
 }
 
-def xorScalarKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS : RegionName) (SEQLEN_OFFSETS : Int) (seqlen : Int) (rotary_dim seqlen_ro stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
+def Ops.ScalarOffsets.rotary_kernel_xorKernel (wideCu wideOffset : Bool) (OUT X COS SIN CU_SEQLENS : RegionName) (SEQLEN_OFFSETS : Int) (seqlen : Int) (rotary_dim seqlen_ro stride_out_batch stride_out_seqlen stride_out_nheads stride_out_headdim stride_x_batch stride_x_seqlen stride_x_nheads stride_x_headdim : Nat) (BLOCK_K BLOCK_M : Nat) (IS_VARLEN INTERLEAVED CONJUGATE : Bool) : ComputeKernel :=
   let IS_SEQLEN_OFFSETS_TENSOR := Bool.false
   with_triton_call (opsScalarSignature wideCu wideOffset) call_args [SEQLEN_OFFSETS := SEQLEN_OFFSETS, seqlen := seqlen, rotary_dim := rotary_dim, seqlen_ro := seqlen_ro, stride_out_batch := stride_out_batch, stride_out_seqlen := stride_out_seqlen, stride_out_nheads := stride_out_nheads, stride_out_headdim := stride_out_headdim, stride_x_batch := stride_x_batch, stride_x_seqlen := stride_x_seqlen, stride_x_nheads := stride_x_nheads, stride_x_headdim := stride_x_headdim] in triton {
     pid_m = tl.program_id(axis=0)

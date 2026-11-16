@@ -79,6 +79,6 @@ theorem complete (x w y i : Contract.TensorInfo) (s : Contract.Scalars) (indices
 
 #axiomsClean executes
 #axiomsClean complete
-#specNonCircular FPGrid.value avoiding [run,FP.Structural.exec,Surface.source,Kernels.source,Kernels.outputFirst,Pasted.originalKernel,Pasted.candidateKernel]
+#specNonCircular FPGrid.value avoiding [run,FP.Structural.exec,Surface.source,Kernels.source,Kernels.outputFirst,Pasted._bgmv_expand_slice_kernel,Pasted._bgmv_expand_slice_kernel_candidateKernel]
 end
 end VeriTile.Bench.Repairs.BgmvExpandSlicePhysicalTileChecked.Signed.Grid

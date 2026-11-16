@@ -16,8 +16,8 @@ theorem source (p : Layout) (r : Regions) (swapped : Bool) (scale : ℝ) :
   rw [← prelude_shared p r swapped scale,← EpilogueProgram.shared p r swapped scale]
   cases swapped
   all_goals simp only [lower,parts,mathematical,kernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,
-    VeriTile.Bench.Repairs.ContextAttnFwd.originalKernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.scaleFirst,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.scaleFirst,
-    VeriTile.Bench.Repairs.ContextAttnFwd.scaleFirstKernel,ComputeKernel.surfaceBody,
+    VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_int8kvKernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.scaleFirst,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.scaleFirst,
+    VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_scale_firstKernel,ComputeKernel.surfaceBody,
     ComputeKernel.eraseDType,ComputeKernel.toAlgorithm?,ComputeKernel.toAlgKernel,
     ComputeKernel.fromKernelBody,Kernel.eraseDType,Stmt.eraseDTypeList,
     Bool.false_eq_true,↓reduceIte,String.reduceEq,Option.map,Option.getD,Except.toOption,

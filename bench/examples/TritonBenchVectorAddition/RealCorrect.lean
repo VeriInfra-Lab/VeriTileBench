@@ -30,17 +30,17 @@ specification vector_addition_optimized_correct (n B : Nat) :
     Spec.Real (optimizedIO n B ⊨ fun xs ys i => xs i + ys i) := by
   refine MaskedKernelIO₂.Implements.intro _
     ?_ ?_ ?_
-  · simp [optimizedIO, optimizedKernel, Kernel.FlattenOk,
+  · simp [optimizedIO, add_commuted_kernel, Kernel.FlattenOk,
       StmtList.FlattenOk, Stmt.FlattenOk, Op.FlattenOk.eq_def]
   · intro bounds s h1 h2 h3 _
-    simpa [optimizedIO, addIO, Kernel.TraceSafe, optimizedKernel, VeriTile.Bench.TritonBenchG.VectorAddition.add_kernel,
+    simpa [optimizedIO, addIO, Kernel.TraceSafe, add_commuted_kernel, VeriTile.Bench.TritonBenchG.VectorAddition.add_kernel,
       Stmt.TraceSafeList, Stmt.TraceSafe, Op.SafeAt.eq_def, MaskOpt.SafeAt,
       MemAccess.SafeAt, stepStmt, evalOp.eq_def,
       Region.cast, Tile.bop, Tile.cop, NumericDType.add, NumericDType.mul,
       ComparableDType.lt, add_comm, optional_add_comm]
       using VeriTile.Bench.TritonBenchG.VectorAddition.add_kernel_traceSafe "x" "y" "output" n B bounds s h1 h2 h3
   · intro s xs ys hx hy
-    change ∃ s1, exec (optimizedKernel n B).toAlgKernel s = some s1 ∧ _
+    change ∃ s1, exec (add_commuted_kernel n B).toAlgKernel s = some s1 ∧ _
     rw [optimized_exec]
     obtain ⟨s1, he, hv, hf⟩ := VeriTile.Bench.TritonBenchG.VectorAddition.add_kernel_region_run "x" "y" "output" n B s xs ys hx hy
     exact ⟨s1, he, hv, fun r o hmiss _ => hf r o hmiss⟩

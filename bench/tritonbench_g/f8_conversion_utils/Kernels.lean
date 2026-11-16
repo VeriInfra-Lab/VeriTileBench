@@ -22,7 +22,7 @@ def encodeSignature (input : Input) (format : Format) : CallSignature where
   readPorts := ["X"]
   writePorts := ["Y"]
 
-def decodeOriginalKernel (format : Format) (Y X : RegionName) (N BLOCK_SIZE : Nat) : ComputeKernel :=
+def kernel_f8_to_f16Kernel (format : Format) (Y X : RegionName) (N BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call (decodeSignature format) call_args [N := N] in triton {
     pid = tl.program_id(0)
     offs = pid * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
@@ -32,7 +32,7 @@ def decodeOriginalKernel (format : Format) (Y X : RegionName) (N BLOCK_SIZE : Na
     tl.store(Y + offs, x, mask=mask)
   }
 
-def decodeCandidateKernel (format : Format) (Y X : RegionName) (N BLOCK_SIZE : Nat) : ComputeKernel :=
+def kernel_f8_to_f16_index_commutedKernel (format : Format) (Y X : RegionName) (N BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call (decodeSignature format) call_args [N := N] in triton {
     pid = tl.program_id(0)
     offs = BLOCK_SIZE * pid + tl.arange(0, BLOCK_SIZE)
@@ -42,7 +42,7 @@ def decodeCandidateKernel (format : Format) (Y X : RegionName) (N BLOCK_SIZE : N
     tl.store(Y + offs, x, mask=mask)
   }
 
-def encodeOriginalKernel (input : Input) (format : Format) (Y X : RegionName) (N BLOCK_SIZE : Nat) : ComputeKernel :=
+def kernel_f16_to_f8Kernel (input : Input) (format : Format) (Y X : RegionName) (N BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call (encodeSignature input format) call_args [N := N] in triton {
     pid = tl.program_id(0)
     offs = pid * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
@@ -51,7 +51,7 @@ def encodeOriginalKernel (input : Input) (format : Format) (Y X : RegionName) (N
     tl.store(Y + offs, x, mask=mask)
   }
 
-def encodeCandidateKernel (input : Input) (format : Format) (Y X : RegionName) (N BLOCK_SIZE : Nat) : ComputeKernel :=
+def kernel_f16_to_f8_index_commutedKernel (input : Input) (format : Format) (Y X : RegionName) (N BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call (encodeSignature input format) call_args [N := N] in triton {
     pid = tl.program_id(0)
     offs = BLOCK_SIZE * pid + tl.arange(0, BLOCK_SIZE)
@@ -62,10 +62,10 @@ def encodeCandidateKernel (input : Input) (format : Format) (Y X : RegionName) (
 
 /-- Profile adapters select a whole raw body; they generate no statements. -/
 def toHalf (format : Format) (swapped : Bool) : sourceType :=
-  if swapped then decodeCandidateKernel format else decodeOriginalKernel format
+  if swapped then kernel_f8_to_f16_index_commutedKernel format else kernel_f8_to_f16Kernel format
 
 def toFP8 (input : Input) (format : Format) (swapped : Bool) : sourceType :=
-  if swapped then encodeCandidateKernel input format else encodeOriginalKernel input format
+  if swapped then kernel_f16_to_f8_index_commutedKernel input format else kernel_f16_to_f8Kernel input format
 end VeriTile.Bench.Repairs.F8ConversionUtils.Body
 
 namespace VeriTile.Bench.Repairs.F8ConversionUtils

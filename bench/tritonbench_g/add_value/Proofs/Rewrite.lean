@@ -15,17 +15,17 @@ def originalExecution {α : Type} [Inhabited α] (M : Algebra α) (n : Nat) (s :
     {t : State α // FP.Structural.exec (engine M) (originalKernel n) s = some t} := by
   refine ⟨?_, ?_⟩
   swap
-  simp [originalKernel, sourceKernel, FP.Structural.exec, run, step, evalExpr,
+  simp [originalKernel, puzzle1_kernel, FP.Structural.exec, run, step, evalExpr,
     evalComputeOp, evalOp_unfold, Option.bind, numeric, numericLt, natLt, bop,
     store, Region.cast]
   rfl
 
 /-- The local constant assignment is part of the candidate's actual execution. -/
 def commutedExecution {α : Type} [Inhabited α] (M : Algebra α) (n : Nat) (s : State α) :
-    {t : State α // FP.Structural.exec (engine M) (commutedKernel n) s = some t} := by
+    {t : State α // FP.Structural.exec (engine M) (puzzle1_commuted_kernel n) s = some t} := by
   refine ⟨?_, ?_⟩
   swap
-  simp [commutedKernel, FP.Structural.exec, run, step, evalExpr,
+  simp [puzzle1_commuted_kernel, FP.Structural.exec, run, step, evalExpr,
     evalComputeOp, evalOp_unfold, Option.bind, numeric, numericLt, natLt, bop,
     store, Region.cast]
   rfl
@@ -53,7 +53,7 @@ theorem site_values_iff {α : Type} [Inhabited α] (M : Algebra α) (D : Domain 
         D .finite (loadedValue M n s i) ∧
         D .finite (M.literal (some .fp32) .real 10) := by
   simp [additionSite, Site.Holds, VeriTile.Triton.Source.prefixBefore,
-    originalKernel, sourceKernel, ComputeKernel.surfaceBody, run, step, evalExpr, evalComputeOp, evalOp_unfold,
+    originalKernel, puzzle1_kernel, ComputeKernel.surfaceBody, run, step, evalExpr, evalComputeOp, evalOp_unfold,
     Option.bind, numeric, numericLt, natLt, bop, Region.cast, loadedValue,
     engine, Algebra.withDefaultPrecision, resolvePrecision]
 

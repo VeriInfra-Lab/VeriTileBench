@@ -48,7 +48,7 @@ def forward (stride N B : Nat) (eps : ℝ) : ComputeKernel :=
 state. Only its actual full memory is compared with the original. -/
 theorem candidate_executes [Inhabited α] (m : Model α) (stride N B : Nat) (eps : ℝ) (s : State α) :
     ∃ t,FP.Structural.exec (engine m) (forward stride N B eps) s=some t := by
-  simp [FP.Structural.exec,forward,TypedSource.forwardCandidateKernel,forwardCandidateKernel,
+  simp [FP.Structural.exec,forward,TypedSource.forwardCandidateKernel,_layer_norm_fwd_fused_candidateKernel,
     ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,evalOp_unfold,
     engine,numeric,natLt,numericLt,numericLe,numericEq,integralMod,bop,State.setReg,FP.Structural.store,
     ComputeDType.eraseDType,TileShape.axisDim,TileShape.eraseAxis,TileShape.insertAxisIndex,
@@ -57,7 +57,7 @@ theorem candidate_executes [Inhabited α] (m : Model α) (stride N B : Nat) (eps
 theorem candidate_memory [Inhabited α] (m : Model α) (stride N B : Nat) (eps : ℝ)
     (s t : State α) (h : FP.Structural.exec (engine m) (forward stride N B eps) s=some t) :
     t.mem=(SourceForwardGraph.final m stride N B eps s).mem := by
-  simp [FP.Structural.exec,forward,TypedSource.forwardCandidateKernel,forwardCandidateKernel,
+  simp [FP.Structural.exec,forward,TypedSource.forwardCandidateKernel,_layer_norm_fwd_fused_candidateKernel,
     ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,evalOp_unfold,
     engine,numeric,natLt,numericLt,numericLe,numericEq,integralMod,bop,State.setReg,FP.Structural.store,
     ComputeDType.eraseDType,TileShape.axisDim,TileShape.eraseAxis,TileShape.insertAxisIndex,
@@ -93,8 +93,8 @@ theorem forward_equiv [Inhabited α] (m : Algebra α) (stride N B : Nat) (eps : 
     (hn : 0<N) (hb : N≤B) (s : State α) :
     FP.Structural.exec m (forward stride N B eps) s=
       FP.Structural.exec m (TypedSource.forward "X" "Y" "W" "Bias" "Mean" "Rstd" stride N B eps) s := by
-  simp [FP.Structural.exec,forward,TypedSource.forwardCandidateKernel,forwardCandidateKernel,
-    TypedSource.forward,forwardKernel,ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,
+  simp [FP.Structural.exec,forward,TypedSource.forwardCandidateKernel,_layer_norm_fwd_fused_candidateKernel,
+    TypedSource.forward,_layer_norm_fwd_fusedKernel,ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,
     evalOp_unfold,signed_range_one _ _ N B hn hb,numeric,natLt,numericLt,numericLe,numericEq,integralMod,bop,
     State.setReg,FP.Structural.store,ComputeDType.eraseDType,TileShape.axisDim,
     TileShape.eraseAxis,TileShape.insertAxisIndex,Region.cast,Option.bind,ofFloat,toFloat]

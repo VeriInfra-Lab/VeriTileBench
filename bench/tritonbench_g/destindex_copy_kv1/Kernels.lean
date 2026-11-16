@@ -44,7 +44,7 @@ def callSignature : CallSignature where
   readPorts := ["K","Dest_loc"]
   writePorts := ["Out"]
 
-def sourceKernel (K : RegionName) (Dest_loc : Region .int) (Out : RegionName)
+def _fwd_kernel_destindex_copy_kvKernel (K : RegionName) (Dest_loc : Region .int) (Out : RegionName)
     (stride_k_bs stride_k_h stride_k_d stride_o_bs stride_o_h stride_o_d head_num head_dim BLOCK_DMODEL BLOCK_HEAD : Nat) : ComputeKernel :=
   with_triton_call callSignature call_args
     [stride_k_bs := stride_k_bs, stride_k_h := stride_k_h, stride_k_d := stride_k_d, stride_o_bs := stride_o_bs, stride_o_h := stride_o_h, stride_o_d := stride_o_d, head_num := head_num, head_dim := head_dim] in triton {
@@ -62,7 +62,7 @@ def sourceKernel (K : RegionName) (Dest_loc : Region .int) (Out : RegionName)
     return
   }
 
-def commutedKernel (K : RegionName) (Dest_loc : Region .int) (Out : RegionName)
+def _fwd_kernel_destindex_copy_kv_index_commutedKernel (K : RegionName) (Dest_loc : Region .int) (Out : RegionName)
     (stride_k_bs stride_k_h stride_k_d stride_o_bs stride_o_h stride_o_d head_num head_dim BLOCK_DMODEL BLOCK_HEAD : Nat) : ComputeKernel :=
   with_triton_call callSignature call_args
     [stride_k_bs := stride_k_bs, stride_k_h := stride_k_h, stride_k_d := stride_k_d, stride_o_bs := stride_o_bs, stride_o_h := stride_o_h, stride_o_d := stride_o_d, head_num := head_num, head_dim := head_dim] in triton {
@@ -81,9 +81,9 @@ def commutedKernel (K : RegionName) (Dest_loc : Region .int) (Out : RegionName)
   }
 
 def kernel (p : Layout) : ComputeKernel :=
-  sourceKernel p.K p.Dest_loc p.Out p.stride_k_bs p.stride_k_h p.stride_k_d p.stride_o_bs p.stride_o_h p.stride_o_d p.head_num p.head_dim p.BLOCK_DMODEL p.BLOCK_HEAD
+  _fwd_kernel_destindex_copy_kvKernel p.K p.Dest_loc p.Out p.stride_k_bs p.stride_k_h p.stride_k_d p.stride_o_bs p.stride_o_h p.stride_o_d p.head_num p.head_dim p.BLOCK_DMODEL p.BLOCK_HEAD
 
 def indexCommutedKernel (p : Layout) : ComputeKernel :=
-  commutedKernel p.K p.Dest_loc p.Out p.stride_k_bs p.stride_k_h p.stride_k_d p.stride_o_bs p.stride_o_h p.stride_o_d p.head_num p.head_dim p.BLOCK_DMODEL p.BLOCK_HEAD
+  _fwd_kernel_destindex_copy_kv_index_commutedKernel p.K p.Dest_loc p.Out p.stride_k_bs p.stride_k_h p.stride_k_d p.stride_o_bs p.stride_o_h p.stride_o_d p.head_num p.head_dim p.BLOCK_DMODEL p.BLOCK_HEAD
 
 end VeriTile.Bench.Repairs.DestindexCopyKv1

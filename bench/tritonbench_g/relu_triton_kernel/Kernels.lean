@@ -19,7 +19,7 @@ def sourceSignature : CallSignature where
   readPorts := ["x_ptr"]
   writePorts := ["out_ptr"]
 
-def sourceKernel (input output : RegionName) (ib ob elementBytes N B : Nat) : ComputeKernel :=
+def relu_kernel (input output : RegionName) (ib ob elementBytes N B : Nat) : ComputeKernel :=
   let x_ptr := input
   let out_ptr := output
   let block_size := B
@@ -38,7 +38,7 @@ def sourceKernel (input output : RegionName) (ib ob elementBytes N B : Nat) : Co
 /-- The same existing store-inline transformation, applied after the gate fix.
 Only the private result register disappears; comparison and selection retain
 FP32 precision, all input words, and the original masked load/store. -/
-def fusedKernel (input output : RegionName) (ib ob elementBytes N B : Nat) : ComputeKernel :=
+def relu_inlined_kernel (input output : RegionName) (ib ob elementBytes N B : Nat) : ComputeKernel :=
   let x_ptr := input
   let out_ptr := output
   let block_size := B
@@ -55,8 +55,8 @@ def fusedKernel (input output : RegionName) (ib ob elementBytes N B : Nat) : Com
   }
 
 /-- Source selected by the checked Python wrapper. -/
-def originalKernel (N : Nat) : ComputeKernel := sourceKernel "x" "out" 0 0 1 N blockSize
+def originalKernel (N : Nat) : ComputeKernel := relu_kernel "x" "out" 0 0 1 N blockSize
 
-def inlinedKernel (N : Nat) : ComputeKernel := fusedKernel "x" "out" 0 0 1 N blockSize
+def inlinedKernel (N : Nat) : ComputeKernel := relu_inlined_kernel "x" "out" 0 0 1 N blockSize
 
 end VeriTile.Bench.Repairs.ReluTritonKernel

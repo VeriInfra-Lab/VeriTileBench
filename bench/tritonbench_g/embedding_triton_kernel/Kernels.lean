@@ -22,7 +22,7 @@ def callSignature : CallSignature where
   writePorts := ["out"]
 
 /-- Unchanged Python `embedding_kernel_repaired`, including every signed64 conversion. -/
-def sourceKernel : IndexType → Parameters → ComputeKernel
+def embedding_kernel_repairedKernel : IndexType → Parameters → ComputeKernel
   | .int32, p =>
     let weight := p.weight
     let input_ids := p.ids
@@ -54,7 +54,7 @@ def sourceKernel : IndexType → Parameters → ComputeKernel
     }
 
 /-- Unchanged Python `embedding_kernel_index_commuted`, including every signed64 conversion. -/
-def indexCommutedKernel : IndexType → Parameters → ComputeKernel
+def embedding_kernel_index_commutedKernel : IndexType → Parameters → ComputeKernel
   | .int32, p =>
     let weight := p.weight
     let input_ids := p.ids

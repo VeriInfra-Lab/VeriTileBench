@@ -6,7 +6,7 @@ open scoped VeriTile.Triton.MaskedKernelIO₂
 
 example (n B : Nat) :
     (TritonBenchVectorAdditionCorrect.optimizedIO n B).kernel =
-      TritonBenchVectorAddition.Kernels.optimizedKernel n B := rfl
+      TritonBenchVectorAddition.Kernels.add_commuted_kernel n B := rfl
 
 example (n B : Nat) :
     Spec.Real (TritonBenchVectorAdditionCorrect.optimizedIO n B ⊨ fun xs ys i => xs i + ys i) :=

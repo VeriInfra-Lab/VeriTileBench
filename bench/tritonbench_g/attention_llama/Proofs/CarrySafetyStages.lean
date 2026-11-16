@@ -42,7 +42,7 @@ theorem iteration_safe (c : Config) (s t : State (Term α)) (scale : Term α) (n
     fun r d hf=>masked_value_cell c s bytes n (r,d,()) hf
   cases hf : c.fp8 <;> cases hc : c.causal
   all_goals
-    simp [parts,kernel,hf,hc,TypedSource.carryFirstHalfKernel,TypedSource.carryFirstBytesKernel,carryFirstHalfKernel,carryFirstBytesKernel,
+    simp [parts,kernel,hf,hc,TypedSource.carryFirstHalfKernel,TypedSource.carryFirstBytesKernel,FP16._fwd_kernel_carry_firstKernel,UInt8._fwd_kernel_carry_firstKernel,
       ComputeKernel.surfaceBody,Triton.Source.dynamicRange?,Option.map,Option.getD,
       traceSafeList_unfold,stepSafe_unfold,safeExpr_unfold,safeCompute_unfold,
       safeOp_unfold,safeAddress_unfold,safeMask_unfold,addressSafe_unfold,maskActive_unfold,

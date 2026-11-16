@@ -24,11 +24,11 @@ def Ops.algebra {α : Type} (o : Ops α) : Algebra α :=
     reduceSumTyped := fun p d {_} a k v => some (o.sum p d a k v)}
 
 def parts (dtype outType : FloatDType) (input output : RegionName) (T BT : Nat) : Source.IntRange :=
-  (Source.intRange? (repairedKernel dtype outType input output T BT).surfaceBody "i_t").getD
+  (Source.intRange? (chunk_global_cumsum_scalar_kernel_repairedKernel dtype outType input output T BT).surfaceBody "i_t").getD
     ⟨[],.constInt 0,.constInt 0,.constNat 1,[],[]⟩
 
 theorem split_source (dtype outType : FloatDType) (input output : RegionName) (T BT : Nat) :
-    (repairedKernel dtype outType input output T BT).surfaceBody =
+    (chunk_global_cumsum_scalar_kernel_repairedKernel dtype outType input output T BT).surfaceBody =
       (parts dtype outType input output T BT).before ++
         [.forRangeInt "i_t" (parts dtype outType input output T BT).start
           (parts dtype outType input output T BT).stop
@@ -46,7 +46,7 @@ theorem prelude {α : Type} [Inhabited α] (o : Ops α)
     (input output : RegionName) (T BT : Nat) (s : State α) :
     ∃ t, run (engine o.algebra) (parts .fp32 .fp32 input output T BT).before s=some t ∧
       Ready (s.pids 0) t ∧ t.mem=s.mem := by
-  simp (config := {maxSteps := 100000}) [parts,repairedKernel,
+  simp (config := {maxSteps := 100000}) [parts,chunk_global_cumsum_scalar_kernel_repairedKernel,
     ComputeKernel.surfaceBody,Source.intRange?,run,step,FP.Structural.evalExpr,
     evalComputeOp,evalOp_unfold,Option.bind,engine,Algebra.withDefaultPrecision,
     resolvePrecision,Ops.algebra,ComputeDType.eraseDType,numeric,numericLt,bop,State.setReg,Ready]
@@ -77,7 +77,7 @@ theorem body {α : Type} [Inhabited α] (o : Ops α)
   obtain ⟨hp,hz⟩ := ready
   obtain ⟨carry,hz⟩ := Option.isSome_iff_exists.mp hz
   all_goals
-    simp (config := {maxSteps := 300000}) [parts,repairedKernel,
+    simp (config := {maxSteps := 300000}) [parts,chunk_global_cumsum_scalar_kernel_repairedKernel,
       ComputeKernel.surfaceBody,Source.intRange?,run,step,FP.Structural.evalExpr,
       evalComputeOp,evalOp_unfold,evalOffsets,FP.Structural.store,Option.bind,engine,Algebra.withDefaultPrecision,
       resolvePrecision,Ops.algebra,ComputeDType.eraseDType,numeric,numericLt,bop,ofFloat,toFloat,
@@ -115,13 +115,13 @@ termination_by stop-cur
 storage branch. No whole-kernel success or numerical equality is a premise. -/
 theorem complete {α : Type} [Inhabited α] (o : Ops α)
     (input output : RegionName) (T BT : Nat) (s : State α) :
-    ∃ t, FP.Structural.exec (engine o.algebra) (repairedKernel .fp32 .fp32 input output T BT) s=some t ∧
+    ∃ t, FP.Structural.exec (engine o.algebra) (chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T BT) s=some t ∧
       Frame output (s.pids 0) T s t := by
   obtain ⟨initial,hpre,hready,hmem⟩ := prelude o input output T BT s
   obtain ⟨final,hl,_,hf⟩ := loop o input output T BT (s.pids 0)
     0 ((T+BT-1)/BT) initial hready
   refine ⟨final,?_,?_⟩
-  · change run (engine o.algebra) (repairedKernel .fp32 .fp32 input output T BT).surfaceBody s=some final
+  · change run (engine o.algebra) (chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T BT).surfaceBody s=some final
     rw [split_source .fp32 .fp32,run_append,hpre]
     simp only [Option.bind_some,run]
     have step_eq : step (engine o.algebra)

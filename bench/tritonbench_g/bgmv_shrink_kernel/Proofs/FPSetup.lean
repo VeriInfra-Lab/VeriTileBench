@@ -18,7 +18,7 @@ def preguard (M : Algebra α) (P : Primitives α) (h : Call)
   all_goals
     refine ⟨?_,?_⟩
     swap
-    simp [prelude,code,Surface.source,Kernels.source,Kernels.originalFP16,Kernels.originalBF16,Pasted.originalKernel,Pasted.candidateKernel,
+    simp [prelude,code,Surface.source,Kernels.source,Kernels.originalFP16,Kernels.originalBF16,Pasted._bgmv_shrink_kernel,Pasted._bgmv_shrink_kernel_candidateKernel,
       ComputeKernel.surfaceBody,List.drop,run,step,FP.Structural.evalExpr,evalComputeOp,
       evalOp_unfold,Option.bind,entry,Data.cells,State.setReg,Cell.read,Region.cast]
     rfl
@@ -34,7 +34,7 @@ def preloop (M : Algebra α) (P : Primitives α) (h : Call)
   all_goals
     refine ⟨?_,?_⟩
     swap
-    simp only [setup,active,code,Surface.source,Kernels.source,Kernels.originalFP16,Kernels.originalBF16,Pasted.originalKernel,Pasted.candidateKernel,
+    simp only [setup,active,code,Surface.source,Kernels.source,Kernels.originalFP16,Kernels.originalBF16,Pasted._bgmv_shrink_kernel,Pasted._bgmv_shrink_kernel_candidateKernel,
       ComputeKernel.surfaceBody,List.drop,Source.conditional?,Source.intRange?,
       Option.map_some,Option.getD_some,beq_self_eq_true]
     dsimp [preguard]

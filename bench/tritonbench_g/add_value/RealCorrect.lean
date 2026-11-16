@@ -20,7 +20,7 @@ specification puzzle1_kernel_correctness (n : Nat) :
 
 #stmtSurfaceSubset puzzle1_kernel_correctness ⊆
   [Spec.Real, addValueIO, MaskedKernelIO₁.Implements, MaskedKernelIO₁.B]
-#specNonCircular mathematical avoiding [sourceKernel, originalKernel, commutedKernel]
+#specNonCircular mathematical avoiding [puzzle1_kernel, originalKernel, puzzle1_commuted_kernel]
 #axiomsClean puzzle1_kernel_correctness
 #guard_msgs (drop info) in
 #auditModuleAxioms

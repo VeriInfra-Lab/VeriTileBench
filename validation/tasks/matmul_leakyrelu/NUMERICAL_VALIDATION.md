@@ -1,48 +1,98 @@
-# Pending local numerical validation
+# Numerical validation
 
-Rule: `MATMUL-LEAKYRELU-FP32-K32-DOT-ADD-TO-DOTACC`.
-Instance: `matmul_leakyrelu.fp32.tf32.k32.live_acc.all_words.v1`.
-Status: deferred; artifact absent; bias gate NOT_RUN; magnitude gate NOT_RUN.
-No experiment is claimed to have passed. This is one pending local numerical
-rewrite, not a missing source-to-program proof or a whole-output assumption.
+Rule: `DOT-ADD-TO-DOTACC`.
+Outcome: **REJECT**. Bias gate `FAIL`; magnitude gate `PASS`.
 
-The compared instructions are the exact local `[32,32]` source operands with
-K32 dot, default TF32 input precision, FP32 dot/accumulator result, the original
-FP32-to-real carrier cast and separate FP32 add, versus FP32 seeded dotAcc.
-The selected historical backend is SM90/Triton 3.7.1, four warps, three stages.
-This metadata identifies the retained profile; no new lowering digest or hardware
-certificate is invented. Local results are FP32; the kernel's later FP16 cast and
-leaky activation are preserved by the program proof and are outside this rule.
+The selected experiment uses NVIDIA GeForce RTX 4090 (SM89),
+Triton 3.5.1, FP32 operands/accumulator/output, TF32 dot input precision,
+K=32 and a 32×32 output tile. Four warps, three stages and FP fusion disabled.
+It ran once to 4,294,967,296 independent whole input groups, using quantized
+Normal(1,1) entries and unit weights. The 1024 output lanes share operands;
+standard error is computed across whole groups.
 
-The formal conditional domain remains all admitted FP32 payloads and arbitrary
-live accumulator values, including padded zero lanes and exceptional values.
-An eventual experiment must explicitly classify NaN/Inf/signed-zero behavior and
-reject all-word admission on a mismatch. Finite-only random samples cannot supply
-all-word coverage or justify narrowing the existing input domain. Exceptional
-classification and any payload policy must be recorded separately from finite
-bias statistics. The retained software counterexample shows why no exact IEEE
-identity is asserted.
+| Metric | Recorded value | Criterion |
+| --- | ---: | ---: |
+| Mean signed ULP shift | -0.12170168115225977 | |
+| Standard error | 0.0058806878334038111 | |
+| abs(mean) + 5 SE | 0.15110512031927881 | ≤ 0.05 ULP |
+| Reference absolute oracle-error peak | 0.11381051382235796 | |
+| Candidate absolute oracle-error peak | 0.11381051382235796 | |
+| Peak ratio | 1.0 | ≤ 10 |
 
-Pending sampling plan: independently sample each a/b operand and incoming
-accumulator from quantized `Normal(1,1^2)` tuples at a recorded fixed seed; report
-independent replicate means. Add separately reported zero/sparse, subnormal,
-large/small exponent, cancellation, ties, accumulator-dominant and padded-tail
-strata. Do not pool different distributions or exceptional classifications into
-one acceptance number. Retain exact source fragments, selected dot options,
-compiler/backend/configuration, seed, input distribution, raw observations and
-replay command with the result. Use the same quantized operands for both source
-instructions and an FP64 oracle for `acc + sum(a*b)`.
+The reference is an FP32 dot followed by a separate FP32 add to the live
+accumulator. The candidate seeds dot with that accumulator. Reference execution
+uses an FP32 intermediate between two launches to prevent Triton's dot/add
+combiner from turning both sides into the same calculation. Actual PTX and the
+ordered FP64 oracle were audited. The final FP16 store and activation remain
+outside this local numerical rule.
 
-Use the project's two-gates protocol in `experiments/floating_point/README.md`
-and `scripts/numerical_gates.py`: local ULP scale from the rounded FP32 golden
-result; bias `abs(mean)+5*SE <= 0.05` local ULP across replicate means; magnitude
-ratio of peak absolute oracle errors with pass threshold 10 and the documented
-POT/bootstrap checks and stopping rule. Both gates must PASS (`passOnly`); smoke,
-WARN, INCONCLUSIVE and missing evidence do not admit this rule. Nonfinite oracle
-or observed statistics follow the protocol's rejection/classification handling.
-These local engineering criteria do not prove exact word equality or an arbitrary
-kernel's global error bound.
+The [shared template](https://github.com/VeriInfra-Lab/VeriTile/blob/6d520c6f715d3c9224440df33472652e6a94f859/VeriTile/Triton/Float/DotContraction.lean),
+[evidence table](https://github.com/VeriInfra-Lab/VeriTile/blob/6d520c6f715d3c9224440df33472652e6a94f859/VeriTile/Triton/Float/DotAdmission.lean) and
+[receipt](https://github.com/VeriInfra-Lab/VeriTile/blob/6d520c6f715d3c9224440df33472652e6a94f859/experiments/floating_point/dot/report/receipt.json) are pinned by
+the repository's VeriTile dependency. The shared guide describes the complete
+fixed-budget protocol and raw evidence checks. SM89 evidence does not validate
+an SM90 compiler profile.
 
-The strict FP32 slope multiplication commutation is already covered by the shared
-concrete-model theorem and is not counted as a deferred experiment. Retained
-optional native primitive bindings are separate from this main-rule record.
+`SourceIO.lean` proves that both shared fragments are exactly the statements of
+the actual Python/Lean bodies, including the carrier conversion. The source
+pair, full schedules, safety, outputs, frames and all-word formal domain remain
+unchanged. Real correctness and the conditional FP derivation are separate from
+numerical admission. `Rules` still requires an explicit accepted atom and the
+model interpretation; the recorded outcome supplies no missing premise.
+
+Special-value diagnostics recorded 0 classification mismatches
+and 0 NaN-payload differences. They are separate from the Normal
+gate statistics and do not establish exhaustive all-word hardware conformance.
+Finite numerical acceptance would not prove IEEE word equality or a kernel
+error bound. A rejected local atom alone does not refute a complete kernel pair.
+
+## Source-model verdict
+
+`FPEquiv.source_pair_disproved` is declared with `refutation`: the universal
+equivalence claim appears after the colon, and the exported theorem negates it
+under the current FP32 dot admission table. Its independent countermodel is in
+`Proofs/Unconditional.lean`: TF32 input truncation, sequential toward-zero
+FP32 fused accumulation, nearest-even scalar addition and nearest-even binary16
+conversion. Legal finite 1×96 and 96×1 inputs lead through the complete actual
+source bodies to distinct normal FP16 outputs, 1/32 and 1/64. Input bindings,
+index/allocation bounds, source-trace safety and every public proof-calculus
+constructor are checked. This theorem concerns the declared source-model
+judgment. GPU conformance is outside its scope.
+
+The original conditional FP theorem and its premises are retained. Real
+correctness remains proved. Numerical rejection is recorded independently of
+the constructive source-model disproof.
+
+
+## FP64 control
+
+The FP64 input/accumulator/output profile ran once to **2^32 = 4,294,967,296**
+independent whole matrix groups. Distribution and thresholds are unchanged.
+Its **Normal two-gates decision is ACCEPT**; no groups were excluded.
+
+| Metric | Recorded value | Criterion |
+| --- | ---: | ---: |
+| Mean signed ULP shift | 0.0018087388154981454 | |
+| Standard error | 0.0018492411269843512 | |
+| abs(mean) + 5 SE | 0.011054944450419902 | ≤ 0.05 ULP |
+| Reference absolute oracle-error peak | 8.9621036488053036e-14 | |
+| Candidate absolute oracle-error peak | 8.9621036488053036e-14 | |
+| Peak ratio | 1 | ≤ 10 |
+
+Server and independent local replay agree. All 524,288 execution-part statistics
+and 16 mandatory raw audits were checked; 524,288 raw output lanes were checked
+against exact rational dot products. In all 512 saved input groups, converting
+FP64 inputs to FP32 reproduces the FP32 experiment's saved operands exactly.
+GPU measurement elapsed 8031.028 seconds.
+
+The separate special-value diagnostic has **1 input group / 1024 output lanes**
+with A=-0, B=+0 and incoming accumulator=-0. The reference returns +0 and the
+candidate -0. Consequently **all-word admission remains disabled**, even though
+the Normal statistical gates pass. Zero signs are retained in the evidence.
+FP64 evidence supplies no FP32 assumption and is independent of the constructive
+FP32 source-model disproof above.
+
+The retained artifact is VeriTile's
+`experiments/floating_point/dot/fp64/report/receipt.json`, with source-manifest
+SHA256 `477bdb15ca5b0c3d6952f1dcf7e76c1da0eb217d53105869cf111a19fb00d972`. This numerical control has its own frozen source
+snapshot; the FP32 proof's VeriTile dependency remains pinned separately.

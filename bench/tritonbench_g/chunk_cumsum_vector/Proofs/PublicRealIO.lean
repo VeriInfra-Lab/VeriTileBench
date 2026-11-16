@@ -75,7 +75,7 @@ theorem implements (h : Call) (layout : Geometry.OutputLayout h) (c : Config)
       · exact no same
       · exact no whereAt
 
-#specNonCircular formula avoiding [Kernels.sourceKernel,Kernels.sumLeftKernel,exec]
+#specNonCircular formula avoiding [Kernels.chunk_global_cumsum_vector_kernel,Kernels.chunk_global_cumsum_vector_kernel_sum_leftKernel,exec]
 #axiomsClean implements
 end
 end VeriTile.Bench.Repairs.ChunkCumsumVector.PublicRealIO

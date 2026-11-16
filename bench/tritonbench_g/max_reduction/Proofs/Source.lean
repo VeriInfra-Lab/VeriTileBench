@@ -53,10 +53,10 @@ def scalarValue (e : Engine A) (input : Nat → A) (N B start : Nat) : A :=
 
 theorem stage1_exec [Inhabited A] (e : Engine A) (inp mid : RegionName)
     (N B : Nat) (s : State A) (hb : 0<B) :
-    ∃ final,FP.Structural.exec e.algebra (stage1Kernel inp mid N B) s=some final ∧
+    ∃ final,FP.Structural.exec e.algebra (max_kernel_1Kernel inp mid N B) s=some final ∧
       final.mem=(s.write mid (s.pids 0) (.mk .real
         (scalarValue e (fun i => (s.mem inp i).read .real) N B (s.pids 0*B)))).mem := by
-  simp [stage1Kernel, VeriTile.Bench.Repairs.MaxReduction.stage1Kernel, VeriTile.Bench.Repairs.MaxReduction.stage1CommutedKernel, VeriTile.Bench.Repairs.MaxReduction.stage2Kernel, VeriTile.Bench.Repairs.MaxReduction.stage2ComplementKernel, VeriTile.Bench.Repairs.MaxReduction.dimensionKernel, VeriTile.Bench.Repairs.MaxReduction.dimensionCommutedKernel, FP.Structural.exec,
+  simp [max_kernel_1Kernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel_1Kernel, VeriTile.Bench.Repairs.MaxReduction.max_stage1_commutedKernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel_2Kernel, VeriTile.Bench.Repairs.MaxReduction.max_stage2_complementKernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel, VeriTile.Bench.Repairs.MaxReduction.max_dimension_commutedKernel, FP.Structural.exec,
     ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,evalOp_unfold,store,Option.bind,
     ComputeDType.eraseDType,numeric,bop,natLt,numericLt,Region.cast,Engine.algebra,
     reduceWith,scalarValue,TileShape.allIndices,TileShape.axisDim,hb,State.write,State.setReg]
@@ -65,10 +65,10 @@ theorem stage1_exec [Inhabited A] (e : Engine A) (inp mid : RegionName)
 
 theorem stage2_exec [Inhabited A] (e : Engine A) (mid out : RegionName)
     (N B : Nat) (s : State A) (hb : 0<B) :
-    ∃ final,FP.Structural.exec e.algebra (stage2Kernel mid out N B) s=some final ∧
+    ∃ final,FP.Structural.exec e.algebra (max_kernel_2Kernel mid out N B) s=some final ∧
       final.mem=(s.write out 0 (.mk .real
         (scalarValue e (fun i => (s.mem mid i).read .real) N B 0))).mem := by
-  simp [stage2Kernel, VeriTile.Bench.Repairs.MaxReduction.stage1Kernel, VeriTile.Bench.Repairs.MaxReduction.stage1CommutedKernel, VeriTile.Bench.Repairs.MaxReduction.stage2Kernel, VeriTile.Bench.Repairs.MaxReduction.stage2ComplementKernel, VeriTile.Bench.Repairs.MaxReduction.dimensionKernel, VeriTile.Bench.Repairs.MaxReduction.dimensionCommutedKernel, FP.Structural.exec,
+  simp [max_kernel_2Kernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel_1Kernel, VeriTile.Bench.Repairs.MaxReduction.max_stage1_commutedKernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel_2Kernel, VeriTile.Bench.Repairs.MaxReduction.max_stage2_complementKernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel, VeriTile.Bench.Repairs.MaxReduction.max_dimension_commutedKernel, FP.Structural.exec,
     ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,evalOp_unfold,store,Option.bind,
     ComputeDType.eraseDType,numeric,bop,natLt,numericLt,Region.cast,Engine.algebra,
     reduceWith,scalarValue,TileShape.allIndices,TileShape.axisDim,hb,State.write,State.setReg]
@@ -108,9 +108,9 @@ def dimensionStores [Inhabited A] (e : Engine A) (inp ov oi : RegionName)
 
 theorem dimension_exec [Inhabited A] (e : Engine A) (inp ov oi : RegionName)
     (M N K BM BN : Nat) (s : State A) (hn : 0<BN) :
-    ∃ final,FP.Structural.exec e.algebra (dimensionKernel inp ov oi M N K BM BN) s=some final ∧
+    ∃ final,FP.Structural.exec e.algebra (max_kernel inp ov oi M N K BM BN) s=some final ∧
       final.mem=(dimensionStores e inp ov oi M N K BM BN s).mem := by
-  simp [dimensionKernel, VeriTile.Bench.Repairs.MaxReduction.stage1Kernel, VeriTile.Bench.Repairs.MaxReduction.stage1CommutedKernel, VeriTile.Bench.Repairs.MaxReduction.stage2Kernel, VeriTile.Bench.Repairs.MaxReduction.stage2ComplementKernel, VeriTile.Bench.Repairs.MaxReduction.dimensionKernel, VeriTile.Bench.Repairs.MaxReduction.dimensionCommutedKernel, FP.Structural.exec,
+  simp [max_kernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel_1Kernel, VeriTile.Bench.Repairs.MaxReduction.max_stage1_commutedKernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel_2Kernel, VeriTile.Bench.Repairs.MaxReduction.max_stage2_complementKernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel, VeriTile.Bench.Repairs.MaxReduction.max_dimension_commutedKernel, FP.Structural.exec,
     ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,evalOp_unfold,store,Option.bind,
     ComputeDType.eraseDType,numeric,bop,natLt,numericLt,Region.cast,Engine.algebra,
     indexedWith,rowValue,dimensionStores,TileShape.allIndices,TileShape.axisDim,TileShape.insertAxisIndex,toFloat,ofFloat,hn,Nat.ne_of_gt hn,

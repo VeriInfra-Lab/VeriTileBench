@@ -13,6 +13,14 @@ from scripts import spec_sheet
 
 
 class SpecificationSheets(unittest.TestCase):
+    def test_refutation_is_inventoried_as_a_public_negative_headline(self):
+        source=('namespace Fixture\nrefutation rejected : False := by trivial\n'
+                'specification conditional : True := by trivial\nend Fixture\n')
+        declarations=spec_sheet.split_decls(source)
+        headline,_=spec_sheet.find_summary_theorems(declarations,[])
+        self.assertEqual([(d['name'],d['kind']) for d in headline],
+                         [('rejected','refutation'),('conditional','specification')])
+
     def test_selected_readers_replace_legacy_filename_inference(self):
         rows = [{'file': 'bench/tritonbench_g/task/KernelOnly/Correct.lean'},
                 {'file': 'bench/tritonbench_g/task/KernelOnly/Correct.lean'},

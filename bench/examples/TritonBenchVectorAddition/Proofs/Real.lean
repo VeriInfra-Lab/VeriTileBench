@@ -12,7 +12,7 @@ open scoped VeriTile.Triton.MaskedKernelIO₂
 
 /-- Erasing precision recovers the existing TritonBench mathematical kernel. -/
 theorem real_projection (nElements blockSize : Nat) :
-    (originalKernel nElements blockSize).toAlgorithm? =
+    (add_kernel nElements blockSize).toAlgorithm? =
       (VeriTile.Bench.TritonBenchG.VectorAddition.add_kernel
         "x" "y" "output" nElements blockSize).toAlgorithm? := rfl
 
@@ -27,9 +27,9 @@ theorem optional_add_comm (a b : Option ℝ) :
   Option.map₂_comm add_comm
 
 theorem optimized_exec (n B : Nat) (s : BlockState) :
-    exec (optimizedKernel n B).toAlgKernel s =
+    exec (add_commuted_kernel n B).toAlgKernel s =
       exec (VeriTile.Bench.TritonBenchG.VectorAddition.add_kernel "x" "y" "output" n B).toAlgKernel s := by
-  simp [optimizedKernel, VeriTile.Bench.TritonBenchG.VectorAddition.add_kernel, exec, stepStmts, stepStmt, evalOp.eq_def,
+  simp [add_commuted_kernel, VeriTile.Bench.TritonBenchG.VectorAddition.add_kernel, exec, stepStmts, stepStmt, evalOp.eq_def,
     Region.cast, Tile.bop, Tile.cop, NumericDType.add, NumericDType.mul,
       ComparableDType.lt, add_comm, optional_add_comm]
 

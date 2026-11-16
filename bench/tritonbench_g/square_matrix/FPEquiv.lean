@@ -12,11 +12,11 @@ local instance : Inhabited Word := ⟨FP.Value.zero .fp32⟩
 def assumptions : Spec.Assumptions FP.GuardedFragment := []
 
 def original (n B : Nat) : Program where
-  kernel := fp32Kernel n B
+  kernel := square_kernel n B
   domain := []
 
 def indexCommuted (n B : Nat) : Program :=
-  { original n B with kernel := indexCommutedKernel n B }
+  { original n B with kernel := square_index_commuted_kernel n B }
 
 /-- Both actual sources succeed and agree on every typed memory cell. Only
 integer index multiplication is commuted; FP32 multiplication is identical.

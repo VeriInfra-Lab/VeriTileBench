@@ -125,7 +125,7 @@ def memory (shape : Shape) (pids : Nat → Nat) : MemoryIO A where
 
 def invocation (rest : Algebra A) (ops : Ops A) (shape : Shape)
     (pids : Nat → Nat) : Invocation A where
-  kernel := Kernels.sourceKernel (Typed.layout shape)
+  kernel := Kernels._rotary_kernel (Typed.layout shape)
   backend := Typed.algebra rest ops
   pids := pids
 

@@ -11,11 +11,13 @@ noncomputable section
 
 def next_multiple_ofSource : StatementJitFunction :=
   with_triton_params (a,b) constexpr_args [] in triton {
+    # the smallest x>=a that x%b ==0
     return tl.cdiv(a, b) * b
   }
 
 def prev_multiple_ofSource : StatementJitFunction :=
   with_triton_params (a,b) constexpr_args [] in triton {
+    # the largest x<a that x%b ==0
     return tl.cdiv(a, b) * b - b
   }
 
@@ -24,7 +26,7 @@ def forward_noninnerSignature : CallSignature where
   scalars := [("M",.i64),("N",.i64),("K",.i64)]
   constexpr := ["TILE_N","TILE_K","ONE_TILE_PER_CTA","NUM_SMS"]
 
-def forward_noninner_kernel
+def softmax_kernel_non_innerKernel
     (output_ptr input_ptr : RegionName) (M N K : Int) (TILE_N TILE_K : Nat)
     (ONE_TILE_PER_CTA : Bool) (NUM_SMS : Nat) : ComputeKernel :=
   with_triton_call forward_noninnerSignature call_args [M := M, N := N, K := K]
@@ -81,7 +83,7 @@ def forward_innerSignature : CallSignature where
   scalars := [("M",.i64),("N",.i64)]
   constexpr := ["TILE_N","ONE_TILE_PER_CTA"]
 
-def forward_inner_kernel
+def softmax_kernel_innerKernel
     (output_ptr input_ptr : RegionName) (M N : Int) (TILE_N : Nat)
     (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
   with_triton_call forward_innerSignature call_args [M := M, N := N]
@@ -152,7 +154,7 @@ def backward_noninnerSignature : CallSignature where
   scalars := [("M",.i64),("N",.i64),("K",.i64)]
   constexpr := ["TILE_N","TILE_K","ONE_TILE_PER_CTA"]
 
-def backward_noninner_kernel
+def softmax_backward_kernel_non_innerKernel
     (out_ptr out_grad_ptr in_grad_ptr : RegionName) (M N K : Int) (TILE_N TILE_K : Nat)
     (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
   with_triton_call backward_noninnerSignature call_args [M := M, N := N, K := K] in triton {
@@ -199,7 +201,7 @@ def backward_innerSignature : CallSignature where
   scalars := [("M",.i64),("N",.i64)]
   constexpr := ["TILE_M","TILE_N","ONE_TILE_PER_CTA"]
 
-def backward_inner_kernel
+def softmax_backward_kernel_innerKernel
     (out_ptr out_grad_ptr in_grad_ptr : RegionName) (M N : Int) (TILE_M TILE_N : Nat)
     (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
   with_triton_call backward_innerSignature call_args [M := M, N := N] in triton {
@@ -244,7 +246,7 @@ def backward_inner_kernel
             offsets += TILE_N
   }
 
-def AddressCandidate.forward_noninner_kernel
+def AddressCandidate.softmax_kernel_non_inner_address_commutedKernel
     (output_ptr input_ptr : RegionName) (M N K : Int) (TILE_N TILE_K : Nat)
     (ONE_TILE_PER_CTA : Bool) (NUM_SMS : Nat) : ComputeKernel :=
   with_triton_call forward_noninnerSignature call_args [M := M, N := N, K := K]
@@ -296,7 +298,7 @@ def AddressCandidate.forward_noninner_kernel
             tl.store(output_ptr + offsets, o, mask=mask)
   }
 
-def AddressCandidate.forward_inner_kernel
+def AddressCandidate.softmax_kernel_inner_address_commutedKernel
     (output_ptr input_ptr : RegionName) (M N : Int) (TILE_N : Nat)
     (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
   with_triton_call forward_innerSignature call_args [M := M, N := N]
@@ -362,7 +364,7 @@ def AddressCandidate.forward_inner_kernel
             tl.store(output_ptr + n_offsets, o)
   }
 
-def AddressCandidate.backward_noninner_kernel
+def AddressCandidate.softmax_backward_kernel_non_inner_address_commutedKernel
     (out_ptr out_grad_ptr in_grad_ptr : RegionName) (M N K : Int) (TILE_N TILE_K : Nat)
     (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
   with_triton_call backward_noninnerSignature call_args [M := M, N := N, K := K] in triton {
@@ -404,7 +406,7 @@ def AddressCandidate.backward_noninner_kernel
             offsets += TILE_N * K
   }
 
-def AddressCandidate.backward_inner_kernel
+def AddressCandidate.softmax_backward_kernel_inner_address_commutedKernel
     (out_ptr out_grad_ptr in_grad_ptr : RegionName) (M N : Int) (TILE_M TILE_N : Nat)
     (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
   with_triton_call backward_innerSignature call_args [M := M, N := N] in triton {
@@ -450,29 +452,29 @@ def AddressCandidate.backward_inner_kernel
   }
 
 def forward_noninner (output_ptr input_ptr : RegionName) (M N K TILE_N TILE_K : Nat) (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
-  forward_noninner_kernel output_ptr input_ptr (M : Int) (N : Int) (K : Int) TILE_N TILE_K ONE_TILE_PER_CTA 0
+  softmax_kernel_non_innerKernel output_ptr input_ptr (M : Int) (N : Int) (K : Int) TILE_N TILE_K ONE_TILE_PER_CTA 0
 
 def forward_inner (output_ptr input_ptr : RegionName) (M N TILE_N : Nat) (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
-  forward_inner_kernel output_ptr input_ptr (M : Int) (N : Int) TILE_N ONE_TILE_PER_CTA
+  softmax_kernel_innerKernel output_ptr input_ptr (M : Int) (N : Int) TILE_N ONE_TILE_PER_CTA
 
 def backward_noninner (out_ptr out_grad_ptr in_grad_ptr : RegionName) (M N K TILE_N TILE_K : Nat) (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
-  backward_noninner_kernel out_ptr out_grad_ptr in_grad_ptr (M : Int) (N : Int) (K : Int) TILE_N TILE_K ONE_TILE_PER_CTA
+  softmax_backward_kernel_non_innerKernel out_ptr out_grad_ptr in_grad_ptr (M : Int) (N : Int) (K : Int) TILE_N TILE_K ONE_TILE_PER_CTA
 
 def backward_inner (out_ptr out_grad_ptr in_grad_ptr : RegionName) (M N TILE_M TILE_N : Nat) (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
-  backward_inner_kernel out_ptr out_grad_ptr in_grad_ptr (M : Int) (N : Int) TILE_M TILE_N ONE_TILE_PER_CTA
+  softmax_backward_kernel_innerKernel out_ptr out_grad_ptr in_grad_ptr (M : Int) (N : Int) TILE_M TILE_N ONE_TILE_PER_CTA
 
 namespace AddressCandidate
 def forward_noninner (output_ptr input_ptr : RegionName) (M N K TILE_N TILE_K : Nat) (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
-  forward_noninner_kernel output_ptr input_ptr (M : Int) (N : Int) (K : Int) TILE_N TILE_K ONE_TILE_PER_CTA 0
+  softmax_kernel_non_inner_address_commutedKernel output_ptr input_ptr (M : Int) (N : Int) (K : Int) TILE_N TILE_K ONE_TILE_PER_CTA 0
 
 def forward_inner (output_ptr input_ptr : RegionName) (M N TILE_N : Nat) (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
-  forward_inner_kernel output_ptr input_ptr (M : Int) (N : Int) TILE_N ONE_TILE_PER_CTA
+  softmax_kernel_inner_address_commutedKernel output_ptr input_ptr (M : Int) (N : Int) TILE_N ONE_TILE_PER_CTA
 
 def backward_noninner (out_ptr out_grad_ptr in_grad_ptr : RegionName) (M N K TILE_N TILE_K : Nat) (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
-  backward_noninner_kernel out_ptr out_grad_ptr in_grad_ptr (M : Int) (N : Int) (K : Int) TILE_N TILE_K ONE_TILE_PER_CTA
+  softmax_backward_kernel_non_inner_address_commutedKernel out_ptr out_grad_ptr in_grad_ptr (M : Int) (N : Int) (K : Int) TILE_N TILE_K ONE_TILE_PER_CTA
 
 def backward_inner (out_ptr out_grad_ptr in_grad_ptr : RegionName) (M N TILE_M TILE_N : Nat) (ONE_TILE_PER_CTA : Bool) : ComputeKernel :=
-  backward_inner_kernel out_ptr out_grad_ptr in_grad_ptr (M : Int) (N : Int) TILE_M TILE_N ONE_TILE_PER_CTA
+  softmax_backward_kernel_inner_address_commutedKernel out_ptr out_grad_ptr in_grad_ptr (M : Int) (N : Int) TILE_M TILE_N ONE_TILE_PER_CTA
 
 end AddressCandidate
 end

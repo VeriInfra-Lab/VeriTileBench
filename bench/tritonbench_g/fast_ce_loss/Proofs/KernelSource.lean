@@ -27,15 +27,15 @@ structure Parameters where
   hasScaling : Bool
 
 def forward (p : Parameters) : ComputeKernel :=
-  TypedSource.forwardKernel p.hasSoftcap p.hasScaling p.logits p.loss p.lse p.labels
+  TypedSource._cross_entropy_forwardKernel p.hasSoftcap p.hasScaling p.logits p.loss p.lse p.labels
     p.vocab p.logitsStride p.block p.softcap p.scaling
 
 def chunked (p : Parameters) : ComputeKernel :=
-  TypedSource.chunkedKernel p.hasSoftcap p.hasScaling p.logits p.loss p.lse p.labels
+  TypedSource._chunked_cross_entropy_forwardKernel p.hasSoftcap p.hasScaling p.logits p.loss p.lse p.labels
     p.vocab p.chunks p.logitsStride p.block p.softcap p.scaling
 
 def backward (p : Parameters) : ComputeKernel :=
-  TypedSource.backwardKernel p.hasSoftcap p.hasScaling p.logits p.upstream p.lse p.labels
+  TypedSource._cross_entropy_backwardKernel p.hasSoftcap p.hasScaling p.logits p.upstream p.lse p.labels
     p.vocab p.logitsStride p.upstreamStride p.block p.softcap p.scaling
 
 def engine {α : Type} (M : Algebra α) : Algebra α := M.withDefaultPrecision .fp32

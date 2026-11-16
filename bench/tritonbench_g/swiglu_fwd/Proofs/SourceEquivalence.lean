@@ -9,15 +9,15 @@ noncomputable section
 
 def assumptions : Spec.Assumptions FP.GuardedFragment := []
 def original (X Y OUT : RegionName) (sx sy so N B : Nat) : Program :=
-  ⟨sourceKernel X Y OUT sx sy so N B,[]⟩
+  ⟨_swiglu_fwd_kernel X Y OUT sx sy so N B,[]⟩
 def indexCommuted (X Y OUT : RegionName) (sx sy so N B : Nat) : Program :=
-  ⟨indexCommutedKernel X Y OUT sx sy so N B,[]⟩
+  ⟨_swiglu_fwd_kernel_index_commutedKernel X Y OUT sx sy so N B,[]⟩
 
 theorem decomposition (v : Bool) (X Y OUT : RegionName) (sx sy so N B : Nat) :
-    (if v then indexCommutedKernel X Y OUT sx sy so N B
-      else sourceKernel X Y OUT sx sy so N B).surfaceBody =
+    (if v then _swiglu_fwd_kernel_index_commutedKernel X Y OUT sx sy so N B
+      else _swiglu_fwd_kernel X Y OUT sx sy so N B).surfaceBody =
       sourcePrefix v X Y OUT sx sy so B ++
-        (sourceKernel X Y OUT sx sy so N B).surfaceBody.drop 5 := by
+        (_swiglu_fwd_kernel X Y OUT sx sy so N B).surfaceBody.drop 5 := by
   cases v <;> rfl
 
 /-- Decompose the two repaired complete sources, with FP32 storage fixed.
@@ -29,12 +29,12 @@ theorem equivalent (X Y OUT : RegionName) (sx sy so N B : Nat) :
     (lhs := original X Y OUT sx sy so N B) (rhs := indexCommuted X Y OUT sx sy so N B) rfl rfl
   intro α _ M D _ s _
   change run (engine M)
-      (sourceKernel X Y OUT sx sy so N B).surfaceBody s =
+      (_swiglu_fwd_kernel X Y OUT sx sy so N B).surfaceBody s =
     run (engine M)
-      (indexCommutedKernel X Y OUT sx sy so N B).surfaceBody s
-  rw [show (sourceKernel X Y OUT sx sy so N B).surfaceBody = _ from
+      (_swiglu_fwd_kernel_index_commutedKernel X Y OUT sx sy so N B).surfaceBody s
+  rw [show (_swiglu_fwd_kernel X Y OUT sx sy so N B).surfaceBody = _ from
     decomposition Bool.false X Y OUT sx sy so N B,
-    show (indexCommutedKernel X Y OUT sx sy so N B).surfaceBody = _ from
+    show (_swiglu_fwd_kernel_index_commutedKernel X Y OUT sx sy so N B).surfaceBody = _ from
     decomposition Bool.true X Y OUT sx sy so N B]
   exact prefix_run M s X Y OUT sx sy so B _
 

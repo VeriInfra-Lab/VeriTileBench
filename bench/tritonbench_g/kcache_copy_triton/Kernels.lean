@@ -23,7 +23,7 @@ def sourceSignature : CallSignature where
 
 /-- Complete actual Python body. The optional arguments retain the old layout
 API; both are unused by the body, and the complete program is independent of them. -/
-def quotedOriginalKernel (p : Parameters) (stride_kcx : Nat := 1) (HEAD_DIM : Nat := p.width) : ComputeKernel :=
+def _copy_to_kcache_seqlen_n_kernel_repairedKernel (p : Parameters) (stride_kcx : Nat := 1) (HEAD_DIM : Nat := p.width) : ComputeKernel :=
   let K := p.K
   let KCache := p.KCache
   let BLOCK_TABLES := p.blockTables
@@ -65,7 +65,7 @@ def quotedOriginalKernel (p : Parameters) (stride_kcx : Nat := 1) (HEAD_DIM : Na
 
 /-- Complete actual Python body. The optional arguments retain the old layout
 API; both are unused by the body, and the complete program is independent of them. -/
-def quotedCommutedKernel (p : Parameters) (stride_kcx : Nat := 1) (HEAD_DIM : Nat := p.width) : ComputeKernel :=
+def _copy_to_kcache_seqlen_n_kernel_commutedKernel (p : Parameters) (stride_kcx : Nat := 1) (HEAD_DIM : Nat := p.width) : ComputeKernel :=
   let K := p.K
   let KCache := p.KCache
   let BLOCK_TABLES := p.blockTables
@@ -106,7 +106,7 @@ def quotedCommutedKernel (p : Parameters) (stride_kcx : Nat := 1) (HEAD_DIM : Na
   }
 
 def kernel (commuted : Bool) (p : Parameters) : ComputeKernel :=
-  if commuted then quotedCommutedKernel p else quotedOriginalKernel p
+  if commuted then _copy_to_kcache_seqlen_n_kernel_commutedKernel p else _copy_to_kcache_seqlen_n_kernel_repairedKernel p
 
 def originalKernel := kernel Bool.false
 def commutedKernel := kernel Bool.true

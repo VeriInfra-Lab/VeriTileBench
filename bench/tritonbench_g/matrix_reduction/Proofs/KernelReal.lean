@@ -8,7 +8,7 @@ noncomputable section
 
 theorem projection (storage : Storage) (X Y : RegionName) (sm sn sy M N : Nat) :
     (kernel storage X Y sm sn sy M N).eraseDType.toAlgKernel.body =
-      (load_reduce_kernel X Y sm sn sy M N).toAlgKernel.body := by
+      (_root_.VeriTile.Bench.TritonBenchG.MatrixReduction.load_reduce_kernel X Y sm sn sy M N).toAlgKernel.body := by
   have body_eq (a b : ComputeKernel) (h : a.surfaceBody = b.surfaceBody) :
       a.toAlgKernel.body = b.toAlgKernel.body := by
     cases a with

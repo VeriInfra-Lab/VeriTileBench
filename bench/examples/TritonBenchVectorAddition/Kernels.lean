@@ -17,7 +17,7 @@ def callSignature : CallSignature where
   constexpr := ["BLOCK_SIZE"]
 
 /-- The fp32 kernel; correctness interprets its mathematical projection. -/
-def originalKernel (nElements blockSize : Nat) : ComputeKernel :=
+def add_kernel (nElements blockSize : Nat) : ComputeKernel :=
   let x_ptr : RegionName := "x"
   let y_ptr : RegionName := "y"
   let output_ptr : RegionName := "output"
@@ -35,7 +35,7 @@ def originalKernel (nElements blockSize : Nat) : ComputeKernel :=
   }
 
 /-- The sole rewrite is output = y + x. Addresses/masks are unchanged. -/
-def optimizedKernel (nElements blockSize : Nat) : ComputeKernel :=
+def add_commuted_kernel (nElements blockSize : Nat) : ComputeKernel :=
   let x_ptr : RegionName := "x"
   let y_ptr : RegionName := "y"
   let output_ptr : RegionName := "output"

@@ -6,8 +6,8 @@ abbrev Source := RegionName → RegionName → Nat → Nat → Nat → Nat → C
 
 /-- The current repaired source and its existing integer-index candidate. -/
 def typedKernel (commuted : Bool) : Source :=
-  if commuted then VeriTile.Bench.Repairs.MeanReduction.indexCommutedSourcePastedKernel
-  else VeriTile.Bench.Repairs.MeanReduction.sourceKernel
+  if commuted then VeriTile.Bench.Repairs.MeanReduction.mean_dim_kernel_index_commutedKernel
+  else VeriTile.Bench.Repairs.MeanReduction.mean_dim_kernel
 
 /-- Mathematical view derived from that same repaired source. -/
 noncomputable def mean_dim_kernel (X Mean : RegionName) (M N BM BN : Nat) : ComputeKernel :=

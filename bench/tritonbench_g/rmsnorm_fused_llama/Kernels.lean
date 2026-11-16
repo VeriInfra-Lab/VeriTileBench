@@ -18,9 +18,10 @@ def callSignature : CallSignature where
   readPorts := ["X","W"]
   writePorts := ["Y"]
 
-def runtimeKernel (X Y W : RegionName) (N B : Nat) (stride : Nat := N) : ComputeKernel :=
+def _rms_norm_fwd_fusedKernel (X Y W : RegionName) (N B : Nat) (stride : Nat := N) : ComputeKernel :=
   let BLOCK_SIZE := B
   with_triton_call callSignature call_args [stride := stride,N := N] in triton {
+    # Map the program id to the row of X and Y it should compute.
     row = tl.program_id(0)
     Y += row * stride
     X += row * stride
@@ -44,9 +45,10 @@ def runtimeKernel (X Y W : RegionName) (N B : Nat) (stride : Nat := N) : Compute
         tl.store(Y + cols, y.to(tl.float16), mask=mask)
   }
 
-def runtimeCandidateKernel (X Y W : RegionName) (N B : Nat) (stride : Nat := N) : ComputeKernel :=
+def _rms_norm_fwd_fused_index_commutedKernel (X Y W : RegionName) (N B : Nat) (stride : Nat := N) : ComputeKernel :=
   let BLOCK_SIZE := B
   with_triton_call callSignature call_args [stride := stride,N := N] in triton {
+    # Map the program id to the row of X and Y it should compute.
     row = tl.program_id(0)
     Y += stride * row
     X += row * stride
@@ -71,10 +73,10 @@ def runtimeCandidateKernel (X Y W : RegionName) (N B : Nat) (stride : Nat := N) 
   }
 
 def kernel (X Y W : RegionName) (N B : Nat) (eps : ℝ) : ComputeKernel :=
-  (runtimeKernel X Y W N B).withScalarArguments [ScalarArgument.fp32 "eps" eps]
+  (_rms_norm_fwd_fusedKernel X Y W N B).withScalarArguments [ScalarArgument.fp32 "eps" eps]
 
 def indexCommutedKernel (X Y W : RegionName) (N B : Nat) (eps : ℝ) : ComputeKernel :=
-  (runtimeCandidateKernel X Y W N B).withScalarArguments [ScalarArgument.fp32 "eps" eps]
+  (_rms_norm_fwd_fused_index_commutedKernel X Y W N B).withScalarArguments [ScalarArgument.fp32 "eps" eps]
 
 end
 end VeriTile.Bench.Repairs.RmsnormFusedLlama

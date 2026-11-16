@@ -17,7 +17,7 @@ specification square_kernel_correctness (n B : Nat) :
     Spec.Real (squareIO n B ⊨ fun xs i => xs i * xs i) :=
   by simpa only [mathematical] using KernelReal.implements n B
 
-#specNonCircular mathematical avoiding [fp32Kernel, indexCommutedKernel]
+#specNonCircular mathematical avoiding [square_kernel, square_index_commuted_kernel]
 #axiomsClean square_kernel_correctness
 #stmtSurfaceSubset square_kernel_correctness ⊆
   [Spec.Real, squareIO, MaskedKernelIO₁.Implements, MaskedKernelIO₁.B]

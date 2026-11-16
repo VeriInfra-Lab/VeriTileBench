@@ -12,7 +12,7 @@ def signature : CallSignature where
   scalars := [("stride_qz",.integer),("stride_qh",.integer),("stride_qm",.integer),("stride_qk",.integer),("stride_kz",.integer),("stride_kh",.integer),("stride_kn",.integer),("stride_kk",.integer),("stride_vz",.integer),("stride_vh",.integer),("stride_vk",.integer),("stride_vn",.integer),("stride_oz",.integer),("stride_oh",.integer),("stride_om",.integer),("stride_on",.integer),("Z",.integer),("H",.integer),("N_CTX",.integer)]
   constexpr := ["HEAD_DIM","BLOCK_M","BLOCK_N","STAGE"]
 
-def originalSource : StatementJitFunction := with_triton_params (acc, l_i, m_i, q, q_scale, K_ptrs, K_scale_ptr, V_ptrs, start_m, BLOCK_M, HEAD_DIM, BLOCK_N, STAGE, offs_m, offs_n, N_CTX, stride_kn, stride_vk) constexpr_args [BLOCK_M, HEAD_DIM, BLOCK_N, STAGE, offs_m, offs_n, N_CTX] in triton {
+def _attn_fwd_innerSource : StatementJitFunction := with_triton_params (acc, l_i, m_i, q, q_scale, K_ptrs, K_scale_ptr, V_ptrs, start_m, BLOCK_M, HEAD_DIM, BLOCK_N, STAGE, offs_m, offs_n, N_CTX, stride_kn, stride_vk) constexpr_args [BLOCK_M, HEAD_DIM, BLOCK_N, STAGE, offs_m, offs_n, N_CTX] in triton {
     lo, hi = 0, N_CTX
     for start_n in range(lo, hi, BLOCK_N):
         start_n = tl.multiple_of(start_n, BLOCK_N)
@@ -40,9 +40,9 @@ def originalSource : StatementJitFunction := with_triton_params (acc, l_i, m_i, 
     return acc, l_i
 }
 
-def originalKernel (Q K V Q_scale K_scale Out : RegionName) (stride_qz stride_qh stride_qm stride_qk stride_kz stride_kh stride_kn stride_kk stride_vz stride_vh stride_vk stride_vn stride_oz stride_oh stride_om stride_on Z H N_CTX HEAD_DIM BLOCK_M BLOCK_N STAGE : Nat) : ComputeKernel :=
+def _attn_fwdKernel (Q K V Q_scale K_scale Out : RegionName) (stride_qz stride_qh stride_qm stride_qk stride_kz stride_kh stride_kn stride_kk stride_vz stride_vh stride_vk stride_vn stride_oz stride_oh stride_om stride_on Z H N_CTX HEAD_DIM BLOCK_M BLOCK_N STAGE : Nat) : ComputeKernel :=
   with_triton_call signature call_args [stride_qz := stride_qz, stride_qh := stride_qh, stride_qm := stride_qm, stride_qk := stride_qk, stride_kz := stride_kz, stride_kh := stride_kh, stride_kn := stride_kn, stride_kk := stride_kk, stride_vz := stride_vz, stride_vh := stride_vh, stride_vk := stride_vk, stride_vn := stride_vn, stride_oz := stride_oz, stride_oh := stride_oh, stride_om := stride_om, stride_on := stride_on, Z := Z, H := H, N_CTX := N_CTX]
-    jit_functions [_attn_fwd_inner := originalSource] in triton {
+    jit_functions [_attn_fwd_inner := _attn_fwd_innerSource] in triton {
     start_m = tl.program_id(0).to(tl.int64)
     off_hz = tl.program_id(1).to(tl.int64)
 
@@ -79,7 +79,7 @@ def originalKernel (Q K V Q_scale K_scale Out : RegionName) (stride_qz stride_qh
     tl.store(O_block_ptr, acc.to(Out.type.element_ty), mask = (offs_m[:, None] < N_CTX) & ((tl.arange(0, 128) < 96)[None, :]))
 }
 
-def candidateSource : StatementJitFunction := with_triton_params (acc, l_i, m_i, q, q_scale, K_ptrs, K_scale_ptr, V_ptrs, start_m, BLOCK_M, HEAD_DIM, BLOCK_N, STAGE, offs_m, offs_n, N_CTX, stride_kn, stride_vk) constexpr_args [BLOCK_M, HEAD_DIM, BLOCK_N, STAGE, offs_m, offs_n, N_CTX] in triton {
+def _attn_fwd_inner_index_shiftSource : StatementJitFunction := with_triton_params (acc, l_i, m_i, q, q_scale, K_ptrs, K_scale_ptr, V_ptrs, start_m, BLOCK_M, HEAD_DIM, BLOCK_N, STAGE, offs_m, offs_n, N_CTX, stride_kn, stride_vk) constexpr_args [BLOCK_M, HEAD_DIM, BLOCK_N, STAGE, offs_m, offs_n, N_CTX] in triton {
     lo, hi = 0, N_CTX
     for start_n in range(lo, hi, BLOCK_N):
         start_n = tl.multiple_of(start_n, BLOCK_N)
@@ -107,9 +107,9 @@ def candidateSource : StatementJitFunction := with_triton_params (acc, l_i, m_i,
     return acc, l_i
 }
 
-def candidateKernel (Q K V Q_scale K_scale Out : RegionName) (stride_qz stride_qh stride_qm stride_qk stride_kz stride_kh stride_kn stride_kk stride_vz stride_vh stride_vk stride_vn stride_oz stride_oh stride_om stride_on Z H N_CTX HEAD_DIM BLOCK_M BLOCK_N STAGE : Nat) : ComputeKernel :=
+def _attn_fwd_index_shiftKernel (Q K V Q_scale K_scale Out : RegionName) (stride_qz stride_qh stride_qm stride_qk stride_kz stride_kh stride_kn stride_kk stride_vz stride_vh stride_vk stride_vn stride_oz stride_oh stride_om stride_on Z H N_CTX HEAD_DIM BLOCK_M BLOCK_N STAGE : Nat) : ComputeKernel :=
   with_triton_call signature call_args [stride_qz := stride_qz, stride_qh := stride_qh, stride_qm := stride_qm, stride_qk := stride_qk, stride_kz := stride_kz, stride_kh := stride_kh, stride_kn := stride_kn, stride_kk := stride_kk, stride_vz := stride_vz, stride_vh := stride_vh, stride_vk := stride_vk, stride_vn := stride_vn, stride_oz := stride_oz, stride_oh := stride_oh, stride_om := stride_om, stride_on := stride_on, Z := Z, H := H, N_CTX := N_CTX]
-    jit_functions [_attn_fwd_inner_index_shift := candidateSource] in triton {
+    jit_functions [_attn_fwd_inner_index_shift := _attn_fwd_inner_index_shiftSource] in triton {
     start_m = tl.program_id(0).to(tl.int64)
     off_hz = tl.program_id(1).to(tl.int64)
 

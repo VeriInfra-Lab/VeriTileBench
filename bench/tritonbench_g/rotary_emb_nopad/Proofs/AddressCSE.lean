@@ -12,16 +12,16 @@ set_option linter.unusedSimpArgs false
 variable {α : Type} [Inhabited α]
 
 /-- Proof-only decomposition; neither authoritative source is generated here. -/
-def uPrefix (p : Kernels.UncachedLayout) := (Kernels.uncachedKernel p).surfaceBody.take 11
-def uSharedPrefix (p : Kernels.UncachedLayout) := (Kernels.uncachedSharedKernel p).surfaceBody.take 11
-def uSuffix (p : Kernels.UncachedLayout) := (Kernels.uncachedKernel p).surfaceBody.drop 11
+def uPrefix (p : Kernels.UncachedLayout) := (Kernels.rotary_embedding_kernel p).surfaceBody.take 11
+def uSharedPrefix (p : Kernels.UncachedLayout) := (Kernels.rotary_embedding_kernel_sharedKernel p).surfaceBody.take 11
+def uSuffix (p : Kernels.UncachedLayout) := (Kernels.rotary_embedding_kernel p).surfaceBody.drop 11
 
 theorem u_body (p : Kernels.UncachedLayout) :
-    (Kernels.uncachedSharedKernel p).surfaceBody = uSharedPrefix p ++ uSuffix p := rfl
+    (Kernels.rotary_embedding_kernel_sharedKernel p).surfaceBody = uSharedPrefix p ++ uSuffix p := rfl
 
 theorem u_prefix_run (M : Algebra α) (p : Kernels.UncachedLayout) (s : State α) :
     run M (uPrefix p) s = run M (uSharedPrefix p) s := by
-  simp [uPrefix,uSharedPrefix,Kernels.uncachedKernel,Kernels.uncachedSharedKernel,
+  simp [uPrefix,uSharedPrefix,Kernels.rotary_embedding_kernel,Kernels.rotary_embedding_kernel_sharedKernel,
     ComputeKernel.surfaceBody,List.take,run,step,evalExpr,evalComputeOp,evalOp_unfold,
     numeric,numericLt,natLt,bop,integralFloorDiv,integralMod,
     ofFloat,toFloat,Region.cast,Option.bind,ComputeDType.eraseDType,
@@ -37,7 +37,7 @@ theorem u_prefix_safe (M : Algebra α) (p : Kernels.UncachedLayout)
     Safety.traceSafeList M bounds (uPrefix p) s ↔
       Safety.traceSafeList M bounds (uSharedPrefix p) s := by
   simp (config := { maxSteps := 200000 }) [uPrefix,uSharedPrefix,
-    Kernels.uncachedKernel,Kernels.uncachedSharedKernel,ComputeKernel.surfaceBody,List.take,
+    Kernels.rotary_embedding_kernel,Kernels.rotary_embedding_kernel_sharedKernel,ComputeKernel.surfaceBody,List.take,
     Safety.traceSafeList_cons,Safety.traceSafeList_nil,
     Safety.stepSafe_unfold,Safety.safeExpr_unfold,Safety.safeCompute_unfold,
     Safety.safeOp_unfold,Safety.safeAddress_unfold,Safety.safeMask_unfold,
@@ -48,32 +48,32 @@ theorem u_prefix_safe (M : Algebra α) (p : Kernels.UncachedLayout)
   try rfl
 
 theorem uncached_execution (M : Algebra α) (p : Kernels.UncachedLayout) (s : State α) :
-    exec M (Kernels.uncachedKernel p) s = exec M (Kernels.uncachedSharedKernel p) s := by
-  change run M (Kernels.uncachedKernel p).surfaceBody s = run M (Kernels.uncachedSharedKernel p).surfaceBody s
+    exec M (Kernels.rotary_embedding_kernel p) s = exec M (Kernels.rotary_embedding_kernel_sharedKernel p) s := by
+  change run M (Kernels.rotary_embedding_kernel p).surfaceBody s = run M (Kernels.rotary_embedding_kernel_sharedKernel p).surfaceBody s
   rw [u_body]
-  conv_lhs => rw [← List.take_append_drop 11 (Kernels.uncachedKernel p).surfaceBody]
+  conv_lhs => rw [← List.take_append_drop 11 (Kernels.rotary_embedding_kernel p).surfaceBody]
   change run M (uPrefix p ++ uSuffix p) s = _
   rw [run_append,run_append,u_prefix_run]
 
 theorem uncached_safe (M : Algebra α) (p : Kernels.UncachedLayout)
     (bounds : RegionName → Nat) (s : State α) :
-    TraceSafe M bounds (Kernels.uncachedKernel p) s ↔ TraceSafe M bounds (Kernels.uncachedSharedKernel p) s := by
+    TraceSafe M bounds (Kernels.rotary_embedding_kernel p) s ↔ TraceSafe M bounds (Kernels.rotary_embedding_kernel_sharedKernel p) s := by
   unfold TraceSafe
   rw [u_body]
-  conv_lhs => rw [← List.take_append_drop 11 (Kernels.uncachedKernel p).surfaceBody]
+  conv_lhs => rw [← List.take_append_drop 11 (Kernels.rotary_embedding_kernel p).surfaceBody]
   change Safety.traceSafeList M bounds (uPrefix p ++ uSuffix p) s ↔ _
   simp only [Safety.traceSafeList_append,u_prefix_run,u_prefix_safe]
 
 def cBody (p : Kernels.CachedLayout) : List ComputeStmt :=
-  match (Kernels.cachedKernel p).surfaceBody.drop 1 with
+  match (Kernels.fused_rotary_embedding_kernel_v2Kernel p).surfaceBody.drop 1 with
   | [.ifThen _ body] => body
   | _ => []
 def cSharedBody (p : Kernels.CachedLayout) : List ComputeStmt :=
-  match (Kernels.cachedSharedKernel p).surfaceBody.drop 1 with
+  match (Kernels.fused_rotary_embedding_kernel_v2_sharedKernel p).surfaceBody.drop 1 with
   | [.ifThen _ body] => body
   | _ => []
 def cCond (p : Kernels.CachedLayout) : Op .bool [] :=
-  match (Kernels.cachedKernel p).surfaceBody.drop 1 with
+  match (Kernels.fused_rotary_embedding_kernel_v2Kernel p).surfaceBody.drop 1 with
   | [.ifThen cond _] => cond
   | _ => .constBool Bool.false
 
@@ -88,12 +88,12 @@ theorem c_prefix_run (M : Algebra α) (p : Kernels.CachedLayout) (s : State α) 
     run M (cPrefix p) s = run M (cSharedPrefix p) s := by
   cases h : s.regs .int [] "block_head_index" with
   | none =>
-    simp [cPrefix,cSharedPrefix,cBody,cSharedBody,Kernels.cachedKernel,Kernels.cachedSharedKernel,
+    simp [cPrefix,cSharedPrefix,cBody,cSharedBody,Kernels.fused_rotary_embedding_kernel_v2Kernel,Kernels.fused_rotary_embedding_kernel_v2_sharedKernel,
       ComputeKernel.surfaceBody,List.drop,List.take,run,step,evalExpr,evalComputeOp,
       evalOp_unfold,numeric,numericLt,natLt,bop,integralFloorDiv,integralMod,
       ofFloat,toFloat,Region.cast,Option.bind,ComputeDType.eraseDType,h]
   | some v =>
-    simp [cPrefix,cSharedPrefix,cBody,cSharedBody,Kernels.cachedKernel,Kernels.cachedSharedKernel,
+    simp [cPrefix,cSharedPrefix,cBody,cSharedBody,Kernels.fused_rotary_embedding_kernel_v2Kernel,Kernels.fused_rotary_embedding_kernel_v2_sharedKernel,
       ComputeKernel.surfaceBody,List.drop,List.take,run,step,evalExpr,evalComputeOp,
       evalOp_unfold,numeric,numericLt,natLt,bop,integralFloorDiv,integralMod,
       ofFloat,toFloat,Region.cast,Option.bind,ComputeDType.eraseDType,h,
@@ -108,7 +108,7 @@ theorem c_prefix_safe (M : Algebra α) (p : Kernels.CachedLayout)
     (bounds : RegionName → Nat) (s : State α) :
     Safety.traceSafeList M bounds (cPrefix p) s ↔
       Safety.traceSafeList M bounds (cSharedPrefix p) s := by
-  simp [cPrefix,cSharedPrefix,cBody,cSharedBody,Kernels.cachedKernel,Kernels.cachedSharedKernel,
+  simp [cPrefix,cSharedPrefix,cBody,cSharedBody,Kernels.fused_rotary_embedding_kernel_v2Kernel,Kernels.fused_rotary_embedding_kernel_v2_sharedKernel,
     ComputeKernel.surfaceBody,List.drop,List.take,Safety.traceSafeList_cons,
     Safety.traceSafeList_nil,Safety.stepSafe_unfold,Safety.safeExpr_unfold,
     Safety.safeCompute_unfold,Safety.safeOp_unfold]
@@ -143,23 +143,23 @@ theorem c_tail_safe (M : Algebra α) (p : Kernels.CachedLayout)
   simp
 
 theorem cached_execution (M : Algebra α) (p : Kernels.CachedLayout) (s : State α) :
-    exec M (Kernels.cachedKernel p) s = exec M (Kernels.cachedSharedKernel p) s := by
-  have oldBody : (Kernels.cachedKernel p).surfaceBody =
-      (Kernels.cachedKernel p).surfaceBody.take 1 ++ [.ifThen (cCond p) (cBody p)] := rfl
-  have newBody : (Kernels.cachedSharedKernel p).surfaceBody =
-      (Kernels.cachedKernel p).surfaceBody.take 1 ++ [.ifThen (cCond p) (cSharedBody p)] := rfl
-  change run M (Kernels.cachedKernel p).surfaceBody s = run M (Kernels.cachedSharedKernel p).surfaceBody s
+    exec M (Kernels.fused_rotary_embedding_kernel_v2Kernel p) s = exec M (Kernels.fused_rotary_embedding_kernel_v2_sharedKernel p) s := by
+  have oldBody : (Kernels.fused_rotary_embedding_kernel_v2Kernel p).surfaceBody =
+      (Kernels.fused_rotary_embedding_kernel_v2Kernel p).surfaceBody.take 1 ++ [.ifThen (cCond p) (cBody p)] := rfl
+  have newBody : (Kernels.fused_rotary_embedding_kernel_v2_sharedKernel p).surfaceBody =
+      (Kernels.fused_rotary_embedding_kernel_v2Kernel p).surfaceBody.take 1 ++ [.ifThen (cCond p) (cSharedBody p)] := rfl
+  change run M (Kernels.fused_rotary_embedding_kernel_v2Kernel p).surfaceBody s = run M (Kernels.fused_rotary_embedding_kernel_v2_sharedKernel p).surfaceBody s
   rw [oldBody,newBody,run_append,run_append]
-  exact congrArg (fun f => (run M ((Kernels.cachedKernel p).surfaceBody.take 1) s).bind f)
+  exact congrArg (fun f => (run M ((Kernels.fused_rotary_embedding_kernel_v2Kernel p).surfaceBody.take 1) s).bind f)
     (funext (c_tail_run M p))
 
 theorem cached_safe (M : Algebra α) (p : Kernels.CachedLayout)
     (bounds : RegionName → Nat) (s : State α) :
-    TraceSafe M bounds (Kernels.cachedKernel p) s ↔ TraceSafe M bounds (Kernels.cachedSharedKernel p) s := by
-  have oldBody : (Kernels.cachedKernel p).surfaceBody =
-      (Kernels.cachedKernel p).surfaceBody.take 1 ++ [.ifThen (cCond p) (cBody p)] := rfl
-  have newBody : (Kernels.cachedSharedKernel p).surfaceBody =
-      (Kernels.cachedKernel p).surfaceBody.take 1 ++ [.ifThen (cCond p) (cSharedBody p)] := rfl
+    TraceSafe M bounds (Kernels.fused_rotary_embedding_kernel_v2Kernel p) s ↔ TraceSafe M bounds (Kernels.fused_rotary_embedding_kernel_v2_sharedKernel p) s := by
+  have oldBody : (Kernels.fused_rotary_embedding_kernel_v2Kernel p).surfaceBody =
+      (Kernels.fused_rotary_embedding_kernel_v2Kernel p).surfaceBody.take 1 ++ [.ifThen (cCond p) (cBody p)] := rfl
+  have newBody : (Kernels.fused_rotary_embedding_kernel_v2_sharedKernel p).surfaceBody =
+      (Kernels.fused_rotary_embedding_kernel_v2Kernel p).surfaceBody.take 1 ++ [.ifThen (cCond p) (cSharedBody p)] := rfl
   unfold TraceSafe
   rw [oldBody,newBody]
   simp only [Safety.traceSafeList_append]

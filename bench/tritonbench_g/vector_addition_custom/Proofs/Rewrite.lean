@@ -12,24 +12,24 @@ set_option maxRecDepth 24000
 
 /-- Execute the original source with both explicit FP32 load boundaries. -/
 def originalExecution {α : Type} [Inhabited α] (M : Algebra α) (n B : Nat) (s : State α) :
-    {t : State α // FP.Structural.exec (engine M) (add_kernel "x" "y" "out" n B) s = some t} := by
+    {t : State α // FP.Structural.exec (engine M) (_add_kernel "x" "y" "out" n B) s = some t} := by
   refine ⟨?_, ?_⟩
   swap
-  simp [add_kernel, FP.Structural.exec, run, step, evalExpr, evalComputeOp,
+  simp [_add_kernel, FP.Structural.exec, run, step, evalExpr, evalComputeOp,
     evalOp_unfold, ComputeDType.eraseDType, Option.bind, numeric, numericLt, natLt, bop, store, Region.cast]
   rfl
 
 def commutedExecution {α : Type} [Inhabited α] (M : Algebra α) (n B : Nat) (s : State α) :
-    {t : State α // FP.Structural.exec (engine M) (add_commuted_kernel "x" "y" "out" n B) s = some t} := by
+    {t : State α // FP.Structural.exec (engine M) (_add_commuted_kernel "x" "y" "out" n B) s = some t} := by
   refine ⟨?_, ?_⟩
   swap
-  simp [add_commuted_kernel, FP.Structural.exec, run, step, evalExpr, evalComputeOp,
+  simp [_add_commuted_kernel, FP.Structural.exec, run, step, evalExpr, evalComputeOp,
     evalOp_unfold, ComputeDType.eraseDType, Option.bind, numeric, numericLt, natLt, bop, store, Region.cast]
   rfl
 
 /-- The actual store mask and operands after the original load prefix. -/
 def additionSite (n B : Nat) : Site :=
-  .maskedBinaryFP32 (VeriTile.Triton.Source.prefixBeforeStore (add_kernel "x" "y" "out" n B).surfaceBody)
+  .maskedBinaryFP32 (VeriTile.Triton.Source.prefixBeforeStore (_add_kernel "x" "y" "out" n B).surfaceBody)
     [B] (.lt .nat .scalarR (.ref .nat [B] "offs") (.constNat n)) (.ref .real [B] "a") (.ref .real [B] "b")
 
 /-- Actual source load result; masked values remain arbitrary. -/
@@ -45,7 +45,7 @@ theorem site_values_iff {α : Type} [Inhabited α] (M : Algebra α) (D : Domain 
       ∀ i : TileIndex [B], s.pids 0 * B + i.1.val < n →
         D .finite (loadedValue M "x" n B s i) ∧ D .finite (loadedValue M "y" n B s i) := by
   simp [additionSite, Site.Holds, VeriTile.Triton.Source.prefixBefore,
-    VeriTile.Triton.Source.prefixBeforeStore, add_kernel, ComputeKernel.surfaceBody,
+    VeriTile.Triton.Source.prefixBeforeStore, _add_kernel, ComputeKernel.surfaceBody,
     run, step, evalExpr, evalComputeOp, evalOp_unfold, Option.bind, numeric,
     numericLt, natLt, bop, Region.cast, loadedValue,
     engine, Algebra.withDefaultPrecision, resolvePrecision]

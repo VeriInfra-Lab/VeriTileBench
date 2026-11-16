@@ -21,7 +21,7 @@ def sourceSignature : CallSignature where
   writePorts := ["Q","K"]
 
 /-- Actual selected original source. -/
-def sourceKernel (p : Layout) : ComputeKernel :=
+def _rotary_kernel (p : Layout) : ComputeKernel :=
   let Q := p.Q
   let K := p.K
   let Cos := p.Cos
@@ -146,7 +146,7 @@ def sourceKernel (p : Layout) : ComputeKernel :=
   }
 
 /-- Complete pre-existing integer index candidate, with a newly authored Python counterpart. -/
-def indexCommutedKernel (p : Layout) : ComputeKernel :=
+def _rotary_kernel_index_commutedKernel (p : Layout) : ComputeKernel :=
   let Q := p.Q
   let K := p.K
   let Cos := p.Cos

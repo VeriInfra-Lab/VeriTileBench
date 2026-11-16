@@ -34,7 +34,7 @@ theorem load_reduce_kernel_correct
     (x_ptr y_ptr : RegionName)
     (stride_xm stride_xn stride_y BLOCK_M BLOCK_N : Nat)
     (s s' : BlockState)
-    (hExec : exec (load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y
+    (hExec : exec (_root_.VeriTile.Bench.TritonBenchG.MatrixReduction.load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y
           BLOCK_M BLOCK_N) s = some s') :
     ∀ i : Fin BLOCK_M,
       s'.readMem y_ptr i.val =
@@ -64,7 +64,7 @@ theorem load_reduce_kernel_compute_correct
     (stride_xm stride_xn stride_y BLOCK_M BLOCK_N : Nat)
     (s : BlockState) :
     ComputeCorrect.Realizes_without_Rounding
-      (kernel := load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y
+      (kernel := _root_.VeriTile.Bench.TritonBenchG.MatrixReduction.load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y
         BLOCK_M BLOCK_N)
       (initialState := s)
       (write := fun i : Fin BLOCK_M => some (y_ptr, i.val))
@@ -196,7 +196,7 @@ theorem matrixReduceSpec_eq_of (x_ptr : RegionName)
 /-- The kernel sits inside the flat-memory bridge's covered fragment. -/
 theorem matrix_reduction_flattenOk (x_ptr y_ptr : RegionName)
     (stride_xm stride_xn stride_y BLOCK_M BLOCK_N : Nat) :
-    ((load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y BLOCK_M
+    ((_root_.VeriTile.Bench.TritonBenchG.MatrixReduction.load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y BLOCK_M
       BLOCK_N).toAlgKernel).FlattenOk := by
   unfold Kernel.FlattenOk
   simp [real_projection, ComputeKernel.toAlgKernel, realBody, StmtList.FlattenOk,
@@ -208,7 +208,7 @@ theorem matrix_reduction_flattenOk (x_ptr y_ptr : RegionName)
 theorem matrix_reduction_terminates (x_ptr y_ptr : RegionName)
     (stride_xm stride_xn stride_y BLOCK_M BLOCK_N : Nat) (hBN : 0 < BLOCK_N)
     (s : BlockState) :
-    ∃ s1, exec (load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y
+    ∃ s1, exec (_root_.VeriTile.Bench.TritonBenchG.MatrixReduction.load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y
       BLOCK_M BLOCK_N) s = some s1 := by
   simp [exec, real_projection, ComputeKernel.toAlgKernel, realBody, stepStmts, stepStmt, evalOp.eq_def,
     Tile.reduceMax, Tile.reduceMaxDrop, TileShape.axisDim, TileShape.eraseAxis,
@@ -221,7 +221,7 @@ theorem matrix_reduction_traceSafe (x_ptr y_ptr : RegionName)
     (hX : ∀ idx : TileIndex [BLOCK_M, BLOCK_N],
       xOffset stride_xm stride_xn BLOCK_M BLOCK_N idx < bounds x_ptr)
     (hY : ∀ i : Fin BLOCK_M, i.val < bounds y_ptr) :
-    ((load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y BLOCK_M
+    ((_root_.VeriTile.Bench.TritonBenchG.MatrixReduction.load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y BLOCK_M
       BLOCK_N).toAlgKernel).TraceSafe bounds s := by
   simp [Kernel.TraceSafe, real_projection, ComputeKernel.toAlgKernel, realBody, Stmt.TraceSafeList, Stmt.TraceSafe,
     Op.SafeAt, MaskOpt.SafeAt, MaskOpt.Active, MemAccess.SafeAt,
@@ -241,7 +241,7 @@ theorem matrix_reduction_traceSafe (x_ptr y_ptr : RegionName)
 theorem matrix_reduction_frame (x_ptr y_ptr : RegionName)
     (stride_xm stride_xn stride_y BLOCK_M BLOCK_N : Nat) (hBN : 0 < BLOCK_N)
     (s s' : BlockState)
-    (hExec : exec (load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y
+    (hExec : exec (_root_.VeriTile.Bench.TritonBenchG.MatrixReduction.load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y
       BLOCK_M BLOCK_N) s = some s') :
     ∀ (r : RegionName) (o : Nat), (r ≠ y_ptr ∨ ∀ i : Fin BLOCK_M, o ≠ i.val) →
       s'.mem r o = s.mem r o := by
@@ -265,7 +265,7 @@ theorem matrix_reduction_region_run (x_ptr y_ptr : RegionName)
     (hx : ∀ idx : TileIndex [BLOCK_M, BLOCK_N],
       s₀.readMem x_ptr (xOffset stride_xm stride_xn BLOCK_M BLOCK_N idx)
         = xs idx) :
-    ∃ s1, exec (load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y
+    ∃ s1, exec (_root_.VeriTile.Bench.TritonBenchG.MatrixReduction.load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y
         BLOCK_M BLOCK_N) s₀ = some s1
       ∧ (∀ idx : TileIndex [BLOCK_M, BLOCK_N],
           s1.readMem y_ptr idx.1.val
@@ -289,7 +289,7 @@ read-active (no `boundary_check`); **column 0** is write-active and writes
 def matrixReduceIO (x_ptr y_ptr : RegionName)
     (stride_xm stride_xn stride_y BLOCK_M BLOCK_N : Nat) :
     MaskedTileKernelIO₁ where
-  kernel := load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y BLOCK_M
+  kernel := _root_.VeriTile.Bench.TritonBenchG.MatrixReduction.load_reduce_kernel x_ptr y_ptr stride_xm stride_xn stride_y BLOCK_M
     BLOCK_N
   projection := by simp [real_projection, ComputeKernel.toAlgKernel]
   inp := x_ptr

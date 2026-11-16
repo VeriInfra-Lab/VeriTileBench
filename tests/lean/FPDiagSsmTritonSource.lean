@@ -47,8 +47,8 @@ theorem real_forward_accesses (storage : Storage) (swapped : Bool) :
        ("load",storageType storage,Bool.true),("store",storageType storage,Bool.true)] := by
   cases storage <;> cases swapped <;>
     simp (config := {maxSteps := 500000}) [forward,
-      VeriTile.Bench.Repairs.DiagSsmTriton.forwardKernel,
-      VeriTile.Bench.Repairs.DiagSsmTriton.forwardCandidateKernel,
+      VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_forward_kernel,
+      VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_forward_kernel_index_commutedKernel,
       ComputeKernel.surfaceBody, accesses, algorithmAccesses, loaded, storageType,
       ComputeStmt.toAlgorithm?, ComputeStmt.listToAlgorithm?,
       ComputeExpr.toAlgorithm?, ComputeOp.toAlgorithm?, ComputeDType.eraseDType,
@@ -60,8 +60,8 @@ theorem real_backward_accesses (storage : Storage) (swapped : Bool) :
       List.replicate 3 ("store",storageType storage,Bool.true) := by
   cases storage <;> cases swapped <;>
     simp (config := {maxSteps := 500000}) [backward,
-      VeriTile.Bench.Repairs.DiagSsmTriton.backwardKernel,
-      VeriTile.Bench.Repairs.DiagSsmTriton.backwardCandidateKernel,
+      VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_backward_kernel,
+      VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_backward_kernel_index_commutedKernel,
       ComputeKernel.surfaceBody, accesses, algorithmAccesses, loaded, storageType,
       ComputeStmt.toAlgorithm?, ComputeStmt.listToAlgorithm?,
       ComputeExpr.toAlgorithm?, ComputeOp.toAlgorithm?, ComputeDType.eraseDType,
@@ -73,8 +73,8 @@ theorem complex_forward_accesses (swapped : Bool) :
       List.replicate 2 ("store",TileDType.real,Bool.true) := by
   cases swapped <;>
     simp (config := {maxSteps := 500000}) [complexForward,
-      VeriTile.Bench.Repairs.DiagSsmTriton.complexForwardKernel,
-      VeriTile.Bench.Repairs.DiagSsmTriton.complexForwardCandidateKernel,
+      VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_forward_kernel_complexKernel,
+      VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_forward_kernel_complex_index_commutedKernel,
       ComputeKernel.surfaceBody, accesses, algorithmAccesses, loaded, storageType,
       ComputeStmt.toAlgorithm?, ComputeStmt.listToAlgorithm?,
       ComputeExpr.toAlgorithm?, ComputeOp.toAlgorithm?, ComputeDType.eraseDType,
@@ -86,8 +86,8 @@ theorem complex_backward_accesses (swapped : Bool) :
       List.replicate 6 ("store",TileDType.real,Bool.true) := by
   cases swapped <;>
     simp (config := {maxSteps := 500000}) [complexBackward,
-      VeriTile.Bench.Repairs.DiagSsmTriton.complexBackwardKernel,
-      VeriTile.Bench.Repairs.DiagSsmTriton.complexBackwardCandidateKernel,
+      VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_backward_kernel_complexKernel,
+      VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_backward_kernel_complex_index_commutedKernel,
       ComputeKernel.surfaceBody, accesses, algorithmAccesses, loaded, storageType,
       ComputeStmt.toAlgorithm?, ComputeStmt.listToAlgorithm?,
       ComputeExpr.toAlgorithm?, ComputeOp.toAlgorithm?, ComputeDType.eraseDType,

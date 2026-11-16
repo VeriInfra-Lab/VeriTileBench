@@ -12,7 +12,7 @@ def callSignature : CallSignature where
     ("stride_bn",.integer),("stride_cm",.integer),("stride_cn",.integer)]
   constexpr := ["BLOCK_SIZE_M","BLOCK_SIZE_N","BLOCK_SIZE_K","GROUP_SIZE_M"]
 
-def bodyKernel (a_ptr b_ptr c_ptr : RegionName)
+def matmul_kernel (a_ptr b_ptr c_ptr : RegionName)
     (BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M : Nat) : ComputeKernel :=
   with_triton_signature callSignature in triton {
     M = tl.cast(M, tl.uint64)
@@ -63,9 +63,9 @@ noncomputable def arguments (p : Core.Parameters) : List ScalarArgument :=
     ScalarArgument.integer "stride_bn" p.weightColumn,ScalarArgument.integer "stride_cm" p.outputRow,
     ScalarArgument.integer "stride_cn" p.outputColumn]
 noncomputable def source (p : Core.Parameters) : ComputeKernel :=
-  (bodyKernel p.input p.weight p.output p.blockRows p.blockColumns p.blockInner p.groupRows).withScalarArguments (arguments p)
+  (matmul_kernel p.input p.weight p.output p.blockRows p.blockColumns p.blockInner p.groupRows).withScalarArguments (arguments p)
 /-- Reuse the loop-invariant row/column comparisons. -/
-def maskHoistedBody (a_ptr b_ptr c_ptr : RegionName)
+def matmul_kernel_mask_hoistedKernel (a_ptr b_ptr c_ptr : RegionName)
     (BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M : Nat) : ComputeKernel :=
   with_triton_signature callSignature in triton {
     M = tl.cast(M, tl.uint64)
@@ -84,8 +84,8 @@ def maskHoistedBody (a_ptr b_ptr c_ptr : RegionName)
     group_id = pid // num_pid_in_group
     first_pid_m = group_id * GROUP_SIZE_M
     group_size_m = tl.cast(min(num_pid_m - first_pid_m, GROUP_SIZE_M), tl.uint64)
-    pid_m = first_pid_m + (pid % group_size_m)
-    pid_n = (pid % num_pid_in_group) // group_size_m
+    pid_m = first_pid_m + pid % group_size_m
+    pid_n = pid % num_pid_in_group // group_size_m
     offs_am = pid_m * BLOCK_SIZE_M + tl.arange(0, BLOCK_SIZE_M).to(tl.uint64)
     offs_bn = pid_n * BLOCK_SIZE_N + tl.arange(0, BLOCK_SIZE_N).to(tl.uint64)
     offs_k = tl.arange(0, BLOCK_SIZE_K).to(tl.uint64)
@@ -94,18 +94,17 @@ def maskHoistedBody (a_ptr b_ptr c_ptr : RegionName)
     a_ptrs = a_ptr + (offs_am[:, None] * stride_am + offs_k[None, :] * stride_ak)
     b_ptrs = b_ptr + (offs_k[:, None] * stride_bk + offs_bn[None, :] * stride_bn)
     accumulator = tl.zeros((BLOCK_SIZE_M, BLOCK_SIZE_N), dtype=tl.float32)
-    for k in range(0, tl.cdiv(K, BLOCK_SIZE_K)) {
-      a = tl.load(a_ptrs, mask=row_mask[:, None] & (offs_k[None, :] < K - k * BLOCK_SIZE_K), other=0.0)
-      b = tl.load(b_ptrs, mask=(offs_k[:, None] < K - k * BLOCK_SIZE_K) & column_mask[None, :], other=0.0)
-      accumulator += tl.dot(a, b)
-      a_ptrs += BLOCK_SIZE_K * stride_ak
-      b_ptrs += BLOCK_SIZE_K * stride_bk
-    }
+    for k in range(0, tl.cdiv(K, BLOCK_SIZE_K)):
+        a = tl.load(a_ptrs, mask=row_mask[:, None] & (offs_k[None, :] < K - k * BLOCK_SIZE_K), other=0.0)
+        b = tl.load(b_ptrs, mask=(offs_k[:, None] < K - k * BLOCK_SIZE_K) & column_mask[None, :], other=0.0)
+        accumulator += tl.dot(a, b)
+        a_ptrs += BLOCK_SIZE_K * stride_ak
+        b_ptrs += BLOCK_SIZE_K * stride_bk
     c_ptrs = c_ptr + (offs_am[:, None] * stride_cm + offs_bn[None, :] * stride_cn)
     c_mask = row_mask[:, None] & column_mask[None, :]
     tl.store(c_ptrs, accumulator, mask=c_mask)
   }
 noncomputable def maskHoisted (p : Core.Parameters) : ComputeKernel :=
-  (maskHoistedBody p.input p.weight p.output p.blockRows p.blockColumns p.blockInner p.groupRows).withScalarArguments (arguments p)
+  (matmul_kernel_mask_hoistedKernel p.input p.weight p.output p.blockRows p.blockColumns p.blockInner p.groupRows).withScalarArguments (arguments p)
 
 end VeriTile.Bench.Repairs.MatmulTriton2.KernelOnly

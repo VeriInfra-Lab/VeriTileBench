@@ -44,7 +44,8 @@ def sample(root_pid, workspace):
             continue
         for line in group:
             path = line.split(':', 2)[-1]
-            if any(part.startswith('run-') and part.endswith('.service') for part in path.split('/')):
+            if any(part.startswith(('run-', 'veritile-proof-audit-')) and part.endswith('.service')
+                   for part in path.split('/')):
                 services.add(path)
     return rss, services
 

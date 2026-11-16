@@ -57,7 +57,7 @@ theorem load_statistics_commute (m : Model α) (s : State α) (stride M N G B : 
   cases hx : s.regs .real [B] "x" <;> cases hr : s.regs .int [] "row" <;>
     cases hc : s.regs .int [B] "cols" <;> cases hm : s.regs .bool [B] "mask" <;>
     simp [statistics,weightLoad,SourceGrouped.body,SourceGrouped.code,
-      TypedSource.groupedBackwardKernel,groupedBackwardKernel,ComputeKernel.surfaceBody,
+      TypedSource.groupedBackwardKernel,_layer_norm_bwd_dx_fusedKernel,ComputeKernel.surfaceBody,
       run,step,evalExpr,evalComputeOp,evalOp_unfold,engine,numeric,natLt,numericLt,
       numericLe,numericEq,bop,FP.Structural.store,ComputeDType.eraseDType,
       TileShape.axisDim,TileShape.eraseAxis,TileShape.insertAxisIndex,

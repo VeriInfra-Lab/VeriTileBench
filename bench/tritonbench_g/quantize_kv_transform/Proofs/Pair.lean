@@ -11,9 +11,9 @@ set_option linter.unusedSimpArgs false
 /-- The two actual programs have identical complete successful states. -/
 theorem kernel_run {α : Type} [Inhabited α] (rest : Algebra α) (convert : α → Int)
     (equal : α → α → Bool) (p : Parameters) (s : State α) (width : 0<p.width) :
-    exec (KernelExecution.backend rest convert equal) (KernelSource.addressEarlyKernel p) s =
-      exec (KernelExecution.backend rest convert equal) (sourceKernel p) s := by
-  simp [sourceKernel, KernelSource.addressEarlyKernel, FP.Structural.exec, ComputeKernel.surfaceBody,
+    exec (KernelExecution.backend rest convert equal) (KernelSource._fwd_kernel_destindex_copy_quantize_kv_candidateKernel p) s =
+      exec (KernelExecution.backend rest convert equal) (_fwd_kernel_destindex_copy_quantize_kvKernel p) s := by
+  simp [_fwd_kernel_destindex_copy_quantize_kvKernel, KernelSource._fwd_kernel_destindex_copy_quantize_kv_candidateKernel, FP.Structural.exec, ComputeKernel.surfaceBody,
     FP.Structural.run, FP.Structural.step, FP.Structural.evalExpr,
     FP.Structural.evalComputeOp, FP.Structural.evalOp_unfold, FP.Structural.store,
     FP.Structural.numeric, FP.Structural.numericLt, FP.Structural.numericEq,
@@ -33,9 +33,9 @@ theorem kernel_run {α : Type} [Inhabited α] (rest : Algebra α) (convert : α 
 theorem kernel_safe {α : Type} [Inhabited α] (rest : Algebra α) (convert : α → Int)
     (equal : α → α → Bool) (p : Parameters) (s : State α) (width : 0<p.width)
     (bounds : RegionName → Nat) :
-    TraceSafe (KernelExecution.backend rest convert equal) bounds (KernelSource.addressEarlyKernel p) s ↔
-      TraceSafe (KernelExecution.backend rest convert equal) bounds (sourceKernel p) s := by
-  simp (maxSteps := 1600000) [FP.Structural.TraceSafe, sourceKernel, KernelSource.addressEarlyKernel,
+    TraceSafe (KernelExecution.backend rest convert equal) bounds (KernelSource._fwd_kernel_destindex_copy_quantize_kv_candidateKernel p) s ↔
+      TraceSafe (KernelExecution.backend rest convert equal) bounds (_fwd_kernel_destindex_copy_quantize_kvKernel p) s := by
+  simp (maxSteps := 1600000) [FP.Structural.TraceSafe, _fwd_kernel_destindex_copy_quantize_kvKernel, KernelSource._fwd_kernel_destindex_copy_quantize_kv_candidateKernel,
     ComputeKernel.surfaceBody, Safety.traceSafeList_unfold, Safety.stepSafe_unfold,
     Safety.safeExpr_unfold, Safety.safeCompute_unfold, Safety.safeOp_unfold,
     Safety.safeAddress_unfold, Safety.safeMask_unfold, Safety.addressSafe_unfold,
@@ -45,7 +45,7 @@ theorem kernel_safe {α : Type} [Inhabited α] (rest : Algebra α) (convert : α
     ofFloat, toFloat, Region.cast, State.setReg, TileShape.axisDim, width]
 
 def invocation {α : Type} (A : Algebra α) (p : Parameters) (token : Nat) : Invocation α :=
-  { IO.launch A p token with kernel := KernelSource.addressEarlyKernel p }
+  { IO.launch A p token with kernel := KernelSource._fwd_kernel_destindex_copy_quantize_kv_candidateKernel p }
 
 theorem invocation_run {α : Type} [Inhabited α] (rest : Algebra α) (convert : α → Int)
     (equal : α → α → Bool) (p : Parameters) (width : 0<p.width) (token : Nat) (s : State α) :

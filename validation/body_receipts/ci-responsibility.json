@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "kind": "ci_responsibility_and_affected_selection_validation",
+  "accepted": true,
+  "completed_at_utc": "2026-11-16T04:55:25.267507+00:00",
+  "ci": {
+    "veritile_examples": [
+      "VectorAdd",
+      "RowWiseSum",
+      "LogExp"
+    ],
+    "each_example": [
+      "RealCorrect",
+      "FPEquiv"
+    ],
+    "bench_pr": "Source/tool checks plus changed cases, reverse dependents and owned proof dependencies; complete independent replay",
+    "large_pr_selections": "Up to 64 shards; every planned shard required",
+    "daily": "64 complete corpus shards and real auditor rejection tests",
+    "pending": "65 bug-detection + 269 pretraining interfaces in a separate path-filtered/manual workflow; remain pending",
+    "github_actions_run": "not_triggered_no_push"
+  },
+  "checks": {
+    "python_tests": 767,
+    "source_and_audit_tool_tests": 157,
+    "real_auditor_tests": 33,
+    "core_dependency_profile_tests": 1,
+    "core_real_fp_pairs_built": 3,
+    "source_cases_checked": 203,
+    "source_pairs_checked": 601,
+    "clean_source_only_environment": "PASS; no Lean executable or local Mathlib/Lean build cache; standard-library-only Python",
+    "pending_interface_build": "PASS; status remains pending",
+    "pending_record_guards": "PASS",
+    "workflow_yaml_and_run_shell_syntax": "PASS"
+  },
+  "selection_coverage": {
+    "cases": 203,
+    "modules": 8549,
+    "public_goals": 521,
+    "shards": 64,
+    "exactly_matches_prior_full_module_inventory": true,
+    "all_module_and_public_goal_partitions_complete": true
+  },
+  "fresh_independent_replay": {
+    "cases": [
+      "bench/examples/FloatDTypeAdd",
+      "bench/examples/VectorAdd",
+      "bench/tritonbench_g/matrix_transpose"
+    ],
+    "modules": 31,
+    "public_goals": 8,
+    "theorem_occurrences": 1031,
+    "batches": 5,
+    "individual_fallbacks": 0,
+    "all_auxiliary_private_generated_theorems_checked": true,
+    "previous_inventory_theorems_missing": 0,
+    "fixture": "Isolated local Git repository with real base/head diffs. Three probes add trailing comments only; ci.py executor equals the current working copy. Selector diagnostics received a final deterministic ordering fix, checked across independent Python processes; selection predicates are unchanged.",
+    "wall_seconds": 683.873844047077
+  },
+  "unchanged_complete_case_evidence": {
+    "cases": 203,
+    "path": "validation/body_receipts/gate-ci-fixes.json",
+    "sha256": "1b5f15c965affa90f987ae7c67b408bc77e2be60ea1e4baf592c27849219e4b6",
+    "case_lean_and_python_fingerprints": "All unchanged; no per-case status relabelled"
+  },
+  "current_inputs_sha256": {
+    ".github/workflows/bench-audit.yml": "f2314fd1c7b252e4a5eb72756bf610d52021018fe1ab243c088a31cfbacd26b7",
+    ".github/workflows/pending-interfaces.yml": "d758781e07b4f3fe418f79eab83877eaa945f977fc56ad5ee01fc891d3ffa450",
+    "scripts/bench/ci.py": "f2e9c0c8be102447c5e9cb730f44cabd1516f30dc6f2069b114b853555ac4288",
+    "scripts/bench/affected.py": "b73b2c384c7b6c10bca758e104d8b466f733c0f058da82d43050f7fcba86c801",
+    "scripts/bench/final_inventory.py": "b345f230ce985d4f49efebb0e63c0bb904b3daee55d18f14b254b058713fc562",
+    "scripts/bench/audit_tritonbench_g.sh": "f3887c2a7f994f23158d26907ad6b817e58ad3413c8046935e3f87334c48b1ae",
+    "scripts/test_bench_ci.py": "8dde62588188febb027c749a52461227a0c8e95e875bd101aa994fabcf3027e9",
+    "scripts/test_bench_affected.py": "34055dcc6e04301ada4f83db165e5d775be8eddd86f9213256f6f86ff15cc333",
+    "README.md": "39bcff49af886ef64a2d893e7fdc6cec85bc528367fa2e7d09f3c7d01aebc0a3",
+    "scripts/README.md": "8d259810f72c8ca87802f6b461048bfcc831931f59ef17dd947bb3e1ed58a00f",
+    "documents/bench/ci.md": "253b4dda67c55689dde48ff43898bd37e08e2fdec19c02ebf5e30e5e1adaad80",
+    "documents/bench/current_source_acceptance.md": "f22dffb96f334ea8567c3116d9e7a28f6115aea1042dc842e2d514a2eb828b0b"
+  },
+  "core_inputs_sha256": {
+    ".github/workflows/core.yml": "b35ba6e4538d330703bd723ea5b56ebb263681fd4777519eeff9adc92f5cae08",
+    "README.md": "fd92b542899db2433fad5e5535a31f9e1b02fd6b3948380889644d3b41da27e2",
+    "scripts/check-core-examples.sh": "c84dd23757c2e542652cb9e2e022a93cce3f7f1549ee8b04308d1d7b680132f4"
+  },
+  "evidence": {
+    "archive": "/tmp/veritile-corpus-naming/ci-responsibility/ci-responsibility-evidence.tar.gz",
+    "sha256": "61bd92eae87f635ca2afc85cdf3bbb2de1560492c46cea3b79c489a74a18efad"
+  },
+  "boundary": "Local CI plumbing and selected proof-replay validation, not a fresh full-corpus replay. Existing complete proof evidence is reused only for identical case sources. Public theorem conditions and numerical assumptions are unchanged. Pending challenges remain pending. No merge, push or tag."
+}

@@ -29,7 +29,7 @@ open SourceFinalGraph
 theorem prelude_safe (m : Model α) (s : State α) (M N BM BN : Nat)
     (bounds : RegionName → Nat) :
     Safety.traceSafeList (engine m) bounds (SourceFinal.prelude M N BM BN) s := by
-  simp [SourceFinal.prelude,SourceFinal.code,TypedSource.finalBackwardKernel,finalBackwardKernel,ComputeKernel.surfaceBody,
+  simp [SourceFinal.prelude,SourceFinal.code,TypedSource.finalBackwardKernel,_layer_norm_bwd_dwdbKernel,ComputeKernel.surfaceBody,
     Safety.traceSafeList_unfold,Safety.stepSafe_unfold,Safety.safeExpr_unfold,Safety.safeCompute_unfold,Safety.safeOp_unfold,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,engine,numeric,bop,State.setReg,Option.bind]
 
@@ -43,7 +43,7 @@ theorem body_safe (m : Model α) (s t : State α) (M N BM BN cur : Nat)
     Safety.traceSafeList (engine m) bounds (SourceFinal.body M N BM BN)
       (t.setReg "i" .int [] (fun _ => (cur : Int))) := by
   obtain ⟨hm,hcols,hdw,hdb⟩ := h
-  simp [SourceFinal.body,SourceFinal.code,TypedSource.finalBackwardKernel,finalBackwardKernel,ComputeKernel.surfaceBody,
+  simp [SourceFinal.body,SourceFinal.code,TypedSource.finalBackwardKernel,_layer_norm_bwd_dwdbKernel,ComputeKernel.surfaceBody,
     Safety.traceSafeList_unfold,Safety.stepSafe_unfold,Safety.safeAlg_unfold,
     Safety.safeExpr_unfold,Safety.safeCompute_unfold,Safety.safeOp_unfold,
     Safety.safeAddress_unfold,Safety.safeMask_unfold,Safety.addressSafe_unfold,Safety.maskActive_unfold,
@@ -84,7 +84,7 @@ theorem suffix_safe (m : Model α) (s t : State α) (M N BM BN : Nat)
     (hb : ∀ j : Fin BN,s.pids 0*BN+j.val<N → s.pids 0*BN+j.val<bounds "FINAL_DB") :
     Safety.traceSafeList (engine m) bounds (SourceFinal.suffix M N BM BN) t := by
   obtain ⟨hm,hcols,hdw,hdb⟩ := h
-  simp [SourceFinal.suffix,SourceFinal.code,TypedSource.finalBackwardKernel,finalBackwardKernel,ComputeKernel.surfaceBody,
+  simp [SourceFinal.suffix,SourceFinal.code,TypedSource.finalBackwardKernel,_layer_norm_bwd_dwdbKernel,ComputeKernel.surfaceBody,
     Safety.traceSafeList_unfold,Safety.stepSafe_unfold,Safety.safeAlg_unfold,
     Safety.safeExpr_unfold,Safety.safeCompute_unfold,Safety.safeOp_unfold,
     Safety.safeAddress_unfold,Safety.safeMask_unfold,Safety.addressSafe_unfold,Safety.maskActive_unfold,

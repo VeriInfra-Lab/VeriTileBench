@@ -8,23 +8,23 @@ open VeriTile.Triton
 
 abbrev forwardSource := RegionName → RegionName → RegionName → RegionName → Nat → Nat → Nat → Nat → ComputeKernel
 def forward (storage : Storage) (swapped : Bool) : forwardSource :=
-  if swapped then VeriTile.Bench.Repairs.DiagSsmTriton.forwardCandidateKernel storage
-  else VeriTile.Bench.Repairs.DiagSsmTriton.forwardKernel storage
+  if swapped then VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_forward_kernel_index_commutedKernel storage
+  else VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_forward_kernel storage
 
 abbrev backwardSource := RegionName → RegionName → RegionName → RegionName → RegionName → RegionName → RegionName → Nat → Nat → Nat → Nat → ComputeKernel
 def backward (storage : Storage) (swapped : Bool) : backwardSource :=
-  if swapped then VeriTile.Bench.Repairs.DiagSsmTriton.backwardCandidateKernel storage
-  else VeriTile.Bench.Repairs.DiagSsmTriton.backwardKernel storage
+  if swapped then VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_backward_kernel_index_commutedKernel storage
+  else VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_backward_kernel storage
 
 abbrev complexForwardSource := RegionName → RegionName → RegionName → RegionName → Nat → Nat → Nat → Nat → ComputeKernel
 def complexForward (swapped : Bool) : complexForwardSource :=
-  if swapped then VeriTile.Bench.Repairs.DiagSsmTriton.complexForwardCandidateKernel
-  else VeriTile.Bench.Repairs.DiagSsmTriton.complexForwardKernel
+  if swapped then VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_forward_kernel_complex_index_commutedKernel
+  else VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_forward_kernel_complexKernel
 
 abbrev complexBackwardSource := RegionName → RegionName → RegionName → RegionName → RegionName → RegionName → RegionName → Nat → Nat → Nat → Nat → ComputeKernel
 def complexBackward (swapped : Bool) : complexBackwardSource :=
-  if swapped then VeriTile.Bench.Repairs.DiagSsmTriton.complexBackwardCandidateKernel
-  else VeriTile.Bench.Repairs.DiagSsmTriton.complexBackwardKernel
+  if swapped then VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_backward_kernel_complex_index_commutedKernel
+  else VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_backward_kernel_complexKernel
 
 end VeriTile.Bench.TritonBenchG.DiagSsmTriton.TypedSource
 

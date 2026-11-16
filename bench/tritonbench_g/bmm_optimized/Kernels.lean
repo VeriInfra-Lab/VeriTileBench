@@ -22,9 +22,10 @@ def callSignature : CallSignature where
   readPorts := ["A","B"]
   writePorts := ["O"]
 
-def sourceKernel (A B O : RegionName) (M N K TILE_M TILE_N TILE_K GROUP_M : Nat)
+def bmm_kernel (A B O : RegionName) (M N K TILE_M TILE_N TILE_K GROUP_M : Nat)
     (DIVISIBLE_M DIVISIBLE_N DIVISIBLE_K : Bool) : ComputeKernel :=
   with_triton_call callSignature call_args [M := M, N := N, K := K] in triton {
+    # batch offsets
     pid_b = tl.program_id(2)
     A += pid_b * M * K
     B += pid_b * K * N
@@ -114,9 +115,10 @@ def sourceKernel (A B O : RegionName) (M N K TILE_M TILE_N TILE_K GROUP_M : Nat)
     tl.store(o_ptrs, o, mask_c)
   }
 
-def candidateKernel (A B O : RegionName) (M N K TILE_M TILE_N TILE_K GROUP_M : Nat)
+def bmm_kernel_quotient_remainderKernel (A B O : RegionName) (M N K TILE_M TILE_N TILE_K GROUP_M : Nat)
     (DIVISIBLE_M DIVISIBLE_N DIVISIBLE_K : Bool) : ComputeKernel :=
   with_triton_call callSignature call_args [M := M, N := N, K := K] in triton {
+    # batch offsets
     pid_b = tl.program_id(2)
     A += pid_b * M * K
     B += pid_b * K * N
@@ -207,10 +209,10 @@ def candidateKernel (A B O : RegionName) (M N K TILE_M TILE_N TILE_K GROUP_M : N
   }
 
 def kernel (p : Parameters) : ComputeKernel :=
-  sourceKernel p.A p.B p.O p.M p.N p.K p.TM p.TN p.TK p.GROUP p.divM p.divN p.divK
+  bmm_kernel p.A p.B p.O p.M p.N p.K p.TM p.TN p.TK p.GROUP p.divM p.divN p.divK
 
 def quotientRemainder (p : Parameters) : ComputeKernel :=
-  candidateKernel p.A p.B p.O p.M p.N p.K p.TM p.TN p.TK p.GROUP p.divM p.divN p.divK
+  bmm_kernel_quotient_remainderKernel p.A p.B p.O p.M p.N p.K p.TM p.TN p.TK p.GROUP p.divM p.divN p.divK
 
 def parameters (s : BmmOptimized.Shape) (c : BmmOptimized.Config) : Parameters :=
   ⟨"A","B","O",s.m,s.n,s.k,c.tm,c.tn,32,c.group,

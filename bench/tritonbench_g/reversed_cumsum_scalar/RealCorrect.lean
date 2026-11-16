@@ -17,7 +17,7 @@ specification reversed_cumsum_scalar_correctness (h : Call) (layout : Geometry.O
       (∑ k : Fin h.T, if t.val ≤ k.val then xs k else 0 : ℝ)) :=
   (IOComplete.logical_iff h c row).mpr (IOComplete.implements h layout c chosen row)
 
-#specNonCircular reference avoiding [exec,RealStorage.execute,Kernels.sourceKernel,Kernels.indexCommutedKernel]
+#specNonCircular reference avoiding [exec,RealStorage.execute,Kernels.chunk_global_reversed_cumsum_scalar_kernel,Kernels.chunk_global_reversed_cumsum_scalar_kernel_index_commutedKernel]
 #stmtSurfaceSubset reversed_cumsum_scalar_correctness ⊆
   [Spec.Real,Call,Call.B,Call.H,Call.T,Geometry.OutputLayout,Config,configurations,
     logicalIO,LogicalIO.Implements,Inputs,io,AlgorithmProgramIO.Implements]

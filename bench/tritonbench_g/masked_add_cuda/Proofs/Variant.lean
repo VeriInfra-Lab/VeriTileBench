@@ -14,12 +14,12 @@ set_option linter.unusedSimpArgs false
 def execution {α : Type} [Inhabited α] (M : Algebra α) (storage : MaskStorage)
     (p : Parameters) (alpha : ℝ) (s : State α) :
     {t : State α // FP.Structural.exec M
-      (commutedKernel storage p.output p.x p.y p.n alpha p.block) s = some t} := by
+      (commuted_masked_addKernel storage p.output p.x p.y p.n alpha p.block) s = some t} := by
   cases storage
   all_goals
     refine ⟨?_, ?_⟩
     swap
-    simp [commutedKernel, FP.Structural.exec, ComputeKernel.surfaceBody,
+    simp [commuted_masked_addKernel, FP.Structural.exec, ComputeKernel.surfaceBody,
       run, step, evalExpr, evalComputeOp, evalOp_unfold, Option.bind,
       numericLt, numericEq, natLt, bop, store, Region.cast, ComputeDType.eraseDType]
     rfl
@@ -54,9 +54,9 @@ theorem equivalent (rest : Algebra Graph.Expr) (word : Graph.Word)
       (s.mem p.output (offset p s i)).read .real = .leaf (grad (offset p s i))) :
     ∃ originalFinal commutedFinal,
       FP.Structural.exec (Graph.nativeAlgebra rest word)
-        (sourceKernel storage p.output p.x p.y p.n alpha p.block) s = some originalFinal ∧
+        (masked_add_kernel storage p.output p.x p.y p.n alpha p.block) s = some originalFinal ∧
       FP.Structural.exec (Graph.nativeAlgebra rest word)
-        (commutedKernel storage p.output p.x p.y p.n alpha p.block) s = some commutedFinal ∧
+        (commuted_masked_addKernel storage p.output p.x p.y p.n alpha p.block) s = some commutedFinal ∧
       originalFinal.mem = commutedFinal.mem := by
   refine ⟨(MaskedAddCuda.execution (Graph.nativeAlgebra rest word) storage p alpha s).val,
     (execution (Graph.nativeAlgebra rest word) storage p alpha s).val,

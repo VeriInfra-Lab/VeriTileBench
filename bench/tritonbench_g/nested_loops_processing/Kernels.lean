@@ -14,7 +14,7 @@ def sourceSignature : CallSignature where
   writePorts := ["out_ptr"]
 
 /-- Complete selected original body. -/
-def quotedOriginalKernel (in_ptr out_ptr : RegionName) (stride_m stride_n n_elements : Nat) : ComputeKernel :=
+def nested3_repairedKernel (in_ptr out_ptr : RegionName) (stride_m stride_n n_elements : Nat) : ComputeKernel :=
   with_triton_call sourceSignature call_args [stride_m := stride_m, stride_n := stride_n, n_elements := n_elements] in
   triton {
     stride_m = tl.cast(stride_m, tl.int64)
@@ -61,7 +61,7 @@ def quotedOriginalKernel (in_ptr out_ptr : RegionName) (stride_m stride_n n_elem
   }
 
 /-- Complete existing candidate with a clearly authored Python counterpart body. -/
-def quotedCommutedKernel (in_ptr out_ptr : RegionName) (stride_m stride_n n_elements : Nat) : ComputeKernel :=
+def nested3_index_commutedKernel (in_ptr out_ptr : RegionName) (stride_m stride_n n_elements : Nat) : ComputeKernel :=
   with_triton_call sourceSignature call_args [stride_m := stride_m, stride_n := stride_n, n_elements := n_elements] in
   triton {
     stride_m = tl.cast(stride_m, tl.int64)
@@ -109,9 +109,9 @@ def quotedCommutedKernel (in_ptr out_ptr : RegionName) (stride_m stride_n n_elem
 
 /-- The retained contiguous caller scope supplies the actual unit minor stride. -/
 abbrev originalKernel (in_ptr out_ptr : RegionName) (count cols : Nat) : ComputeKernel :=
-  quotedOriginalKernel in_ptr out_ptr cols 1 count
+  nested3_repairedKernel in_ptr out_ptr cols 1 count
 abbrev commutedKernel (in_ptr out_ptr : RegionName) (count cols : Nat) : ComputeKernel :=
-  quotedCommutedKernel in_ptr out_ptr cols 1 count
+  nested3_index_commutedKernel in_ptr out_ptr cols 1 count
 
 def kernel (candidate : Bool) : RegionName → RegionName → Nat → Nat → ComputeKernel :=
   if candidate then commutedKernel else originalKernel

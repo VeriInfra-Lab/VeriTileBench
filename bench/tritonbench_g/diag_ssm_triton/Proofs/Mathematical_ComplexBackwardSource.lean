@@ -23,7 +23,7 @@ theorem source_body (s l y gs gx gl gy : RegionName) (length batch dim B : Nat) 
           postlude gs gl B := by
   unfold prelude body postlude Erasure.complexBackward TypedSource.complexBackward
   simp only [Bool.false_eq_true,if_false]
-  unfold VeriTile.Bench.Repairs.DiagSsmTriton.complexBackwardKernel
+  unfold VeriTile.Bench.Repairs.DiagSsmTriton.diag_ssm_backward_kernel_complexKernel
   simp only [
     ComputeKernel.eraseDType,ComputeKernel.toAlgKernel,ComputeKernel.toAlgorithm?,
     ComputeKernel.fromKernelBody,ComputeKernel.surfaceBody,ComputeStmt.listToAlgorithm?,

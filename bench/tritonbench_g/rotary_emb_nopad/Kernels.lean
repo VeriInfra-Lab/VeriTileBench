@@ -24,7 +24,7 @@ def uncachedSignature : CallSignature where
   readPorts := ["q", "k", "cos", "sin"]
   writePorts := ["q", "k"]
 
-def uncachedKernel (p : UncachedLayout) : ComputeKernel :=
+def rotary_embedding_kernel (p : UncachedLayout) : ComputeKernel :=
   let q := p.q
   let k := p.k
   let cos := p.cos
@@ -128,7 +128,7 @@ def uncachedKernel (p : UncachedLayout) : ComputeKernel :=
         )
   }
 
-def uncachedSharedKernel (p : UncachedLayout) : ComputeKernel :=
+def rotary_embedding_kernel_sharedKernel (p : UncachedLayout) : ComputeKernel :=
   let q := p.q
   let k := p.k
   let cos := p.cos
@@ -235,7 +235,7 @@ def cachedSignature : CallSignature where
   readPorts := ["q", "k", "cos", "sin", "BLOCK_TABLES", "context_lengths"]
   writePorts := ["q", "kv_cache"]
 
-def cachedKernel (p : CachedLayout) : ComputeKernel :=
+def fused_rotary_embedding_kernel_v2Kernel (p : CachedLayout) : ComputeKernel :=
   let q := p.q
   let k := p.k
   let cos := p.cos
@@ -345,7 +345,7 @@ def cachedKernel (p : CachedLayout) : ComputeKernel :=
     )
   }
 
-def cachedSharedKernel (p : CachedLayout) : ComputeKernel :=
+def fused_rotary_embedding_kernel_v2_sharedKernel (p : CachedLayout) : ComputeKernel :=
   let q := p.q
   let k := p.k
   let cos := p.cos

@@ -153,21 +153,19 @@ require the official comparator and the sandbox tools installed above. Missing
 tools, export failures, and comparator rejections fail the gate. CI installs
 the same pinned tools through `.github/actions/setup-comparator`.
 
-The Bench audit workflow checks the final source and contract inventory,
-builds/replays the library on pull requests and main pushes. Full corpus builds
-and replay, including all 334 benchmark interfaces, run daily at 04:00
-Asia/Singapore (20:00 UTC), and on manual runs with `full_audit=true` (the
-default). Each of the 64 corpus workers builds its complete dependencies, then
-checks axioms/specifications and runs official comparator replay. The exporter
-recursively includes the proof dependencies of each selected theorem.
+The Bench audit workflow runs source/tool checks on PRs and main pushes, then
+builds and independently replays changed cases and affected proof dependencies.
+It uses both Git revisions to retain reverse dependencies after renames or
+deletions. Each selected case includes every owned proof helper. Large selections
+use up to 64 shards. Library/toolchain changes select the complete verified corpus.
 
-The daily run covers all 8,428 retained corpus modules, including helper
-theorems unused by public results. Its final gate requires the global job,
-draft build and all shards to succeed; failed, cancelled or skipped jobs fail
-it. PRs require the global gates and explicitly skip corpus/draft jobs. A PR
-pass does not claim an exhaustive per-module audit. Separate concurrency groups
-prevent PR or main pushes from cancelling a daily run. Before merging proof
-changes, run the complete applicable proof checks locally.
+Daily full audits run at 04:00 Asia/Singapore (20:00 UTC), with 64 workers over
+the current TritonBench-G/example and regression inventory. Every module's
+auxiliary, private and generated theorems remain required. Official auditor
+rejection tests run daily and when PRs change audit/build tools. All planned jobs
+must succeed; unexpected skips or cancellations fail the completion status.
+The 334 pending interfaces have their own workflow and retain pending status.
+See [the CI guide](../documents/bench/ci.md) for exact scope and local commands.
 
 Local `scripts/bench/audit_tritonbench_g.sh` runs still cover all gates and the whole
 corpus by default. To reproduce the CI stages separately:
@@ -179,6 +177,15 @@ AUDIT_TRUST_SHARD_COUNT=64 AUDIT_TRUST_SHARD_INDEX=0 scripts/bench/audit_trust.s
 # Optional public-entry audit (run indices 0–15):
 AUDIT_TRUST_SHARD_COUNT=16 AUDIT_TRUST_SHARD_INDEX=0 scripts/bench/audit_trust.sh --ci-targets
 ```
+
+Batch replay retains each selected file's trust audit and complete theorem
+inventory, then combines compatible neighboring modules for official replay.
+The defaults are two audit compilers, at most 32 modules per comparator batch,
+a 1,800-second active budget per file/batch, and 30-second progress heartbeats.
+Timeouts terminate the compiler process group and any named comparator service.
+Module-header and hygienic-name cases use explicit independent replay; coverage
+mismatches and failed checks never authorize partial acceptance. Settings and
+evidence are described in [the batch audit guide](../documents/bench/batch_replay.md).
 
 Run every index for the selected shard count for a complete corpus audit. Both shard
 variables are required, and sharding cannot be combined with named targets or
@@ -214,8 +221,18 @@ trust pass. Batch workers share one independent snapshot, with separate output
 modules, and concurrency accounts for export/replay memory. Raw `lake build`
 remains the build step; use these gates for proof acceptance.
 
-The final aggregate checks `scripts/bench/final_inventory.py`, source correspondence
-and the imported benchmark review before the build and proof gates. Generic
+The final aggregate checks `scripts/bench/final_inventory.py`, source correspondence,
+Python/Lean function naming, and the imported benchmark review before the build
+and proof gates. Source names keep the full Python spelling with the fixed
+`Source` or `Kernel` suffix; the exact convention is in
+[AGENTS.md](../AGENTS.md#python-与-lean-的函数命名对应).
+
+```bash
+python3 -m scripts.bench.generate_jit_correspondence bench/examples/VectorAdd
+python3 -B scripts/bench/check_source_naming.py --check-comments --check-lean-coverage
+```
+
+Naming and body checks do not establish Real/FP correctness or GPU behavior. Generic
 source-parser regressions remain in `scripts/test_source_*.py`; they test
 extraction and rejection behavior without supplying archived corpus evidence.
 

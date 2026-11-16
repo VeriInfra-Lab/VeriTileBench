@@ -44,7 +44,7 @@ theorem suffix_refines [Inhabited α] (m : Model α) (stride M N G B group : Nat
     ∃ u,run (engine m) (SourceGrouped.suffix stride M N G B) t=some u ∧
       u.mem=(stores s N B group a).mem := by
   obtain ⟨hm,hu,hgroup,hcols,hmask,hdwp,hdbp,hdw,hdb⟩ := h
-  simp [SourceGrouped.suffix,SourceGrouped.code,TypedSource.groupedBackwardKernel,groupedBackwardKernel,ComputeKernel.surfaceBody,
+  simp [SourceGrouped.suffix,SourceGrouped.code,TypedSource.groupedBackwardKernel,_layer_norm_bwd_dx_fusedKernel,ComputeKernel.surfaceBody,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,
     engine,numeric,natLt,numericLt,numericLe,numericEq,bop,
     State.setReg,FP.Structural.store,ComputeDType.eraseDType,

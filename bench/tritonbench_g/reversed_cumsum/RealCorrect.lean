@@ -17,7 +17,7 @@ specification kernel_correct (h : Call) (distinct : h.input≠h.output)
       ∑ t : Fin h.T, if time ≤ t then xs t feature else 0) :=
   ReaderFormat.correct h distinct c chosen program
 
-#specNonCircular reference avoiding [Kernels.sourceKernel,Kernels.compareRightKernel,exec]
+#specNonCircular reference avoiding [Kernels.chunk_global_reversed_cumsum_vector_kernel,Kernels.chunk_global_reversed_cumsum_vector_kernel_compare_rightKernel,exec]
 #stmtSurfaceSubset kernel_correct ⊆
   [Spec.Real,RegionName,Call,Call.input,Call.output,Call.T,Config,configurations,Geometry.Program,
     suffixIO,LogicalIO.Implements,Interface.Matrix,BS,Inputs,AlgorithmProgramIO.Implements,io]

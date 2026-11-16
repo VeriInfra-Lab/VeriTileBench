@@ -60,7 +60,7 @@ def commuted (rest : Algebra Graph.Expr) (ops : Graph.Operations)
     (p : Parameters) (W : Nat) (a : Bool) (launch : Nat → Nat) :
     ProgramIO.Variant (original rest ops p W a launch) where
   schedule := fun _ => [{ invocation rest p W a launch with
-    kernel := commutedKernel p.output p.y p.x W p.n p.block (1/2) a }]
+    kernel := fused_add_mul_activation_commuted_kernel p.output p.y p.x W p.n p.block (1/2) a }]
   observe := fun _ _ => Graph.eval ops
 
 def x {p : Parameters} (values : Inputs p) (j : Fin p.block) : Graph.Word :=
@@ -95,7 +95,7 @@ def formula (activation : Bool) (x bias input : ℝ) : ℝ :=
 
 /-- Three entry-state reads, cyclic bias indexing, and an in-place x write. -/
 def activationIO (x b input : RegionName) (W N B : Nat) (a : Bool) : GroupedMasked2DKernelIO where
-  kernel := sourceKernel x b input W N B (1/2) a
+  kernel := fused_add_mul_activation_kernel x b input W N B (1/2) a
   projection := Projection.original_projection x b input W N B (1/2) a
   nIn := 3
   nOut := 1

@@ -1128,17 +1128,29 @@ def check_statement_function(python_text: str, lean_text: str, python_function: 
 
 
 def check_source_procedure(python_text: str, lean_text: str, python_function: str,
-                           lean_definition: str, expected_fp32_constants: list[str]) -> dict:
+                           lean_definition: str, expected_fp32_constants: list[str],
+                           expected_jit_functions: dict[str,str] | None = None) -> dict:
     header, body = quotation(lean_text, lean_definition, raw_python=True)
     parameters = r"(\([^)]*\)\s+constexpr_args\s*\[[^\]]*\])"
     fp32_constants = r"\s+fp32_constants\s*\[([^\]]*)\]"
     declaration = re.search(r"\bwith_triton_params\s*" + parameters
-                            + r"(?:" + fp32_constants + r")?\s+in\s+triton\s*$", header)
+                            + r"(?:" + fp32_constants + r")?(?:\s+jit_functions\s*\[([^\]]*)\])?\s+in\s+triton\s*$", header)
     if declaration is None:
         declaration = re.search(r"\btriton_source_procedure\s*" + parameters
                                 + fp32_constants + r"\s*$", header)
     if not declaration:
         raise ValueError("source procedure requires exact parameters, constexprs and materialized constants")
+    raw_helpers = declaration[3] if len(declaration.groups())>2 else None
+    if raw_helpers is not None:
+        entries = [e.strip() for e in raw_helpers.split(',') if e.strip()]
+        parsed = [re.fullmatch(r"([A-Za-z_]\w*)\s*:=\s*([A-Za-z_][\w.']*)", e) for e in entries]
+        if not entries or any(m is None for m in parsed):
+            raise ValueError("source JIT helpers require named complete bindings")
+        helpers = {m[1]:m[2] for m in parsed}
+        if len(helpers)!=len(entries) or helpers!=expected_jit_functions:
+            raise ValueError("source JIT helper bindings differ from reviewed helpers")
+    elif expected_jit_functions is not None:
+        raise ValueError("source JIT helper bindings are missing")
     selected = f"def {lean_definition} := triton_function {declaration[1]} {{" + body + "}"
     result = check_statement_function(python_text, selected, python_function, lean_definition)
     materialized = [name.strip() for name in (declaration[2] or '').split(',') if name.strip()]
@@ -1304,6 +1316,54 @@ def check_manifest(root: Path, manifest: Path) -> list[dict]:
     return check_records(root, json.loads(manifest.read_text()))
 
 
+def validate_helper_links(records: list[dict], r: dict, py: str) -> None:
+    helper_kind = ("source_procedure" if "expected_source_procedures" in r else
+                   "procedure_jit_function" if "expected_jit_procedures" in r else
+                   "statement_jit_function" if "expected_jit_functions" in r else
+                   "binary_pure_jit_function" if "expected_binary_functions" in r else "pure_jit_function")
+    for name, definition in r.get("expected_source_procedures", r.get("expected_jit_procedures", r.get("expected_jit_functions", r.get("expected_binary_functions", r.get("expected_pure_functions", {}))))).items():
+        helpers = [h for h in records if h.get("kind") == helper_kind
+                   and h["lean"] == r["lean"] and h["lean_definition"] == definition]
+        # Independently retained Python files may copy the same unchanged
+        # helper into one shared Lean declaration. Bind each local call to
+        # its own checked Python body; an imported helper still needs the
+        # unique separately checked import below.
+        local_helpers = [h for h in helpers if h["python"] == r["python"]]
+        if local_helpers:
+            helpers = local_helpers
+        if len(helpers) != 1:
+            raise ValueError("pure JIT call needs a separately checked helper body")
+        helper = helpers[0]
+        module = ast.parse(py)
+        bindings = []
+        class Writes(ast.NodeVisitor):
+            wildcard = False
+            def visit_Name(self, node):
+                if isinstance(node.ctx, (ast.Store, ast.Del)): bindings.append(node.id)
+            def visit_FunctionDef(self, node): bindings.append(node.name)
+            visit_AsyncFunctionDef = visit_FunctionDef
+            def visit_ClassDef(self, node): bindings.append(node.name)
+            def visit_ImportFrom(self, node):
+                self.wildcard |= any(a.name == "*" for a in node.names)
+                bindings.extend(a.asname or a.name for a in node.names)
+            def visit_Import(self, node):
+                bindings.extend(a.asname or a.name.split('.')[0] for a in node.names)
+        writes = Writes(); writes.visit(module)
+        if writes.wildcard or bindings.count(name) != 1:
+            raise ValueError("pure JIT callee must have one static binding without rebinding")
+        if helper["python"] == r["python"]:
+            if helper["python_function"] != name:
+                raise ValueError("local pure JIT binding differs from the selected helper")
+        else:
+            selected = next(n for n in module.body if isinstance(n, ast.FunctionDef)
+                            and n.name == r["python_function"])
+            imports = [(n.module, a.name) for n in module.body if isinstance(n, ast.ImportFrom)
+                       and n.level == 0 and n.lineno < selected.lineno for a in n.names
+                       if (a.asname or a.name) == name]
+            if imports != [(Path(helper["python"]).stem, helper["python_function"])]:
+                raise ValueError("pure JIT import differs from the separately checked helper source")
+
+
 def check_records(root: Path, records: list[dict]) -> list[dict]:
     """Check records supplied by a snapshot or the source-discovery tool."""
     results = []
@@ -1324,10 +1384,11 @@ def check_records(root: Path, records: list[dict]) -> list[dict]:
                                                r.get("expected_constexpr_dtypes"), r.get("expected_jit_calls")))
             continue
         if r.get("kind") == "source_procedure":
-            if set(r) != {"kind", "python", "lean", "python_function", "lean_definition", "expected_fp32_constants"}:
+            if set(r) - {"expected_jit_functions"} != {"kind", "python", "lean", "python_function", "lean_definition", "expected_fp32_constants"}:
                 raise ValueError("source procedure requires exact original parameters and reviewed constants")
             results.append(check_source_procedure(py, lean, r["python_function"], r["lean_definition"],
-                                                  r["expected_fp32_constants"]))
+                                                  r["expected_fp32_constants"],r.get("expected_jit_functions")))
+            validate_helper_links(records,r,py)
             continue
         if r.get("kind") == "procedure_jit_function":
             if set(r) - {"expected_parameter_rebinding"} != {"kind", "python", "lean", "python_function", "lean_definition",
@@ -1372,51 +1433,7 @@ def check_records(root: Path, records: list[dict]) -> list[dict]:
                        and h['python_function'] == name and h['lean_definition'] == definition]
             if len(helpers) != 1:
                 raise ValueError("uniform call requires its separately checked complete helper")
-        helper_kind = ("source_procedure" if "expected_source_procedures" in r else
-                       "procedure_jit_function" if "expected_jit_procedures" in r else
-                       "statement_jit_function" if "expected_jit_functions" in r else
-                       "binary_pure_jit_function" if "expected_binary_functions" in r else "pure_jit_function")
-        for name, definition in r.get("expected_source_procedures", r.get("expected_jit_procedures", r.get("expected_jit_functions", r.get("expected_binary_functions", r.get("expected_pure_functions", {}))))).items():
-            helpers = [h for h in records if h.get("kind") == helper_kind
-                       and h["lean"] == r["lean"] and h["lean_definition"] == definition]
-            # Independently retained Python files may copy the same unchanged
-            # helper into one shared Lean declaration. Bind each local call to
-            # its own checked Python body; an imported helper still needs the
-            # unique separately checked import below.
-            local_helpers = [h for h in helpers if h["python"] == r["python"]]
-            if local_helpers:
-                helpers = local_helpers
-            if len(helpers) != 1:
-                raise ValueError("pure JIT call needs a separately checked helper body")
-            helper = helpers[0]
-            module = ast.parse(py)
-            bindings = []
-            class Writes(ast.NodeVisitor):
-                wildcard = False
-                def visit_Name(self, node):
-                    if isinstance(node.ctx, (ast.Store, ast.Del)): bindings.append(node.id)
-                def visit_FunctionDef(self, node): bindings.append(node.name)
-                visit_AsyncFunctionDef = visit_FunctionDef
-                def visit_ClassDef(self, node): bindings.append(node.name)
-                def visit_ImportFrom(self, node):
-                    self.wildcard |= any(a.name == "*" for a in node.names)
-                    bindings.extend(a.asname or a.name for a in node.names)
-                def visit_Import(self, node):
-                    bindings.extend(a.asname or a.name.split('.')[0] for a in node.names)
-            writes = Writes(); writes.visit(module)
-            if writes.wildcard or bindings.count(name) != 1:
-                raise ValueError("pure JIT callee must have one static binding without rebinding")
-            if helper["python"] == r["python"]:
-                if helper["python_function"] != name:
-                    raise ValueError("local pure JIT binding differs from the selected helper")
-            else:
-                selected = next(n for n in module.body if isinstance(n, ast.FunctionDef)
-                                and n.name == r["python_function"])
-                imports = [(n.module, a.name) for n in module.body if isinstance(n, ast.ImportFrom)
-                           and n.level == 0 and n.lineno < selected.lineno for a in n.names
-                           if (a.asname or a.name) == name]
-                if imports != [(Path(helper["python"]).stem, helper["python_function"])]:
-                    raise ValueError("pure JIT import differs from the separately checked helper source")
+        validate_helper_links(records,r,py)
     return results
 
 

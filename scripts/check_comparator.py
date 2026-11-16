@@ -9,6 +9,7 @@ import argparse
 import fcntl
 import hashlib
 import json
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -16,10 +17,12 @@ import sys
 import tempfile
 
 from comparator_common import AXIOMS, comparator_command, require_tools, snapshot_project, write_config
+from audit_process import DEFAULT_TIMEOUT, positive_seconds, run_logged, service_unit
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.bench.audit_trust_prep import add_import, prepare_source
+from scripts.bench.audit_source import lean_code_mask
 
 # Alias actual Lean names instead of trying to parse private, quoted, or
 # hygienic names through comparator's dotted-string config format.
@@ -115,8 +118,13 @@ def prepare(workspace):
             (ROOT / 'Logs').mkdir(exist_ok=True)
             logs = Path(tempfile.mkdtemp(prefix='comparator-check-', dir=ROOT / 'Logs'))
             (logs / 'inputs.json').write_text(json.dumps(hashes, indent=2) + '\n')
+            judge_inputs = logs / 'judge-inputs.json'
+            judge_inputs.write_text(json.dumps({name: hashlib.sha256((judge / name).read_bytes()).hexdigest()
+                                               for name in hashes}, sort_keys=True) + '\n')
             state = {'root': str(ROOT), 'comparator': comparator, 'logs': str(logs),
-                     'comparator_sha256': hashlib.sha256(Path(comparator).read_bytes()).hexdigest()}
+                     'comparator_sha256': hashlib.sha256(Path(comparator).read_bytes()).hexdigest(),
+                     'judge_inputs': str(judge_inputs),
+                     'judge_inputs_sha256': hashlib.sha256(judge_inputs.read_bytes()).hexdigest()}
             ready.write_text(json.dumps(state))
             return state
         except Exception:
@@ -162,59 +170,79 @@ def prepare_target(state, judge, source=None, trust=False, library=False, all_ax
     selection = '#[' + ', '.join(f'{json.dumps(n)}.toName' for n in selected) + ']'
     footer = INVENTORY.replace('__SELECTED__', selection).replace(
         '__REPORT__', json.dumps(str(metadata)))
+    standalone = bool(re.search(r'^\s*module\s*$', lean_code_mask(text), re.M))
     audit = ALL_THEOREM_AXIOMS.replace('__ALLOWED__', '#[' + ', '.join(
-        json.dumps(name) + '.toName' for name in AXIOMS) + ']') if all_axioms else ''
+        json.dumps(name) + '.toName' for name in AXIOMS) + ']') if all_axioms and not standalone else ''
     footer = footer.replace('__AXIOM_AUDIT__', audit)
     program = add_import(text, 'Lean') + '\n' + footer
     (judge / 'VeriTileComparator' / (tag + '.lean')).write_text(program)
     (job_logs / 'Source.lean').write_text(program)
     return {'module': module, 'logs': job_logs, 'metadata': metadata,
-            'source': label, 'tag': tag}
+            'source': label, 'tag': tag, 'all_axioms': all_axioms, 'requires_individual': standalone}
 
 
-def build_inventory(judge, target):
-    """Run the existing per-module audits and discover every local theorem."""
+def build_inventory(judge, target, timeout=DEFAULT_TIMEOUT, heartbeat=30, cancel=None):
+    """Compile one audited source with its own deadline and compiler trace."""
     job_logs = target['logs']
-    # These are trusted repository sources, not an untrusted agent submission.
-    # Elaboration discovers actual theorem objects, never regex-matched names.
-    with (job_logs / 'build.log').open('w') as output:
-        build = subprocess.run(['lake', 'build', target['module']], cwd=judge,
-                               stdout=output, stderr=subprocess.STDOUT)
+    build, elapsed = run_logged(['lake', 'build', target['module']], cwd=judge,
+        log=job_logs / 'build-all.log', source=target['source'], stage='audit-compile',
+        timeout=timeout, heartbeat=heartbeat, cancel=cancel)
     if build.returncode or not target['metadata'].is_file():
-        print((job_logs / 'build.log').read_text(), file=sys.stderr)
+        print((job_logs / 'build-all.log').read_text(), file=sys.stderr)
         raise ValueError(f'{target["source"]}: elaboration/inventory failed; logs: {job_logs}')
+    trace = judge / '.lake/build/lib/lean' / Path(*target['module'].split('.')).with_suffix('.trace')
+    if not trace.is_file():
+        raise ValueError('Missing per-module audit trace: ' + target['source'])
+    entries = json.loads(trace.read_text())['log']
+    if any(entry['level'] == 'error' for entry in entries):
+        raise ValueError('Per-module compiler trace contains an error: ' + target['source'])
+    (job_logs / 'build.log').write_text('\n'.join(entry['message'] for entry in entries) + '\n')
+    shutil.copyfile(trace, job_logs / 'build.trace.json')
     inventory = json.loads(target['metadata'].read_text())
     shutil.copyfile(target['metadata'], job_logs / 'targets.json')
+    target['audit_seconds'] = elapsed
     return inventory
 
 
-def check(workspace, source=None, trust=False, library=False):
-    state = prepare(workspace)
-    judge = workspace / 'project'
-    target = prepare_target(state, judge, source, trust, library)
-    inventory = build_inventory(judge, target)
+def replay_target(state, judge, target, inventory, timeout=DEFAULT_TIMEOUT, heartbeat=30):
     job_logs, module = target['logs'], target['module']
     label, tag = target['source'], target['tag']
     config = write_config(judge, inventory['aliases'], challenge=module, solution=module,
                           filename=f'.lake/comparator/{tag}/config.json')
     shutil.copyfile(config, job_logs / 'config.json')
-    with (job_logs / 'comparator.log').open('w') as output:
-        result = subprocess.run(comparator_command(judge, state['comparator'], config),
-                                stdout=output, stderr=subprocess.STDOUT)
+    unit = service_unit()
+    result, elapsed = run_logged(comparator_command(judge, state['comparator'], config, unit=unit),
+        cwd=judge, log=job_logs / 'comparator.log', source=label, stage='individual-replay',
+        timeout=timeout, heartbeat=heartbeat, unit=unit)
     report = {**state, 'source': label, 'mode': 'source-replay',
               'theorem_count': len(inventory['theorems']),
               'theorems': inventory['theorems'], 'evidence_dir': str(job_logs),
+              'audit_seconds': target.get('audit_seconds', 0), 'replay_seconds': elapsed,
+              'all_theorems_axioms_checked': target.get('all_axioms', False),
               'comparator_exit': result.returncode, 'accepted': result.returncode == 0}
     (job_logs / 'result.json').write_text(json.dumps(report, indent=2) + '\n')
     if result.returncode:
         print((job_logs / 'comparator.log').read_text(), file=sys.stderr)
         raise ValueError(f'{label}: comparator rejected; logs: {job_logs}')
+    print(f'Comparator: {label}: {len(inventory["theorems"])} theorem(s) accepted; logs: {job_logs}', flush=True)
+    return report
+
+
+def check(workspace, source=None, trust=False, library=False, timeout=DEFAULT_TIMEOUT, heartbeat=30):
+    timeout = positive_seconds(timeout)
+    state = prepare(workspace)
+    judge = workspace / 'project'
+    target = prepare_target(state, judge, source, trust, library, all_axioms=trust)
+    inventory = build_inventory(judge, target, timeout, heartbeat)
+    remaining = timeout - target['audit_seconds']
+    if remaining <= 0:
+        raise ValueError(f'{target["source"]}: file audit deadline exhausted')
+    report = replay_target(state, judge, target, inventory, remaining, heartbeat)
     if trust:
-        for line in (job_logs / 'build.log').read_text().splitlines():
+        for line in (target['logs'] / 'build.log').read_text().splitlines():
             for marker in ('Axiom audit:', 'Spec audit:'):
                 if marker in line:
-                    print(line[line.index(marker):])
-    print(f'Comparator: {label}: {len(inventory["theorems"])} theorem(s) accepted; logs: {job_logs}')
+                    print(line[line.index(marker):], flush=True)
     return report
 
 
@@ -226,15 +254,18 @@ def main():
     group.add_argument('--check-tools', action='store_true')
     parser.add_argument('--trust', action='store_true', help='also run the standalone trust gates')
     parser.add_argument('--workspace', type=Path, help='share one snapshot within a batch')
+    parser.add_argument('--timeout', type=positive_seconds, default=DEFAULT_TIMEOUT,
+                        help='active compile/replay seconds per file (default: 1800)')
+    parser.add_argument('--heartbeat', type=positive_seconds, default=30)
     args = parser.parse_args()
     if args.check_tools:
         require_tools()
         print('Official comparator and sandbox tools are available.')
     elif args.workspace:
-        check(args.workspace.resolve(), args.file, args.trust, args.library)
+        check(args.workspace.resolve(), args.file, args.trust, args.library, args.timeout, args.heartbeat)
     else:
         with tempfile.TemporaryDirectory(prefix='veritile-comparator-') as temp:
-            check(Path(temp), args.file, args.trust, args.library)
+            check(Path(temp), args.file, args.trust, args.library, args.timeout, args.heartbeat)
 
 
 if __name__ == '__main__':

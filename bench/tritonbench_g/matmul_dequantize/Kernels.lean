@@ -12,7 +12,7 @@ def original_matmul4_kernel_signature (dtype : FloatDType) : CallSignature where
   scalars := [("M",.integer), ("N",.integer), ("K",.integer), ("stride_am",.integer), ("stride_ak",.integer), ("stride_bk",.integer), ("stride_bn",.integer), ("stride_cm",.integer), ("stride_cn",.integer), ("stride_scales_g",.integer), ("stride_scales_n",.integer), ("stride_zeros_g",.integer), ("stride_zeros_n",.integer), ("groupsize",.integer)]
   constexpr := ["NO_GROUPS", "BLOCK_SIZE_M", "BLOCK_SIZE_N", "BLOCK_SIZE_K", "GROUP_SIZE_M"]
 
-def original_matmul4_kernel (dtype : FloatDType) (a_ptr b_ptr c_ptr scales_ptr zeros_ptr : RegionName) (M N K stride_am stride_ak stride_bk stride_bn stride_cm stride_cn stride_scales_g stride_scales_n stride_zeros_g stride_zeros_n groupsize BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M : Nat) (NO_GROUPS : Bool) : ComputeKernel :=
+def matmul4_kernel (dtype : FloatDType) (a_ptr b_ptr c_ptr scales_ptr zeros_ptr : RegionName) (M N K stride_am stride_ak stride_bk stride_bn stride_cm stride_cn stride_scales_g stride_scales_n stride_zeros_g stride_zeros_n groupsize BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M : Nat) (NO_GROUPS : Bool) : ComputeKernel :=
   with_triton_call (original_matmul4_kernel_signature dtype) call_args [M := M, N := N, K := K, stride_am := stride_am, stride_ak := stride_ak, stride_bk := stride_bk, stride_bn := stride_bn, stride_cm := stride_cm, stride_cn := stride_cn, stride_scales_g := stride_scales_g, stride_scales_n := stride_scales_n, stride_zeros_g := stride_zeros_g, stride_zeros_n := stride_zeros_n, groupsize := groupsize] in triton {
       """
       Compute the matrix multiplication C = A x B.
@@ -86,7 +86,7 @@ def original_matmul_kernel_signature (dtype : FloatDType) : CallSignature where
   scalars := [("M",.integer), ("N",.integer), ("K",.integer), ("stride_am",.integer), ("stride_ak",.integer), ("stride_bk",.integer), ("stride_bn",.integer), ("stride_cm",.integer), ("stride_cn",.integer), ("stride_bsk",.integer), ("stride_bsn",.integer), ("stride_bzpk",.integer), ("stride_bzpn",.integer), ("group_size",.integer)]
   constexpr := ["BLOCK_SIZE_M", "BLOCK_SIZE_N", "BLOCK_SIZE_K", "GROUP_SIZE_M", "SPLIT_K"]
 
-def original_matmul_kernel (dtype : FloatDType) (a_ptr b_ptr c_ptr bs_ptr bzp_ptr : RegionName) (M N K stride_am stride_ak stride_bk stride_bn stride_cm stride_cn stride_bsk stride_bsn stride_bzpk stride_bzpn group_size BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M SPLIT_K : Nat) : ComputeKernel :=
+def matmul_kernel (dtype : FloatDType) (a_ptr b_ptr c_ptr bs_ptr bzp_ptr : RegionName) (M N K stride_am stride_ak stride_bk stride_bn stride_cm stride_cn stride_bsk stride_bsn stride_bzpk stride_bzpn group_size BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M SPLIT_K : Nat) : ComputeKernel :=
   with_triton_call (original_matmul_kernel_signature dtype) call_args [M := M, N := N, K := K, stride_am := stride_am, stride_ak := stride_ak, stride_bk := stride_bk, stride_bn := stride_bn, stride_cm := stride_cm, stride_cn := stride_cn, stride_bsk := stride_bsk, stride_bsn := stride_bsn, stride_bzpk := stride_bzpk, stride_bzpn := stride_bzpn, group_size := group_size] in triton {
       """
       Matrix multiplication kernel with dequantization for 4-bit integers
@@ -147,7 +147,7 @@ def candidate_matmul4_kernel_signature (dtype : FloatDType) : CallSignature wher
   scalars := [("M",.integer), ("K",.integer), ("stride_am",.integer), ("stride_ak",.integer), ("stride_bk",.integer), ("stride_bn",.integer), ("stride_cm",.integer), ("stride_cn",.integer), ("stride_scales_g",.integer), ("stride_scales_n",.integer), ("stride_zeros_g",.integer), ("stride_zeros_n",.integer), ("groupsize",.integer)]
   constexpr := ["N", "NO_GROUPS", "BLOCK_SIZE_M", "BLOCK_SIZE_N", "BLOCK_SIZE_K", "GROUP_SIZE_M"]
 
-def candidate_matmul4_kernel (dtype : FloatDType) (a_ptr b_ptr c_ptr scales_ptr zeros_ptr : RegionName) (M K stride_am stride_ak stride_bk stride_bn stride_cm stride_cn stride_scales_g stride_scales_n stride_zeros_g stride_zeros_n groupsize N BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M : Nat) (NO_GROUPS : Bool) : ComputeKernel :=
+def matmul4_kernel_scalar_addressKernel (dtype : FloatDType) (a_ptr b_ptr c_ptr scales_ptr zeros_ptr : RegionName) (M K stride_am stride_ak stride_bk stride_bn stride_cm stride_cn stride_scales_g stride_scales_n stride_zeros_g stride_zeros_n groupsize N BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M : Nat) (NO_GROUPS : Bool) : ComputeKernel :=
   with_triton_call (candidate_matmul4_kernel_signature dtype) call_args [M := M, K := K, stride_am := stride_am, stride_ak := stride_ak, stride_bk := stride_bk, stride_bn := stride_bn, stride_cm := stride_cm, stride_cn := stride_cn, stride_scales_g := stride_scales_g, stride_scales_n := stride_scales_n, stride_zeros_g := stride_zeros_g, stride_zeros_n := stride_zeros_n, groupsize := groupsize] in triton {
       """
       Compute the matrix multiplication C = A x B.
@@ -221,7 +221,7 @@ def candidate_matmul_kernel_signature (dtype : FloatDType) : CallSignature where
   scalars := [("M",.integer), ("K",.integer), ("stride_am",.integer), ("stride_ak",.integer), ("stride_bk",.integer), ("stride_bn",.integer), ("stride_cm",.integer), ("stride_cn",.integer), ("stride_bsk",.integer), ("stride_bsn",.integer), ("stride_bzpk",.integer), ("stride_bzpn",.integer), ("group_size",.integer)]
   constexpr := ["N", "BLOCK_SIZE_M", "BLOCK_SIZE_N", "BLOCK_SIZE_K", "GROUP_SIZE_M", "SPLIT_K"]
 
-def candidate_matmul_kernel (dtype : FloatDType) (a_ptr b_ptr c_ptr bs_ptr bzp_ptr : RegionName) (M K stride_am stride_ak stride_bk stride_bn stride_cm stride_cn stride_bsk stride_bsn stride_bzpk stride_bzpn group_size N BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M SPLIT_K : Nat) : ComputeKernel :=
+def matmul_kernel_scalar_addressKernel (dtype : FloatDType) (a_ptr b_ptr c_ptr bs_ptr bzp_ptr : RegionName) (M K stride_am stride_ak stride_bk stride_bn stride_cm stride_cn stride_bsk stride_bsn stride_bzpk stride_bzpn group_size N BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M SPLIT_K : Nat) : ComputeKernel :=
   with_triton_call (candidate_matmul_kernel_signature dtype) call_args [M := M, K := K, stride_am := stride_am, stride_ak := stride_ak, stride_bk := stride_bk, stride_bn := stride_bn, stride_cm := stride_cm, stride_cn := stride_cn, stride_bsk := stride_bsk, stride_bsn := stride_bsn, stride_bzpk := stride_bzpk, stride_bzpn := stride_bzpn, group_size := group_size] in triton {
       """
       Matrix multiplication kernel with dequantization for 4-bit integers
@@ -282,7 +282,7 @@ def candidate_dequantize_kernel_signature (dtype : FloatDType) : CallSignature w
   scalars := [("K",.integer), ("N",.integer), ("group_size",.integer), ("stride_bk",.integer), ("stride_bn",.integer), ("stride_bsk",.integer), ("stride_bsn",.integer), ("stride_bzpk",.integer), ("stride_bzpn",.integer), ("stride_fpbk",.integer), ("stride_fpbn",.integer)]
   constexpr := ["BLOCK_SIZE_K", "BLOCK_SIZE_N"]
 
-def candidate_dequantize_kernel (dtype : FloatDType) (b_ptr b_scale_ptr b_zp_ptr fpb_ptr : RegionName) (K N group_size stride_bk stride_bn stride_bsk stride_bsn stride_bzpk stride_bzpn stride_fpbk stride_fpbn BLOCK_SIZE_K BLOCK_SIZE_N : Nat) : ComputeKernel :=
+def dequantize_kernel_scalar_addressKernel (dtype : FloatDType) (b_ptr b_scale_ptr b_zp_ptr fpb_ptr : RegionName) (K N group_size stride_bk stride_bn stride_bsk stride_bsn stride_bzpk stride_bzpn stride_fpbk stride_fpbn BLOCK_SIZE_K BLOCK_SIZE_N : Nat) : ComputeKernel :=
   with_triton_call (candidate_dequantize_kernel_signature dtype) call_args [K := K, N := N, group_size := group_size, stride_bk := stride_bk, stride_bn := stride_bn, stride_bsk := stride_bsk, stride_bsn := stride_bsn, stride_bzpk := stride_bzpk, stride_bzpn := stride_bzpn, stride_fpbk := stride_fpbk, stride_fpbn := stride_fpbn] in triton {
       """Dequantize tile [BLOCK_SIZE_K, BLOCK_SIZE_N] in full precision.
       We should assert BLOCK_SIZE_N % 8 == 0.

@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "kind": "local_ci_batch_validation",
+  "base_commit": "b675436a005bb8c41b01abe81d8ace66d039e0e7",
+  "scope": {
+    "mode": "--final-inventory",
+    "shard_index": 41,
+    "shard_count": 64,
+    "modules": 133,
+    "selected_task_modules": {
+      "matmul_dequantize_int4": 38,
+      "matmul_kernel": 30,
+      "matmul_leakyrelu": 39,
+      "matmul_leakyrelu_fp8": 26
+    },
+    "complete_corpus_replay": false
+  },
+  "settings": {
+    "audit_jobs": 2,
+    "batch_size": 32,
+    "file_timeout_seconds": 1800,
+    "batch_timeout_seconds": 1800,
+    "heartbeat_seconds": 30
+  },
+  "coverage": {
+    "accepted": true,
+    "every_selected_file_exactly_once": true,
+    "per_file_theorem_occurrences": 3648,
+    "unique_per_file_targets": 3509,
+    "private_targets": 796,
+    "complete_per_file_axiom_audits": 133,
+    "batch_replays": 6,
+    "individual_replays": 0,
+    "missing_theorems": [],
+    "canonical_inventory_sha256": "f89830faab4f3eacd7971501a3bd8dda02d34ddbba1a7cf76ceb9d30b09089e2",
+    "trust_summaries_sha256": "ef9e85d1d2134cd09dfdbe4c1fc73609db77c55f221fee8fb176a10bbceafbfc"
+  },
+  "batches": [
+    {
+      "task": "matmul_dequantize_int4",
+      "module_count": 32,
+      "theorem_count": 952,
+      "unique_theorem_count": 952,
+      "additional_targets": [],
+      "accepted": true,
+      "batch_inventory_seconds": 11.542205472942442,
+      "comparator_seconds": 108.1740401131101
+    },
+    {
+      "task": "matmul_dequantize_int4",
+      "module_count": 6,
+      "theorem_count": 56,
+      "unique_theorem_count": 56,
+      "additional_targets": [],
+      "accepted": true,
+      "batch_inventory_seconds": 6.1184360180050135,
+      "comparator_seconds": 61.75159482611343
+    },
+    {
+      "task": "matmul_kernel",
+      "module_count": 30,
+      "theorem_count": 1027,
+      "unique_theorem_count": 1027,
+      "additional_targets": [],
+      "accepted": true,
+      "batch_inventory_seconds": 16.8767834501341,
+      "comparator_seconds": 53.87637010589242
+    },
+    {
+      "task": "matmul_leakyrelu",
+      "module_count": 32,
+      "theorem_count": 850,
+      "unique_theorem_count": 783,
+      "additional_targets": [],
+      "accepted": true,
+      "batch_inventory_seconds": 11.973789976909757,
+      "comparator_seconds": 81.82534071896225
+    },
+    {
+      "task": "matmul_leakyrelu",
+      "module_count": 7,
+      "theorem_count": 190,
+      "unique_theorem_count": 190,
+      "additional_targets": [],
+      "accepted": true,
+      "batch_inventory_seconds": 6.368781347293407,
+      "comparator_seconds": 63.866398592013866
+    },
+    {
+      "task": "matmul_leakyrelu_fp8",
+      "module_count": 26,
+      "theorem_count": 573,
+      "unique_theorem_count": 573,
+      "additional_targets": [],
+      "accepted": true,
+      "batch_inventory_seconds": 9.12158724712208,
+      "comparator_seconds": 72.2723624217324
+    }
+  ],
+  "identity": {
+    "selection_sha256": "3bf32af707c94e36976e47c79ab2832f97754ac5317f2164d1b4df50af7bccef",
+    "final_inventory_sha256": "4a6c29160e1259b4b95b3d8a1329cb4bea2e7ab8169d71fe90c4167398ffd7a6",
+    "proof_inputs_sha256": "5e640061f5733b43d213bb481ec0217e968f1c6ba01354f9ef7a3eb8bd843d97",
+    "comparator_sha256": "bee6e2f6f3dd08f12fe759190748427d1fd3217605863d9c4dfe236fcc7b932f",
+    "policy_sha256": {
+      ".github/workflows/bench-audit.yml": "b8b41f6639664823355a290d24dfce0317faf5e3fdd95e7b150a1f4f30da019d",
+      "scripts/audit_process.py": "e7811aa7280251590fcc5be7c2d297f91dc2115827f4d04f918aa7ae44ee39a4",
+      "scripts/check_comparator.py": "1b45c7a45f5d9fb72d3290a2899b1ead1b38618bf79dd137013253fa171409ba",
+      "scripts/check_comparator_batch.py": "3635192a5e4db9fce52163b0daa662532cfa7eea00d72271b7a62c82293d43c2",
+      "scripts/comparator_common.py": "0092eb746096c535000ba1be40263e7467efac25cec213a8a4d251a63fd797a2",
+      "scripts/bench/audit_trust.sh": "fe60f38628fc01d7119188b1facf854355f88abfe638c66b391d0911d3accc65",
+      "scripts/bench/final_inventory.py": "0659c9252613dadca299b5372054658da0008db969311e554855e77dc6183f87",
+      "scripts/bench/check_worker_results.py": "62c2f68c929ef90f960a496b179383ac1967fbdd04ba483ab02615498335a3a6"
+    },
+    "kernel_or_lean_sources_changed": false,
+    "public_theorem_conditions_changed": false
+  },
+  "measurement": {
+    "wall_seconds": 1319.4653954929672,
+    "audit_inventory_seconds": 742.7011975571513,
+    "snapshot_seconds": 18.677149553783238,
+    "sampled_peak_total_rss_bytes": 10681344000,
+    "rss_method": "sum of driver descendants and processes in the private judge workspace; includes separate systemd services; shared pages can be counted repeatedly",
+    "maximum_sampling_gap_seconds": 0.16486537316814065,
+    "cpu_affinity_count": 96,
+    "comparator_services_observed": 6,
+    "raw_metrics_sha256": "2b1a5db39fdb6e5b971ef89d141f8146613d0bf4a6ab1198a9d4dd4cc824f856",
+    "service_observation_sha256": "821078dad72720ca46ed26471195257fff6ed7c6d9bd72613fb136a057969a45",
+    "note": "Named service count was collected separately after extending the service-name recognizer. RSS samples are unchanged. Local measurement; shared pages may be counted repeatedly; no GitHub-runner runtime or physical-memory guarantee."
+  },
+  "regressions": {
+    "python_tests_passed": 753,
+    "batch_unit_tests_included_in_python": 26,
+    "shard_scheduling_tests_passed": 61,
+    "audit_process_tests_passed": 5,
+    "comparator_preflight_tests_passed": 3,
+    "real_audit_gate_tests_passed": 14,
+    "official_comparator_integration_tests_passed": 19,
+    "named_service_measurement_and_timeout_rechecked": true,
+    "source_only_gates_passed": true,
+    "selected_source_body_pairs_checked": 594,
+    "unchanged_interface_only_tasks": 334,
+    "syntax_and_diff_checks_passed": true
+  },
+  "matmul_leakyrelu": {
+    "plan": "validation/tasks/matmul_leakyrelu/NUMERICAL_VALIDATION.md",
+    "two_gates_contract_commit": "a3c77e12ab5e2e0f78aaeb19fc2a16ee452322fc",
+    "samples_per_configuration": 4294967296,
+    "sampler": "direct quantized Normal(1,1), unit weights",
+    "bias_gate": "NOT_RUN",
+    "magnitude_gate": "NOT_RUN",
+    "numerical_artifact_present": false,
+    "plan_only": true
+  },
+  "evidence": {
+    "selection_report_sha256": "59401827e5ce26dc2ba3e28638b8333ad6e66e3e2483e3669ea6226ae291ead1",
+    "layout": "Logs/comparator-check-*/{inputs.json,judge-inputs.json,File_*/,Batch_*/,Selection_*/}",
+    "raw_logs_committed": false
+  },
+  "publication": {
+    "local_only": true,
+    "github_workflow_run_with_these_changes": false,
+    "pushed": false,
+    "merged": false,
+    "tagged": false
+  }
+}

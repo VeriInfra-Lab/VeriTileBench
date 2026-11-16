@@ -8,11 +8,11 @@ namespace VeriTile.Bench.Repairs.RopeEmbedding.PairIO
 open VeriTile.Triton FP.ProfiledRewrite
 
 def original (p : Source.Parameters) (back : Bool) : Program :=
-  ⟨Kernels.ropeKernel p.input p.cosine p.sine p.rowStride p.cosineStride p.sineStride
+  ⟨Kernels._rope_embeddingKernel p.input p.cosine p.sine p.rowStride p.cosineStride p.sineStride
     p.length p.dimension p.heads p.width back, []⟩
 
 def indexCommutedKernel (p : Source.Parameters) (back : Bool) : Program :=
-  ⟨Kernels.indexCommutedKernel p.input p.cosine p.sine p.rowStride p.cosineStride p.sineStride
+  ⟨Kernels._rope_embedding_index_commutedKernel p.input p.cosine p.sine p.rowStride p.cosineStride p.sineStride
     p.length p.dimension p.heads p.width back, []⟩
 
 def assumptions : VeriTile.Spec.Assumptions FP.GuardedFragment := []

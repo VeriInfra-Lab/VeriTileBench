@@ -63,7 +63,7 @@ def rawKernel (dtype : FloatDType) (a_ptr b_ptr c_ptr : RegionName)
     c_mask = mask_m[:, None] & mask_n[None, :]
     tl.store(c_ptrs, c, mask=c_mask)
   }
-  else VeriTile.Bench.TritonBenchG.TritonMatmul.Repair.Source.rawKernel dtype a_ptr b_ptr c_ptr BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M
+  else VeriTile.Bench.TritonBenchG.TritonMatmul.Repair.Source.matmul_kernel_repairedKernel dtype a_ptr b_ptr c_ptr BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M
 
 def call (dtype : FloatDType) (a_ptr b_ptr c_ptr : RegionName)
     (M N K stride_am stride_ak stride_bk stride_bn stride_cm stride_cn

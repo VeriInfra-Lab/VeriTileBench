@@ -1,192 +1,108 @@
-# Task batch replay pilot
+# Batch proof audit
 
-The opt-in batch driver replays every theorem in a selected TritonBench-G task
-through the pinned official comparator. The regular per-file audit remains the
-default. The initial performance trial uses `rms_matmul_rbe`.
+`scripts/bench/audit_trust.sh` uses bounded batch replay for the selected corpus.
+CI freezes its complete inventory, selects the shard, builds the selected
+modules and dependencies, and passes that exact file list to the audit driver.
+Selection includes retained auxiliary and private proofs, even when the public
+Real/FP entries do not import them.
 
 ```sh
-python3 scripts/check_comparator_batch.py --task rms_matmul_rbe
+AUDIT_TRUST_SHARD_COUNT=64 AUDIT_TRUST_SHARD_INDEX=41 \
+  scripts/bench/audit_trust.sh --final-inventory
 ```
 
-Audit preparation submits at most two audited modules to each Lake build.
-`--audit-batch-size N` controls this wave size; `1` retains the initial serial
-audit path. Each module still compiles its complete original audited source
-copy and runs the same headline, independent-specification and full-theorem
-axiom checks. This optimization changes scheduling, not the audit predicates.
+For a selected task or an explicit file list:
 
-Per-module compiler messages come from Lake's individual `.trace` log, retained
-alongside that module's inventory. Aggregate wave logs are retained separately.
-A successful message from a sibling module cannot satisfy a missing audit;
-missing traces/inventories, a failed wave or a module error abort acceptance.
-The wave size bounds audited targets submitted together, not all dependency
-compilation on an initially empty cache. The measurements below use built
-dependency-cache copies.
+```sh
+scripts/bench/audit_trust.sh rms_matmul_rbe
+python3 scripts/check_comparator_batch.py --task rms_matmul_rbe
+python3 scripts/check_comparator_batch.py --files-from /path/to/selected-files.txt
+```
 
-Use the existing [judge setup](../../scripts/README.md). The command requires
-the same exporter, comparator, allowed axioms, and systemd/Landlock isolation as
-the per-file driver. It does not change kernel sources, specifications, FP
-rules, or theorem premises.
+## Scheduling and limits
+
+| Setting | Default | Meaning |
+| --- | ---: | --- |
+| `AUDIT_TRUST_AUDIT_JOBS` | `2` | Concurrent audited-file compilers |
+| `AUDIT_TRUST_BATCH_SIZE` | `32` | Maximum files in one comparator batch |
+| `AUDIT_TRUST_FILE_TIMEOUT` | `1800` seconds | Active compilation and replay budget per file |
+| `AUDIT_TRUST_BATCH_TIMEOUT` | `1800` seconds | Combined inventory/replay budget per batch |
+| `AUDIT_TRUST_HEARTBEAT_SECONDS` | `30` seconds | Live progress interval |
+
+Batches keep neighboring files from the same task together and never add files
+outside the selected shard. Each source receives its own audited compilation,
+compiler trace and complete theorem inventory. At most the configured number
+of audit compilers run concurrently; each has an independent deadline.
+
+The batch deadline is also capped by its members' remaining file budgets.
+Individual replay uses the remaining file budget. Snapshot copying, queueing
+and final source-identity checks are global preparation/verification work,
+rather than active work attributed to one file. Timeouts fail the audit; they
+never skip a file or authorize a partial result. The task-level CI limit is
+six hours.
+
+Each subprocess emits flushed begin, heartbeat and end records naming its
+source, phase, elapsed time, timeout and log path. Batch records list their
+members. A timed-out compiler's process group is killed. A timed-out comparator
+also stops its uniquely named systemd service, including exporter workers
+outside the launcher's process group.
+
+`AUDIT_TRUST_REPLAY=individual` selects the independent per-file path for diagnosis;
+it uses the same deadlines and live logs. `AUDIT_TRUST_JOBS` controls concurrency
+in that mode. Individual checks also expose `--timeout` and `--heartbeat`.
+The batch CLI exposes `--audit-batch-size`, `--batch-size`, `--file-timeout`,
+`--batch-timeout` and `--heartbeat`. `--task` selects one complete task;
+`--files-from` uses exactly the nonempty, unique paths in its input file.
 
 ## Coverage and acceptance
 
-The driver freezes an independent source/build-cache copy, then recursively
-selects **all** Lean modules in the task, including modules not imported by
-`RealCorrect.lean` or `FPEquiv.lean`.
+Every selected module must retain its complete per-file theorem inventory,
+including zero-theorem modules, unused helpers, quoted names and generated
+matcher equations. Ordinary modules also receive a standard-axiom check for
+every theorem before batches are combined. Compiler messages come from the
+module's own Lake trace; a dependency's successful audit cannot satisfy a
+missing audit in the selected source.
 
-1. Compile the same audited source copies used by the per-file driver. Retain
-   each module's axiom/specification audit and complete theorem inventory. Check
-   the standard-axiom boundary for **every** theorem occurrence before merging;
-   a bad proof cannot hide behind another proof of a same-named theorem.
-2. Import all original task modules into one generated module. Resolve the union
-   of the per-file inventories in the actual kernel environment and supplement
-   it with all theorems owned by the original task modules. Dependencies outside
-   the task remain part of recursive proof checking.
-3. Compare the old and new per-file inventories exactly, including zero-theorem
-   modules. Normalize only the private-name module prefix introduced by the old
-   source-copy mechanism; retain private counters and complete names. Lean's
-   import compatibility checks reject same-named declarations with conflicting
-   types. Deduplicate replay targets only after all per-file axiom audits pass.
-4. Pass every discovered target to one official comparator invocation. The
-   exporter deduplicates shared dependencies within each export. Record batch
-   acceptance only after official replay and the final source-hash check pass.
+The combined inventory imports original modules, resolves the union of their
+per-file targets and adds every theorem owned by the selected original modules.
+Only the copied module prefix of private names is normalized; private counters
+and macro scopes are not erased. Lazy equation-theorem ownership can move under
+combined imports, so the complete target union is checked independently of
+final module attribution. Missing, duplicate or unexpected inventories/targets
+fail the audit.
 
-Equation theorems are generated lazily and may be attributed to different
-consumer modules under combined imports. Filtering targets solely by their
-final module attribution would omit some old targets. The driver therefore
-preserves each file's original inventory and checks its union. Original-module
-theorems not already in that union are also replayed and reported separately.
-Reports distinguish per-file theorem occurrences from unique replay targets.
+Each accepted group passes the pinned official comparator with the unchanged
+allowed axioms and systemd/Landlock isolation. The exporter recursively checks
+proof dependencies. Zero-theorem modules retain the standard primitive checks.
+The source and judge fingerprints are checked before and after the selection;
+the final inventory snapshot must also match the build-time snapshot.
 
-The source snapshot is checked before and after replay. Missing/unexpected targets,
-failed per-module audits, missing modules, import conflicts and comparator
-rejections fail the command. Definition-only tasks retain the standard primitive
-checks while reporting zero original theorem targets. Sources using Lean's new
-`module` header and source-copy hygienic macro names currently require the
-existing individual replay path. The pilot rejects these cases explicitly
-rather than erasing scopes or dropping declarations. Private names, quoted names,
-generated matcher equations and imported equation theorems are covered by the
-pilot regressions.
+Lean `module` files and source-copy hygienic theorem names receive independent
+replay. A combined-import compilation conflict also triggers explicit individual
+replay of every affected file. These paths retain full target enumeration and
+require official acceptance of every file; they do not authorize a batch.
+A theorem-coverage mismatch, failed trust audit, timeout or comparator rejection
+is a failure, not a reason to ignore a declaration. The individual path is
+important for `module` imports: hidden imported theorem bodies must not be
+misclassified as additional axioms by an elaborator-side traversal.
 
-## Reproduce the performance comparison
+The selection result accounts for every batch member and individual fallback
+exactly once. It requires every replay to succeed before reporting the shard
+as accepted. All shards and the interface/source gates must succeed for a full
+CI acceptance. Kernel sources, public theorem conditions and FP numerical
+admission remain separate from audit scheduling.
 
-Use a frozen old checkout and the pilot checkout with copies of the same built
-dependency cache. Keep the official tools fixed, set `AUDIT_TRUST_JOBS=1` for the
-baseline, and run the two trials sequentially on the same host. Each trial
-creates and cleans its own independent judge workspace.
+## Evidence
 
-```sh
-trial_dir="$(mktemp -d)"
-export AUDIT_TRUST_JOBS=1
-python3 scripts/bench/measure_replay.py \
-  --cwd /path/to/frozen-baseline --workspace "$trial_dir/old-tmp" \
-  --output "$trial_dir/old-metrics.json" --log "$trial_dir/old.log" \
-  -- bash scripts/bench/audit_trust.sh rms_matmul_rbe
-python3 scripts/bench/measure_replay.py \
-  --cwd "$PWD" --workspace "$trial_dir/new-tmp" \
-  --output "$trial_dir/new-metrics.json" --log "$trial_dir/new.log" \
-  -- python3 scripts/check_comparator_batch.py --task rms_matmul_rbe
-```
+`Logs/comparator-check-*` contains source/tool fingerprints, per-file inventories
+and trust logs, batch membership/coverage, official comparator output and
+selection results. CI retains these diagnostics for seven days when a shard
+fails. No measurement logs are committed to Git.
 
-Wall time includes snapshot preparation and cleanup. Memory is sampled as the
-sum of process RSS, with a 100 ms wait between scans; the actual maximum sampling
-gap is recorded in each receipt. The sampler follows both driver descendants
-and processes whose working directory belongs to the private judge workspace,
-so comparator services launched separately by systemd remain included. RSS can
-count shared pages repeatedly; the sampled peak is not an exact physical-memory
-high-water mark or a prediction of GitHub runner capacity.
-
-`scripts/bench/compare_replay.py` compares the old receipt directory and the new
-batch receipt. It requires identical frozen proof inputs, identical comparator
-binary hashes, every old/new acceptance result, exact canonical theorem lists,
-and matching per-module trust-audit summaries. It writes a compact JSON summary
-and a deterministic compressed theorem inventory. Raw logs stay outside Git.
-
-## Initial result with serial audit preparation
-
-The [generated comparison summary](../../validation/replay_batch/rms_matmul_rbe.json)
-and [compressed complete theorem inventory](../../validation/replay_batch/rms_matmul_rbe.theorems.json.gz)
-record one sequential local-host trial pair:
-
-| Measurement | Existing per-file replay | Task batch replay |
-| --- | ---: | ---: |
-| Wall time, including preparation and cleanup | 6,897.6 s (114m 58s) | 1,639.7 s (27m 20s) |
-| Sampled aggregate RSS peak | 11.62 GiB | 11.65 GiB |
-| Official comparator invocations | 100 | 1 |
-| Distinct theorem targets | 1,890 | 1,890 |
-| Private targets included above | 374 | 374 |
-| Official acceptance | All 100 files pass | Entire batch passes |
-
-Wall time fell by **4.21 times**, while sampled aggregate RSS remained nearly
-unchanged. In the batch run, snapshot preparation plus per-module compilation,
-audits and inventories took 1,444.5 s; combined inventory generation took 21.5 s;
-the comparator phase, including the final source checks, took 158.6 s. The
-remaining time covers report writing and cleanup. The preparation/audit stage
-is now the main cost.
-
-All **100** module inventories match exactly: **2,030** per-file theorem entries
-reduce to **1,890** unique targets, including the **374** private targets. There
-are zero missing or additional batch targets. Every per-file trust-audit summary
-matches, and the new full-theorem axiom checks pass for every module. All files
-under `Proofs/` are selected, including optional helpers; selection does not rely
-on whether a declaration is referenced by a public theorem.
-
-The baseline is commit `9e4e6ed1ece1661073ff5de36195d44bff710c64`; the measured
-implementation is `417dc425de567b0654db2dda82586e78aca2b755`. Their 10,741 frozen
-proof inputs and comparator binary hashes match. Both runs use Lean 4.29.0, the
-same pinned VeriTile dependency and copies of the same built dependency cache.
-The JSON binds these commits, source/tool hashes, the complete inventory digest
-and the measured driver hashes. No task Lean or Python source changed; public
-Real/FP theorem conditions and the existing numerical scope are preserved.
-
-Validation also passed all four source-correspondence pairs, 742 Python tests,
-101 audit regressions and 16 official-comparator integration tests. These checks
-include rejection of unused private proofs with `sorry`/extra axioms, same-named
-duplicate proofs carrying forbidden axioms, and dropped helper targets.
-
-These are single-pair local measurements with 96 CPUs available to the process,
-not predictions for GitHub runners. The largest sampling gaps were 170.3 ms
-(old) and 165.5 ms (new); short memory spikes may be missed. The pilot is opt-in
-and does not replace the full-corpus CI driver. Wider adoption requires checking
-batch compatibility, memory limits and runtime on representative tasks.
-
-## Bounded audit-build measurements
-
-The follow-up keeps the exact audited source copies and audit predicates, but
-submits multiple modules to each Lake build. Both measured wave sizes pass the
-same official replay and strict comparison against the original 100 per-file
-receipts and the initial serial-preparation batch.
-
-| Audit preparation | Lake audit builds | Preparation, compilation and audits | Total wall time | Sampled aggregate RSS peak |
-| --- | ---: | ---: | ---: | ---: |
-| Serial, one module per build | 100 | 24m 04s | 27m 20s | 11.65 GiB |
-| Two modules per wave (default) | 50 | 17m 45s | 21m 08s | 11.68 GiB |
-| Four modules per wave | 25 | 13m 33s | 17m 22s | 16.57 GiB |
-
-The default reduces the preparation/audit phase by **26.2%** and total wall time
-by **22.7%**, with a 33 MiB increase in the sampled aggregate RSS peak. Four-module
-waves reduce total wall time by **36.4%**, but their peak contains four compiler
-processes at approximately 3.9 GiB RSS each. The serial and two-module peaks
-occur in the official replay phase instead. These are aggregate RSS readings;
-shared pages can be counted repeatedly.
-
-The [two-module receipt](../../validation/replay_batch/rms_matmul_rbe.audit-waves-2.json)
-and [four-module receipt](../../validation/replay_batch/rms_matmul_rbe.audit-waves-4.json)
-bind each result to its measured implementation and driver hashes. Both reuse
-the initial compressed inventory: its canonical digest is unchanged. Every
-per-file list, the full 1,890-target union, all 374 private targets and the
-per-module trust-audit summaries match. The 10,741 proof inputs and official
-comparator binary also match across all runs. No auxiliary theorem is filtered
-out, and no task source or public theorem condition changed.
-
-The measured four-module implementation is
-`e03b84f7bf5f6066f715e81bdba72bad2c407f95` and the measured two-module implementation is
-`a3c79f11b313eaffc08bccf97e91076fe3813898`. These are single local trials with
-the same built dependency cache; the trial commands ran sequentially. The
-two-module comparator phase took 159.5 s, close to the initial 158.6 s; the
-four-module phase took 193.6 s. The largest sampling gaps were 160.7 ms for two
-modules and 304.4 ms for four. This comparison is not a statistical runtime or
-physical-memory guarantee for other machines or tasks.
-
-Use `--audit-batch-size 1` for the previous serial preparation or `4` to select
-the measured higher-memory configuration. Full-corpus CI continues to use the
-existing per-file driver; this pilot does not change its acceptance scope.
+Recorded performance evidence is under
+[`validation/replay_batch/`](../../validation/replay_batch/). Each receipt binds
+its measured source, tools, theorem inventories, elapsed time and sampled
+aggregate RSS; it is not a runtime or physical-memory guarantee for another
+host or selection. `scripts/bench/measure_replay.py` measures an explicit command,
+and `scripts/bench/compare_replay.py` requires matching proof inputs, tools,
+per-file theorem lists and trust summaries before accepting a comparison.

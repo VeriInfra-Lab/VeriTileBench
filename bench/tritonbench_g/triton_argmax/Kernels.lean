@@ -17,7 +17,7 @@ def stage1Signature (MID_DTYPE : SourceDType) : CallSignature where
   readPorts := ["inp"]
   writePorts := ["mid_value", "mid_index"]
 
-def stage1Kernel (inp mid_value : RegionName) (mid_index : Region .int)
+def argmax_kernel_1_repairedKernel (inp mid_value : RegionName) (mid_index : Region .int)
     (MID_DTYPE : SourceDType) (BLOCK_SIZE : Nat) (INT64_INDEX : Bool) : ComputeKernel :=
   with_triton_signature (stage1Signature MID_DTYPE) in triton {
     pid = tl.program_id(0).to(tl.int64) + program_base
@@ -62,7 +62,7 @@ def stage2Signature (MID_DTYPE : SourceDType) : CallSignature where
   readPorts := ["mid_value", "mid_index"]
   writePorts := ["out"]
 
-def stage2Kernel (mid_value : RegionName) (mid_index out : Region .int)
+def argmax_kernel_2_repairedKernel (mid_value : RegionName) (mid_index out : Region .int)
     (MID_DTYPE : SourceDType) (BLOCK_MID : Nat) : ComputeKernel :=
   with_triton_signature (stage2Signature MID_DTYPE) in triton {
     offset = tl.arange(0, BLOCK_MID).to(tl.int64)
@@ -100,7 +100,7 @@ def dimensionSignature : CallSignature where
   readPorts := ["inp"]
   writePorts := ["out_index"]
 
-def dimensionKernel (inp : RegionName) (out_index : Region .int)
+def argmax_kernel_repairedKernel (inp : RegionName) (out_index : Region .int)
     (BLOCK_M BLOCK_N : Nat) (INT64_INDEX : Bool) : ComputeKernel :=
   with_triton_signature dimensionSignature in triton {
     program = tl.program_id(0).to(tl.int64) + program_base
@@ -160,7 +160,7 @@ def stage1Signature (MID_DTYPE : SourceDType) : CallSignature where
   readPorts := ["inp"]
   writePorts := ["mid_value", "mid_index"]
 
-def stage1Kernel (inp mid_value : RegionName) (mid_index : Region .int)
+def argmax_kernel_1_shiftedKernel (inp mid_value : RegionName) (mid_index : Region .int)
     (MID_DTYPE : SourceDType) (BLOCK_SIZE : Nat) (INT64_INDEX : Bool) : ComputeKernel :=
   with_triton_signature (stage1Signature MID_DTYPE) in triton {
     pid = tl.program_id(0).to(tl.int64) + program_base
@@ -208,7 +208,7 @@ def dimensionSignature : CallSignature where
   readPorts := ["inp"]
   writePorts := ["out_index"]
 
-def dimensionKernel (inp : RegionName) (out_index : Region .int)
+def argmax_kernel_shiftedKernel (inp : RegionName) (out_index : Region .int)
     (BLOCK_M BLOCK_N : Nat) (INT64_INDEX : Bool) : ComputeKernel :=
   with_triton_signature dimensionSignature in triton {
     program = tl.program_id(0).to(tl.int64) + program_base

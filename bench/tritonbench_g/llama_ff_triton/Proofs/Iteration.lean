@@ -36,7 +36,7 @@ def bodyExecution {α : Type} [Inhabited α] (a : Arithmetic α) (native : Bool)
     refine ⟨?_, ?_⟩
     swap
     simp [loopBody, compiledBody, dot1Index, dot3Index, carryNode, directWeightNode,
-      body, source, Source.kernel, Source.half, halfKernel, Source.byte, byteKernel, hp,
+      body, source, Source.kernel, Source.half, FP16.ff_llamaKernel, Source.byte, UInt8.ff_llamaKernel, hp,
       ComputeKernel.surfaceBody, run, step, evalExpr, evalComputeOp,
       evalOp_unfold, evalOffsets, evalDeltas, numeric, bop, natLt, numericLt,
       ComputeDType.eraseDType, ofFloat, toFloat, Region.cast, Option.bind,

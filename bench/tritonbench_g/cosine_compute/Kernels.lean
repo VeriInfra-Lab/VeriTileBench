@@ -15,7 +15,7 @@ def callSignature : CallSignature where
 def blockSize : Nat := 256
 def gridCount (n : Nat) : Nat := (n + 255) / 256
 
-def sourceKernel (A O : RegionName) (n B : Nat) : ComputeKernel :=
+def cos_funcKernel (A O : RegionName) (n B : Nat) : ComputeKernel :=
   let a : RegionName := A
   let b : RegionName := O
   let BLOCK_SIZE : Nat := B
@@ -28,7 +28,7 @@ def sourceKernel (A O : RegionName) (n B : Nat) : ComputeKernel :=
     tl.store(b + offset, b_value, mask=mask)
   }
 
-def indexCommutedKernel (A O : RegionName) (n B : Nat) : ComputeKernel :=
+def cos_func_index_commutedKernel (A O : RegionName) (n B : Nat) : ComputeKernel :=
   let a : RegionName := A
   let b : RegionName := O
   let BLOCK_SIZE : Nat := B
@@ -41,6 +41,6 @@ def indexCommutedKernel (A O : RegionName) (n B : Nat) : ComputeKernel :=
     tl.store(b + offset, b_value, mask=mask)
   }
 
-def originalKernel (n : Nat) : ComputeKernel := sourceKernel "a" "b" n blockSize
-def candidateKernel (n : Nat) : ComputeKernel := indexCommutedKernel "a" "b" n blockSize
+def originalKernel (n : Nat) : ComputeKernel := cos_funcKernel "a" "b" n blockSize
+def candidateKernel (n : Nat) : ComputeKernel := cos_func_index_commutedKernel "a" "b" n blockSize
 end VeriTile.Bench.Repairs.CosineCompute

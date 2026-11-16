@@ -15,7 +15,7 @@ def matmul4Typed (dtype : FloatDType)
       stride_scales_g stride_scales_n stride_zeros_g stride_zeros_n
       groupsize : Nat) (NO_GROUPS : Bool)
     (BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M : Nat) :
-    ComputeKernel := Body.original_matmul4_kernel dtype a_ptr b_ptr c_ptr scales_ptr zeros_ptr M N K stride_am stride_ak stride_bk stride_bn stride_cm stride_cn stride_scales_g stride_scales_n stride_zeros_g stride_zeros_n groupsize BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M NO_GROUPS
+    ComputeKernel := Body.matmul4_kernel dtype a_ptr b_ptr c_ptr scales_ptr zeros_ptr M N K stride_am stride_ak stride_bk stride_bn stride_cm stride_cn stride_scales_g stride_scales_n stride_zeros_g stride_zeros_n groupsize BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K GROUP_SIZE_M NO_GROUPS
 
 end
 end VeriTile.Bench.TritonBenchG.MatmulDequantize.FPTyped

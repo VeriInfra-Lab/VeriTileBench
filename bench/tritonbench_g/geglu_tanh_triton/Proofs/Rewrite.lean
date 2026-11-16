@@ -20,8 +20,8 @@ theorem prefix_eq {α : Type} [Inhabited α] (M : Algebra α)
     funext i
     exact Int.mul_comm _ _
   cases backward <;>
-    simp [source,indexCommutedSource,forwardKernel,backwardKernel,
-      forwardIndexCommutedKernel,backwardIndexCommutedKernel,ComputeKernel.surfaceBody,
+    simp [source,indexCommutedSource,_geglu_tanh_forward_kernel_repairedKernel,_geglu_tanh_backward_kernel_repairedKernel,
+      forward_index_commuted_kernel,backward_index_commuted_kernel,ComputeKernel.surfaceBody,
       run,step,FP.Structural.evalExpr,evalOp_unfold,numeric,State.setReg,product]
 
 theorem suffix_eq (backward : Bool) (block count : Nat) :

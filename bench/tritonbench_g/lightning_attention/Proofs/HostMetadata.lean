@@ -94,5 +94,5 @@ theorem launch_axes (d : Dimensions) (h : Contract d) (stage : Stage) :
 #axiomsClean bm_legal
 #axiomsClean bm_divides
 #axiomsClean launch_axes
-#specNonCircular Contract avoiding [KernelOnly.forwardKernel,KernelOnly.intraKernel,KernelOnly.interKernel]
+#specNonCircular Contract avoiding [KernelOnly._fwd_kernel,KernelOnly._bwd_intra_kernel,KernelOnly._bwd_inter_kernel]
 end VeriTile.Bench.Repairs.LightningAttention.Host

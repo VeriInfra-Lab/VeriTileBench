@@ -31,6 +31,7 @@ DIRECTORIES = ('bench/tritonbench_g', 'bench/examples',
 LEDGER = 'validation/task_progress.json'
 CORPUS_PREFIXES = ('bench/tritonbench_g/', 'bench/examples/', 'tests/lean/')
 BENCH_SECTIONS = {'examples', 'bug_detection', 'pretrain_kernels', 'tritonbench_g'}
+PUBLIC_GOAL_KINDS = {'specification', 'refutation'}
 
 
 def validate_layout(root, ledger):
@@ -145,15 +146,40 @@ def selected_tasks(root, ledger):
 
 def public_specifications(root, path):
     text = local(root, path).read_text()
-    declarations = [d for d in split_decls(text) if d['kind'] == 'specification']
+    declarations = [d for d in split_decls(text) if d['kind'] in PUBLIC_GOAL_KINDS]
     if not declarations and Path(path).name in (*REAL_ENTRY_NAMES, 'FPEquiv.lean'):
         raise ValueError(path + ': no public specification')
     return text, declarations
 
 
+def required_refutations(root, cases=None):
+    """Bind each DISPROVED ledger verdict to its actual public refutation."""
+    if not (root / LEDGER).is_file():
+        return {}  # Isolated source fixtures need not contain a task ledger.
+    required = {}
+    for task in read(root, LEDGER)['tasks']:
+        case = 'bench/tritonbench_g/' + task['task']
+        if cases is not None and case not in cases:
+            continue
+        verdict = task.get('fp_verdict', {})
+        if verdict.get('status') != 'DISPROVED':
+            continue
+        path, name = verdict.get('public_entry'), verdict.get('public_theorem')
+        if path != case + '/FPEquiv.lean' or not isinstance(name, str) or not re.fullmatch(r"[A-Za-z_][\w'.]*", name):
+            raise ValueError(case + ': invalid public refutation verdict')
+        _, declarations = public_specifications(root, path)
+        matches = [d for d in declarations if d['kind'] == 'refutation'
+                   and d['name'] == name.rsplit('.', 1)[-1]]
+        if len(matches) != 1:
+            raise ValueError(path + ': missing required refutation ' + name)
+        required.setdefault(path, []).append(name)
+    return required
+
+
 def collect(root=ROOT):
     root = root.resolve()
     rows = selected_tasks(root, read(root, LEDGER))
+    required_refutations(root)
     for row in rows.values():
         for path in row['public_entries']:
             public_specifications(root, path)
@@ -173,11 +199,15 @@ def collect(root=ROOT):
     inputs = set(paths) | {LEDGER, 'lean-toolchain', 'lakefile.toml', 'lake-manifest.json',
                            'validation/bench-layout.json',
                            'scripts/bench/final_inventory.py', 'scripts/bench/lean_import_scan.py',
+                           'scripts/bench/check_source_naming.py', 'scripts/bench/replay_body_migrations.py',
+                           'scripts/bench/ci.py', 'scripts/bench/affected.py', '.github/workflows/bench-audit.yml',
+                           'validation/body-migration-batch.json',
                            'scripts/bench/library_source.py',
                            'scripts/spec_sheet.py',
                            'scripts/bench/audit_trust.sh', 'scripts/bench/audit_trust_prep.py', 'scripts/bench/audit_tritonbench_g.sh',
                            'scripts/bench/select_audit_shard.py', 'scripts/bench/check_worker_results.py',
-                           'scripts/check_comparator.py', 'scripts/comparator_common.py',
+                           'scripts/check_comparator.py', 'scripts/check_comparator_batch.py',
+                           'scripts/audit_process.py', 'scripts/comparator_common.py',
                            'scripts/setup-comparator.sh', 'scripts/comparator-string-literals.patch',
                            'scripts/kernel-manifest.tsv'}
     inputs.update(row['source'] for row in rows.values())
@@ -194,6 +224,7 @@ def collect(root=ROOT):
 def coverage(root=ROOT):
     root = root.resolve()
     rows = selected_tasks(root, read(root, LEDGER))
+    required_refutations(root)
     result = []
     for task, row in sorted(rows.items()):
         for path in row['public_entries']:
@@ -203,6 +234,8 @@ def coverage(root=ROOT):
                 result.append({'id': task + '--' + hashlib.sha256((path + ':' + decl['name']).encode()).hexdigest()[:12],
                     'port': task, 'file': path, 'line': text[:decl['start']].count('\n') + 1,
                     'declaration': decl['name'], 'python_file': row['source'],
+                    'declaration_kind': decl['kind'],
+                    'polarity': 'negative' if decl['kind'] == 'refutation' else 'positive',
                     'python_functions': [], 'coverage_level': 'selected_contract',
                     'numeric_model': 'mathematical' if 'Spec.Real' in statement else 'explicit_fp_contract',
                     'scope': row['proof_scope'], 'statement': statement, 'references': [], 'io': [],

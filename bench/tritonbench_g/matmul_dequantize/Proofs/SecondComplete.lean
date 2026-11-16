@@ -41,7 +41,7 @@ def epilogueExecution {α : Type} [Inhabited α] (M : Algebra α) (D : Dot α)
     {t : State α // run (backend M D) (epilogue p) current = some t} := by
   refine ⟨?_, ?_⟩
   swap
-  simp [epilogue, source, FPTyped.matmulTyped,VeriTile.Bench.TritonBenchG.MatmulDequantize.Body.original_matmul_kernel, ComputeKernel.surfaceBody,
+  simp [epilogue, source, FPTyped.matmulTyped,VeriTile.Bench.TritonBenchG.MatmulDequantize.Body.matmul_kernel, ComputeKernel.surfaceBody,
     run, step, evalExpr, evalComputeOp, evalOp_unfold, evalOffsets, store, numeric,
     FP.Structural.bop, natLt, numericEq, ComputeDType.eraseDType, ofFloat, toFloat,
     FloatDType.numericDType, FloatDType.toTileDType,
@@ -73,7 +73,7 @@ theorem loop_step {α : Type} [Inhabited α] (M : Algebra α) (D : Dot α)
     step (backend M D) (loopStatement p) s =
       FP.Structural.range (backend M D) "k" 0 p.steps 1 (body p) s := by
   simp [loopStatement,source,FPTyped.matmulTyped,
-    VeriTile.Bench.TritonBenchG.MatmulDequantize.Body.original_matmul_kernel,
+    VeriTile.Bench.TritonBenchG.MatmulDequantize.Body.matmul_kernel,
     body,ComputeKernel.surfaceBody,Parameters.steps,step,
     evalOp_unfold,evalOffsets,numeric,bop,natLt,integralFloorDiv]
 
@@ -99,7 +99,7 @@ theorem correctness {α : Type} [Inhabited α] (M : Algebra α) (D : Dot α)
         run (backend M D) [loopStatement p] s =
           FP.Structural.range (backend M D) "k" 0 p.steps 1 (body p) s := by
       simp [loopStatement, source, FPTyped.matmulTyped,
-        VeriTile.Bench.TritonBenchG.MatmulDequantize.Body.original_matmul_kernel,
+        VeriTile.Bench.TritonBenchG.MatmulDequantize.Body.matmul_kernel,
         body,ComputeKernel.surfaceBody,Parameters.steps,run,step,
         evalOp_unfold,evalOffsets,numeric,bop,natLt,integralFloorDiv]
     simp only [Option.bind_some, hsingle, hm]

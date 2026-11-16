@@ -62,3 +62,17 @@ def dequantize_rowwise_repaired(x: torch.Tensor, state_x: torch.Tensor):
         _dequantize_rowwise_repaired[grid](x, state_x, output, 1.0 / 127, n_elements,
                                          BLOCK_SIZE=x.shape[1], P2=P2)
         return output
+
+
+# Comparison candidate: commute the exact signed integer row-start product.
+@triton.jit
+def _dequantize_rowwise_index_commuted(x_ptr, state_x, output_ptr, inv_127, n_elements, BLOCK_SIZE: tl.constexpr, P2: tl.constexpr):
+    pid = tl.program_id(axis=0).to(tl.int64)
+    block_start = BLOCK_SIZE * pid
+    arange = tl.arange(0, P2).to(tl.int64)
+    offsets = block_start + arange
+    row_mask = arange < BLOCK_SIZE
+    x = tl.load(x_ptr + offsets, mask=row_mask)
+    max_val = tl.load(state_x + pid)
+    output = max_val * x * inv_127
+    tl.store(output_ptr + offsets, output, mask=row_mask)

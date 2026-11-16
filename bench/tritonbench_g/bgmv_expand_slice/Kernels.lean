@@ -16,7 +16,7 @@ def callSignature (index_dtype : IndexStorage) : CallSignature where
   readPorts := ["input_ptr","lora_ptr","out_ptr","lora_indices"]
   writePorts := ["out_ptr"]
 
-def originalKernel (index_dtype : IndexStorage) (input_ptr lora_ptr out_ptr lora_indices : RegionName)
+def _bgmv_expand_slice_kernel (index_dtype : IndexStorage) (input_ptr lora_ptr out_ptr lora_indices : RegionName)
     (N K xm_stride xk_stride l0_stride lora_k_stride lora_n_stride cm_stride cn_stride slice_offset : Nat) (BLOCK_N BLOCK_K SPLIT_N : Nat) (EVEN_K ADD_INPUTS CAST_TYPE : Bool) : ComputeKernel :=
   with_triton_call (callSignature index_dtype) call_args [N := N,K := K,xm_stride := xm_stride,xk_stride := xk_stride,l0_stride := l0_stride,lora_k_stride := lora_k_stride,lora_n_stride := lora_n_stride,cm_stride := cm_stride,cn_stride := cn_stride,slice_offset := slice_offset] in triton {
     """
@@ -65,7 +65,7 @@ def originalKernel (index_dtype : IndexStorage) (input_ptr lora_ptr out_ptr lora
         tl.store(c_ptr + current_n * cn_stride, accumulator, mask=c_mask)
   }
 
-def candidateKernel (index_dtype : IndexStorage) (input_ptr lora_ptr out_ptr lora_indices : RegionName)
+def _bgmv_expand_slice_kernel_candidateKernel (index_dtype : IndexStorage) (input_ptr lora_ptr out_ptr lora_indices : RegionName)
     (N K xm_stride xk_stride l0_stride lora_k_stride lora_n_stride cm_stride cn_stride slice_offset : Nat) (BLOCK_N BLOCK_K SPLIT_N : Nat) (EVEN_K ADD_INPUTS CAST_TYPE : Bool) : ComputeKernel :=
   with_triton_call (callSignature index_dtype) call_args [N := N,K := K,xm_stride := xm_stride,xk_stride := xk_stride,l0_stride := l0_stride,lora_k_stride := lora_k_stride,lora_n_stride := lora_n_stride,cm_stride := cm_stride,cn_stride := cn_stride,slice_offset := slice_offset] in triton {
     """
@@ -120,12 +120,12 @@ end VeriTile.Bench.Repairs.BgmvExpandSlicePhysicalTileChecked.Pasted
 namespace VeriTile.Bench.Repairs.BgmvExpandSlicePhysicalTileChecked.Kernels
 open VeriTile.Triton
 def source (h : Call) : ComputeKernel :=
-  Pasted.originalKernel .i64 "X" "W" "Y" "Indices"
+  Pasted._bgmv_expand_slice_kernel .i64 "X" "W" "Y" "Indices"
     h.N h.K h.K 1 (h.N*h.K) h.K 1 h.columns 1 h.slice
     256 h.BK h.N h.even h.add Bool.true
 
 def outputFirst (h : Call) : ComputeKernel :=
-  Pasted.candidateKernel .i64 "X" "W" "Y" "Indices"
+  Pasted._bgmv_expand_slice_kernel_candidateKernel .i64 "X" "W" "Y" "Indices"
     h.N h.K h.K 1 (h.N*h.K) h.K 1 h.columns 1 h.slice
     256 h.BK h.N h.even h.add Bool.true
 

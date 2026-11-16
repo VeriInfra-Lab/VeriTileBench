@@ -14,7 +14,7 @@ def signature (a_dtype b_dtype : Storage) (out_dtype : FloatDType) : CallSignatu
   readPorts := ["a_ptr","b_ptr","seq_idx_ptr"]
   writePorts := ["out_ptr"]
 
-def originalKernel
+def _bmm_chunk_fwd_kernel_repairedKernel
     (a_dtype b_dtype : Storage) (out_dtype dot_dtype : FloatDType) (a_ptr b_ptr out_ptr : RegionName)
     (seq_idx_ptr : Region .int)
     (seqlen chunk_size K ngroups stride_a_batch stride_a_seqlen stride_a_head stride_ak
@@ -86,7 +86,7 @@ with_triton_call (signature a_dtype b_dtype out_dtype) call_args [seqlen := seql
     tl.store(out_ptrs, out, mask=(offs_m[:, None] < chunk_size) & (offs_n[None, :] < chunk_size))
   }
 
-def indexCommutedKernel
+def _bmm_chunk_fwd_kernel_repaired_candidateKernel
     (a_dtype b_dtype : Storage) (out_dtype dot_dtype : FloatDType) (a_ptr b_ptr out_ptr : RegionName)
     (seq_idx_ptr : Region .int)
     (seqlen chunk_size K ngroups stride_a_batch stride_a_seqlen stride_a_head stride_ak
@@ -128,12 +128,14 @@ with_triton_call (signature a_dtype b_dtype out_dtype) call_args [seqlen := seql
     b_ptr += pid_b * stride_b_batch + pid_c * chunk_size * stride_b_seqlen + pid_h * stride_b_head
     if HAS_SEQ_IDX:
         seq_idx_ptr += pid_b * stride_seq_idx_batch + pid_c * chunk_size * stride_seq_idx_seqlen
+
     offs_m = pid_m * BLOCK_SIZE_M + tl.arange(0, BLOCK_SIZE_M).to(tl.int64)
     offs_n = pid_n * BLOCK_SIZE_N + tl.arange(0, BLOCK_SIZE_N).to(tl.int64)
     offs_k = tl.arange(0, BLOCK_SIZE_K).to(tl.int64)
     a_ptrs = a_ptr + (offs_m[:, None] * stride_a_seqlen + offs_k[None, :] * stride_ak)
     b_ptrs = b_ptr + (offs_k[:, None] * stride_bk + offs_n[None, :] * stride_b_seqlen)
     chunk_size_limit = min(chunk_size, seqlen - pid_c * chunk_size)
+
     acc = tl.zeros((BLOCK_SIZE_M, BLOCK_SIZE_N), dtype=tl.float32)
     for k in range(0, tl.cdiv(K, BLOCK_SIZE_K)):
         a = tl.load(a_ptrs, mask=(offs_m[:, None] < chunk_size_limit) & (offs_k[None, :] < K - k * BLOCK_SIZE_K), other=0.0).to(dot_dtype)
@@ -141,6 +143,7 @@ with_triton_call (signature a_dtype b_dtype out_dtype) call_args [seqlen := seql
         acc += tl.dot(a, b)
         a_ptrs += BLOCK_SIZE_K * stride_ak
         b_ptrs += BLOCK_SIZE_K * stride_bk
+
     offs_m = pid_m * BLOCK_SIZE_M + tl.arange(0, BLOCK_SIZE_M).to(tl.int64)
     offs_n = pid_n * BLOCK_SIZE_N + tl.arange(0, BLOCK_SIZE_N).to(tl.int64)
     if HAS_SEQ_IDX:
@@ -149,12 +152,13 @@ with_triton_call (signature a_dtype b_dtype out_dtype) call_args [seqlen := seql
         seq_idx_n = tl.load(seq_idx_ptr + offs_n * stride_seq_idx_seqlen, mask=offs_n < chunk_size_limit, other=-2)
         acc = tl.where(seq_idx_m[:, None] == seq_idx_n[None, :], acc, 0.0)
     out = acc.to(out_ptr.dtype.element_ty)
+
     out_ptr += pid_b * stride_out_batch + pid_c * stride_out_chunk + pid_h * stride_out_head
     out_ptrs = out_ptr + (stride_outm * offs_m[:, None] + offs_n[None, :] * stride_outn)
     tl.store(out_ptrs, out, mask=(offs_m[:, None] < chunk_size) & (offs_n[None, :] < chunk_size))
   }
 
-def dotFirstKernel
+def _bmm_chunk_fwd_kernel_repaired_dot_firstKernel
     (a_dtype b_dtype : Storage) (out_dtype dot_dtype : FloatDType) (a_ptr b_ptr out_ptr : RegionName)
     (seq_idx_ptr : Region .int)
     (seqlen chunk_size K ngroups stride_a_batch stride_a_seqlen stride_a_head stride_ak
@@ -228,7 +232,7 @@ def clearSignature (out_dtype : FloatDType) : CallSignature where
   constexpr := ["BLOCK_M","BLOCK_N"]
   readPorts := []
   writePorts := ["Out"]
-def clearUpperKernel (out_dtype : FloatDType) (Out : RegionName)
+def _clear_causal_upperKernel (out_dtype : FloatDType) (Out : RegionName)
     (chunk_size chunk_heads BLOCK_M BLOCK_N : Nat) : ComputeKernel :=
   with_triton_call (clearSignature out_dtype) call_args [chunk_size := chunk_size, chunk_heads := chunk_heads] in triton {
     pid = tl.program_id(0).to(tl.int64)

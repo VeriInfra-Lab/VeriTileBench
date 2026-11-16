@@ -8,8 +8,8 @@ theorem original_bundle :
       first_waveSource full_tilesSource reduce_streamkSource=.ok kernels := kernelsDecoded.property
 
 theorem candidate_bundle :
-    SourceAdapter.decodeSources area_swizzle_tileSource area_linear_tileSource area_mac_loopSource
-      area_first_waveSource area_full_tilesSource area_reduce_streamkSource=.ok areaKernels := areaKernelsDecoded.property
+    SourceAdapter.decodeSources swizzle_tile_areaSource linear_tile_areaSource mac_loop_areaSource
+      first_wave_areaSource full_tiles_areaSource reduce_streamk_areaSource=.ok areaKernels := areaKernelsDecoded.property
 
 theorem missing_dtype_rejected :
     SourceAdapter.decode {mac_loopSource with dtypeConstants:=[]}=

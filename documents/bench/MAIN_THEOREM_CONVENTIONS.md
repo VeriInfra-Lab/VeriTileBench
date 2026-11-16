@@ -125,7 +125,7 @@ The same distinction applies to proof aliases declared with `alias` or `abbrev`;
 changing the keyword alone does not make an auxiliary conclusion reader content.
 Named source programs, IO views and independent formulas may remain in readers.
 
-Run `python bench/check_main_entry_roles.py` to compare all 183 selected readers
+Run `python bench/check_main_entry_roles.py` to compare all 184 selected readers
 and re-exports with the explicit per-declaration role review and check that their
 repository import closures exclude `Misc/`. Reader changes require a new role
 review. This guard does not infer semantics from declaration counts, re-prove
