@@ -1,5 +1,7 @@
 import bench.tritonbench_g.matmul_leakyrelu.Proofs.Support.PairIO
 import VeriTile.Spec
+import VeriTile.Triton.Float.DotContraction
+import VeriTile.Triton.Float.DotAdmission
 
 namespace VeriTile.Bench.Repairs.MatmulLeakyrelu.KernelOnly.SourcePair
 open VeriTile.Triton FP.Structural
@@ -15,31 +17,27 @@ def fragmentRequest : Whole.Request where
   aContiguous := Bool.true; activation := ""
 
 def separateFragment : List ComputeStmt :=
-  ((FPValue.body fragmentRequest.parameters .single).take 3).drop 2
+  FP.DotContraction.separate 32 32 32 "a" "b" "accumulator"
 def contractedFragment : List ComputeStmt :=
-  ((FPFused.body fragmentRequest.contractedParameters .single).take 3).drop 2
+  FP.DotContraction.seeded 32 32 32 "a" "b" "accumulator"
 
-/-- Pending numerical validation; this record does not claim either gate ran.
-The shapes are the local source instruction tile, independent of matrix sizes. -/
-def contractionEntry : Spec.RuleEntry ComputeStmt where
-  rule := {
-    lhs := separateFragment
-    rhs := contractedFragment
-    contract := {
-      ruleID := "MATMUL-LEAKYRELU-FP32-K32-DOT-ADD-TO-DOTACC"
-      instanceKey := "matmul_leakyrelu.fp32.tf32.k32.live_acc.all_words.v1"
-      configuration := Lean.Json.mkObj [
-        ("precision", "fp32"), ("dot_input_precision", "tf32"),
-        ("tile", Lean.toJson ([32,32,32] : List Nat)),
-        ("domain", "all FP32 payloads; padded zero lanes; arbitrary live FP32 accumulator"),
-        ("backend", "SM90/Triton 3.7.1 selected profile"),
-        ("status", "deferred; no experimental gates run")]
-      warningPolicy := .passOnly
-      description := "Local separate FP32 dot, fp32-to-real carrier cast and add to seeded FP32 dotAcc; numerical assumption pending validation, not IEEE word equality." } }
-  evidence := { instanceKey := "matmul_leakyrelu.fp32.tf32.k32.live_acc.all_words.v1" }
+/-- The shared atoms are exactly the statements of these actual source bodies;
+the rule never substitutes a complete kernel or drops a carrier conversion. -/
+theorem separateFragment_source : separateFragment =
+    ((FPValue.body fragmentRequest.parameters .single).take 3).drop 2 := by rfl
+theorem contractedFragment_source : contractedFragment =
+    ((FPFused.body fragmentRequest.contractedParameters .single).take 3).drop 2 := by rfl
 
-/-- Evidence remains an explicit conditional parameter. The pending record
-above has no fabricated acceptance proof; an actual future record must discharge
+/-- The shared source-specific experiment is retained with its actual outcome.
+This data record supplies no permission when its numerical gates reject. -/
+def contractionEntry : Spec.RuleEntry ComputeStmt := FP.DotAdmission.candidate
+
+theorem contractionEntry_source :
+    contractionEntry.rule.lhs = separateFragment ∧
+    contractionEntry.rule.rhs = contractedFragment := ⟨rfl, rfl⟩
+
+/-- Evidence remains an explicit conditional parameter. The recorded
+experiment does not manufacture this proof; any selected evidence must discharge
 its own gates and provenance before constructing this value. -/
 structure Rules where
   evidence : Spec.Evidence

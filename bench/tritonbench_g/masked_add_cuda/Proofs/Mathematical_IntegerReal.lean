@@ -45,8 +45,8 @@ theorem integer_math_kernel_correct
     rintro ⟨a, _⟩ ⟨b, _⟩ hab
     obtain rfl : a = b := Fin.ext (Nat.add_left_cancel hab)
     rfl
-  simp [exec, integer_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.sourceKernel,
-    VeriTile.Bench.Repairs.MaskedAddCuda.commutedKernel,ComputeKernel.eraseDType,
+  simp [exec, integer_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.masked_add_kernel,
+    VeriTile.Bench.Repairs.MaskedAddCuda.commuted_masked_addKernel,ComputeKernel.eraseDType,
     ComputeKernel.toAlgorithm?,ComputeKernel.fromKernelBody,ComputeKernel.surfaceBody,
     ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,
     Kernel.eraseDType,Stmt.eraseDTypeList,Stmt.eraseDType,Op.eraseDType.eq_def,
@@ -94,8 +94,8 @@ theorem integer_math_kernel_frame
         = 0 →
       ¬(grad_ptr = r ∧ s.pids 0 * BLOCK_SIZE + i.val = o)) :
     s1.mem r o = s.mem r o := by
-  simp [exec, integer_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.sourceKernel,
-    VeriTile.Bench.Repairs.MaskedAddCuda.commutedKernel,ComputeKernel.eraseDType,
+  simp [exec, integer_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.masked_add_kernel,
+    VeriTile.Bench.Repairs.MaskedAddCuda.commuted_masked_addKernel,ComputeKernel.eraseDType,
     ComputeKernel.toAlgorithm?,ComputeKernel.fromKernelBody,ComputeKernel.surfaceBody,
     ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,
     Kernel.eraseDType,Stmt.eraseDTypeList,Stmt.eraseDType,Op.eraseDType.eq_def,
@@ -118,8 +118,8 @@ theorem integer_math_kernel_exec_isSome
     (s : BlockState) :
     ∃ s1, exec ((integer_math_kernel grad_ptr p_ptr p_mask_ptr
         n_elements alpha BLOCK_SIZE).toAlgKernel) s = some s1 := by
-  simp [exec, integer_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.sourceKernel,
-    VeriTile.Bench.Repairs.MaskedAddCuda.commutedKernel,ComputeKernel.eraseDType,
+  simp [exec, integer_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.masked_add_kernel,
+    VeriTile.Bench.Repairs.MaskedAddCuda.commuted_masked_addKernel,ComputeKernel.eraseDType,
     ComputeKernel.toAlgorithm?,ComputeKernel.fromKernelBody,ComputeKernel.surfaceBody,
     ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,
     Kernel.eraseDType,Stmt.eraseDTypeList,Stmt.eraseDType,Op.eraseDType.eq_def,
@@ -195,8 +195,8 @@ theorem integer_math_kernel_traceSafe
       ((integer_math_kernel grad_ptr p_ptr p_mask_ptr n_elements alpha
         BLOCK_SIZE).toAlgKernel) s := by
   unfold Kernel.TraceSafe
-  simp [integer_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.sourceKernel,
-    VeriTile.Bench.Repairs.MaskedAddCuda.commutedKernel,ComputeKernel.eraseDType,
+  simp [integer_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.masked_add_kernel,
+    VeriTile.Bench.Repairs.MaskedAddCuda.commuted_masked_addKernel,ComputeKernel.eraseDType,
     ComputeKernel.toAlgorithm?,ComputeKernel.fromKernelBody,ComputeKernel.surfaceBody,
     ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,
     Kernel.eraseDType,Stmt.eraseDTypeList,Stmt.eraseDType,Op.eraseDType.eq_def,
@@ -220,8 +220,8 @@ theorem integer_math_kernel_flattenOk
     ((integer_math_kernel grad_ptr p_ptr p_mask_ptr n_elements alpha
         BLOCK_SIZE).toAlgKernel).FlattenOk := by
   unfold Kernel.FlattenOk
-  simp [integer_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.sourceKernel,
-    VeriTile.Bench.Repairs.MaskedAddCuda.commutedKernel,ComputeKernel.eraseDType,
+  simp [integer_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.masked_add_kernel,
+    VeriTile.Bench.Repairs.MaskedAddCuda.commuted_masked_addKernel,ComputeKernel.eraseDType,
     ComputeKernel.toAlgorithm?,ComputeKernel.fromKernelBody,ComputeKernel.surfaceBody,
     ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,
     Kernel.eraseDType,Stmt.eraseDTypeList,Stmt.eraseDType,Op.eraseDType.eq_def,
@@ -254,8 +254,8 @@ theorem integer_commuted_math_kernel_traceSafe
       ((integer_commuted_math_kernel grad_ptr p_ptr p_mask_ptr n_elements alpha
         BLOCK_SIZE).toAlgKernel) s := by
   unfold Kernel.TraceSafe
-  simp [integer_commuted_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.sourceKernel,
-    VeriTile.Bench.Repairs.MaskedAddCuda.commutedKernel,ComputeKernel.eraseDType,
+  simp [integer_commuted_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.masked_add_kernel,
+    VeriTile.Bench.Repairs.MaskedAddCuda.commuted_masked_addKernel,ComputeKernel.eraseDType,
     ComputeKernel.toAlgorithm?,ComputeKernel.fromKernelBody,ComputeKernel.surfaceBody,
     ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,
     Kernel.eraseDType,Stmt.eraseDTypeList,Stmt.eraseDType,Op.eraseDType.eq_def,
@@ -279,8 +279,8 @@ theorem integer_commuted_math_kernel_flattenOk
     ((integer_commuted_math_kernel grad_ptr p_ptr p_mask_ptr n_elements alpha
         BLOCK_SIZE).toAlgKernel).FlattenOk := by
   unfold Kernel.FlattenOk
-  simp [integer_commuted_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.sourceKernel,
-    VeriTile.Bench.Repairs.MaskedAddCuda.commutedKernel,ComputeKernel.eraseDType,
+  simp [integer_commuted_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.masked_add_kernel,
+    VeriTile.Bench.Repairs.MaskedAddCuda.commuted_masked_addKernel,ComputeKernel.eraseDType,
     ComputeKernel.toAlgorithm?,ComputeKernel.fromKernelBody,ComputeKernel.surfaceBody,
     ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,
     Kernel.eraseDType,Stmt.eraseDTypeList,Stmt.eraseDType,Op.eraseDType.eq_def,
@@ -297,14 +297,14 @@ theorem integer_commuted_exec (g p m : RegionName) (n : Nat) (a : ℝ) (B : Nat)
     (s : BlockState) :
     exec (integer_commuted_math_kernel g p m n a B).toAlgKernel s =
       exec (integer_math_kernel g p m n a B).toAlgKernel s := by
-  simp [integer_commuted_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.sourceKernel,
-    VeriTile.Bench.Repairs.MaskedAddCuda.commutedKernel,ComputeKernel.eraseDType,
+  simp [integer_commuted_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.masked_add_kernel,
+    VeriTile.Bench.Repairs.MaskedAddCuda.commuted_masked_addKernel,ComputeKernel.eraseDType,
     ComputeKernel.toAlgorithm?,ComputeKernel.fromKernelBody,ComputeKernel.surfaceBody,
     ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,
     Kernel.eraseDType,Stmt.eraseDTypeList,Stmt.eraseDType,Op.eraseDType.eq_def,
     MemAccess.eraseDType.eq_def,MaskOpt.eraseDType.eq_def,VeriTile.Triton.eraseDType,
-    NumericDType.eraseDType,ComparableDType.eraseDType,ComputeDType.eraseDType,Except.bind,bind, integer_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.sourceKernel,
-    VeriTile.Bench.Repairs.MaskedAddCuda.commutedKernel,ComputeKernel.eraseDType,
+    NumericDType.eraseDType,ComparableDType.eraseDType,ComputeDType.eraseDType,Except.bind,bind, integer_math_kernel,VeriTile.Bench.Repairs.MaskedAddCuda.masked_add_kernel,
+    VeriTile.Bench.Repairs.MaskedAddCuda.commuted_masked_addKernel,ComputeKernel.eraseDType,
     ComputeKernel.toAlgorithm?,ComputeKernel.fromKernelBody,ComputeKernel.surfaceBody,
     ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,
     Kernel.eraseDType,Stmt.eraseDTypeList,Stmt.eraseDType,Op.eraseDType.eq_def,

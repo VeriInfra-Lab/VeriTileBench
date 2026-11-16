@@ -24,7 +24,7 @@ def callSignature : CallSignature where
   readPorts := ["A","absmax_inv_ptr"]
   writePorts := ["B"]
 
-def quotedOriginalKernel (p : Parameters) : ComputeKernel :=
+def _quantize_global_transposeKernel (p : Parameters) : ComputeKernel :=
   let A : RegionName := ⟨p.x⟩
   let absmax_inv_ptr : RegionName := ⟨p.scale⟩
   let B : RegionName := ⟨p.output⟩
@@ -68,7 +68,7 @@ def quotedOriginalKernel (p : Parameters) : ComputeKernel :=
     tl.store(B, output, mask=mask)
   }
 
-def quotedCommutedKernel (p : Parameters) : ComputeKernel :=
+def _quantize_global_transpose_index_commutedKernel (p : Parameters) : ComputeKernel :=
   let A : RegionName := ⟨p.x⟩
   let absmax_inv_ptr : RegionName := ⟨p.scale⟩
   let B : RegionName := ⟨p.output⟩
@@ -114,7 +114,7 @@ def quotedCommutedKernel (p : Parameters) : ComputeKernel :=
 
 def kernel (version : Bool) : Parameters → ComputeKernel :=
   match version with
-  | Bool.false => quotedOriginalKernel
-  | Bool.true => quotedCommutedKernel
+  | Bool.false => _quantize_global_transposeKernel
+  | Bool.true => _quantize_global_transpose_index_commutedKernel
 
 end VeriTile.Bench.Repairs.QuantTransposeKernel.KernelSource

@@ -20,7 +20,7 @@ def forwardSignature (storage : Storage) : CallSignature where
   readPorts := ["s_ptr", "x_ptr", "lambda_ptr"]
   writePorts := ["y_ptr"]
 
-def forwardKernel (storage : Storage) (s_ptr x_ptr lambda_ptr y_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
+def diag_ssm_forward_kernel (storage : Storage) (s_ptr x_ptr lambda_ptr y_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call (forwardSignature storage) call_args [length := length, batch_size := batch_size, dim := dim] in triton {
     """
     Forward kernel (real version)
@@ -47,7 +47,7 @@ def forwardKernel (storage : Storage) (s_ptr x_ptr lambda_ptr y_ptr : RegionName
         tl.store(y_ptr + offsets, s, mask=mask)
 }
 
-def forwardCandidateKernel (storage : Storage) (s_ptr x_ptr lambda_ptr y_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
+def diag_ssm_forward_kernel_index_commutedKernel (storage : Storage) (s_ptr x_ptr lambda_ptr y_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call (forwardSignature storage) call_args [length := length, batch_size := batch_size, dim := dim] in triton {
     """
     Forward kernel (real version)
@@ -81,7 +81,7 @@ def backwardSignature (storage : Storage) : CallSignature where
   readPorts := ["s_ptr", "lambda_ptr", "y_ptr", "grad_y_ptr"]
   writePorts := ["grad_s_ptr", "grad_x_ptr", "grad_lambda_ptr"]
 
-def backwardKernel (storage : Storage) (s_ptr lambda_ptr y_ptr grad_s_ptr grad_x_ptr grad_lambda_ptr grad_y_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
+def diag_ssm_backward_kernel (storage : Storage) (s_ptr lambda_ptr y_ptr grad_s_ptr grad_x_ptr grad_lambda_ptr grad_y_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call (backwardSignature storage) call_args [length := length, batch_size := batch_size, dim := dim] in triton {
     """
     Backward kernel (real version)
@@ -133,7 +133,7 @@ def backwardKernel (storage : Storage) (s_ptr lambda_ptr y_ptr grad_s_ptr grad_x
     tl.store(grad_lambda_ptr + col_offsets, grad_Lambda, mask=mask)
 }
 
-def backwardCandidateKernel (storage : Storage) (s_ptr lambda_ptr y_ptr grad_s_ptr grad_x_ptr grad_lambda_ptr grad_y_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
+def diag_ssm_backward_kernel_index_commutedKernel (storage : Storage) (s_ptr lambda_ptr y_ptr grad_s_ptr grad_x_ptr grad_lambda_ptr grad_y_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call (backwardSignature storage) call_args [length := length, batch_size := batch_size, dim := dim] in triton {
     """
     Backward kernel (real version)
@@ -192,7 +192,7 @@ def complexForwardSignature : CallSignature where
   readPorts := ["s_ptr", "x_ptr", "lambda_ptr"]
   writePorts := ["y_ptr"]
 
-def complexForwardKernel (s_ptr x_ptr y_ptr lambda_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
+def diag_ssm_forward_kernel_complexKernel (s_ptr x_ptr y_ptr lambda_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call complexForwardSignature call_args [length := length, batch_size := batch_size, dim := dim] in triton {
     """
     Forward kernel (complex version)
@@ -237,7 +237,7 @@ def complexForwardKernel (s_ptr x_ptr y_ptr lambda_ptr : RegionName) (length bat
         s_real, s_imag = new_s_real, new_s_imag
 }
 
-def complexForwardCandidateKernel (s_ptr x_ptr y_ptr lambda_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
+def diag_ssm_forward_kernel_complex_index_commutedKernel (s_ptr x_ptr y_ptr lambda_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call complexForwardSignature call_args [length := length, batch_size := batch_size, dim := dim] in triton {
     """
     Forward kernel (complex version)
@@ -289,7 +289,7 @@ def complexBackwardSignature : CallSignature where
   readPorts := ["s_ptr", "lambda_ptr", "y_ptr", "grad_y_ptr"]
   writePorts := ["grad_s_ptr", "grad_x_ptr", "grad_lambda_ptr"]
 
-def complexBackwardKernel (s_ptr lambda_ptr y_ptr grad_s_ptr grad_x_ptr grad_lambda_ptr grad_y_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
+def diag_ssm_backward_kernel_complexKernel (s_ptr lambda_ptr y_ptr grad_s_ptr grad_x_ptr grad_lambda_ptr grad_y_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call complexBackwardSignature call_args [length := length, batch_size := batch_size, dim := dim] in triton {
     """
     Backward kernel (complex version)
@@ -372,7 +372,7 @@ def complexBackwardKernel (s_ptr lambda_ptr y_ptr grad_s_ptr grad_x_ptr grad_lam
         mask=mask)
 }
 
-def complexBackwardCandidateKernel (s_ptr lambda_ptr y_ptr grad_s_ptr grad_x_ptr grad_lambda_ptr grad_y_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
+def diag_ssm_backward_kernel_complex_index_commutedKernel (s_ptr lambda_ptr y_ptr grad_s_ptr grad_x_ptr grad_lambda_ptr grad_y_ptr : RegionName) (length batch_size dim BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call complexBackwardSignature call_args [length := length, batch_size := batch_size, dim := dim] in triton {
     """
     Backward kernel (complex version)

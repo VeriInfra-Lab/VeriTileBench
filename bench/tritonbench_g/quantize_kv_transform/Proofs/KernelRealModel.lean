@@ -71,6 +71,6 @@ def code (values : Nat → ℝ) (width column : Nat) : Int :=
 #axiomsClean maximum_bound
 #axiomsClean maximum_le
 #axiomsClean maximum_abs
-#specNonCircular code avoiding [KernelSource.sourceKernel, FP.Structural.exec, sourceRegisters]
+#specNonCircular code avoiding [KernelSource._fwd_kernel_destindex_copy_quantize_kvKernel, FP.Structural.exec, sourceRegisters]
 end
 end VeriTile.Bench.Repairs.QuantizeKvTransform.KernelRealModel

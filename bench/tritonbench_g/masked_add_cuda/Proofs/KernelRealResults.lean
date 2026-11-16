@@ -31,7 +31,7 @@ def KernelCorrect (source : ComputeKernel) (n : Nat) (alpha : ℝ) : Prop :=
           i ≠ integerAddOffset before blockSize j) → final.mem r i = before.mem r i)
 
 theorem masked_add_kernel_correctness (storage : MaskStorage) (n : Nat) (alpha : ℝ) :
-    Spec.Real (KernelCorrect (sourceKernel storage "grad" "data" "mask" n alpha) n alpha) := by
+    Spec.Real (KernelCorrect (masked_add_kernel storage "grad" "data" "mask" n alpha) n alpha) := by
   intro before grad data mask hg hp hm
   obtain ⟨final, he⟩ := integer_math_kernel_exec_isSome "grad" "data" "mask" n alpha blockSize before
   refine ⟨final, ?_, ?_, ?_⟩
@@ -50,7 +50,7 @@ theorem masked_add_kernel_correctness (storage : MaskStorage) (n : Nat) (alpha :
       exact hit.2.symm
 
 theorem masked_add_commuted_correctness (storage : MaskStorage) (n : Nat) (alpha : ℝ) :
-    Spec.Real (KernelCorrect (commutedKernel storage "grad" "data" "mask" n alpha) n alpha) := by
+    Spec.Real (KernelCorrect (commuted_masked_addKernel storage "grad" "data" "mask" n alpha) n alpha) := by
   intro before grad data mask hg hp hm
   obtain ⟨final, he, hv, hf⟩ := masked_add_kernel_correctness storage n alpha before grad data mask hg hp hm
   refine ⟨final, ?_, hv, hf⟩
@@ -62,8 +62,8 @@ theorem masked_add_commuted_correctness (storage : MaskStorage) (n : Nat) (alpha
 theorem masked_add_access_safe (storage : MaskStorage) (n : Nat) (alpha : ℝ)
     (before : BlockState) (bounds : RegionBounds)
     (hg : n ≤ bounds "grad") (hp : n ≤ bounds "data") (hm : n ≤ bounds "mask") :
-    Kernel.TraceSafe bounds (sourceKernel storage "grad" "data" "mask" n alpha).eraseDType.toAlgKernel before ∧
-    Kernel.TraceSafe bounds (commutedKernel storage "grad" "data" "mask" n alpha).eraseDType.toAlgKernel before := by
+    Kernel.TraceSafe bounds (masked_add_kernel storage "grad" "data" "mask" n alpha).eraseDType.toAlgKernel before ∧
+    Kernel.TraceSafe bounds (commuted_masked_addKernel storage "grad" "data" "mask" n alpha).eraseDType.toAlgKernel before := by
   rw [kernel_eq_original, commutedKernel_eq_original]
   exact ⟨integer_traceSafe storage Bool.false _ _ _ n alpha blockSize bounds before
       (fun _ h => Nat.lt_of_lt_of_le h hp) (fun _ h => Nat.lt_of_lt_of_le h hg)
@@ -73,7 +73,7 @@ theorem masked_add_access_safe (storage : MaskStorage) (n : Nat) (alpha : ℝ)
       (fun _ h => Nat.lt_of_lt_of_le h hm)⟩
 
 
-#specNonCircular formula avoiding [sourceKernel, commutedKernel, exec]
+#specNonCircular formula avoiding [masked_add_kernel, commuted_masked_addKernel, exec]
 #axiomsClean masked_add_kernel_correctness
 #axiomsClean masked_add_commuted_correctness
 #axiomsClean masked_add_access_safe

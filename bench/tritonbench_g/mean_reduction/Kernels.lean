@@ -15,9 +15,10 @@ def sourceSignature : CallSignature where
   readPorts := ["X"]
   writePorts := ["Mean"]
 
-def sourceKernel (X Mean : RegionName) (M N BLOCK_M BLOCK_N : Nat) : ComputeKernel :=
+def mean_dim_kernel (X Mean : RegionName) (M N BLOCK_M BLOCK_N : Nat) : ComputeKernel :=
   with_triton_call sourceSignature call_args [M := M, N := N] in
   triton {
+    # Map the program id to the row of X it should compute.
     pid = tl.program_id(0) * BLOCK_M + tl.arange(0, BLOCK_M)[:, None]
     X = X + pid * N
     Mean = Mean + pid
@@ -37,9 +38,10 @@ def sourceKernel (X Mean : RegionName) (M N BLOCK_M BLOCK_N : Nat) : ComputeKern
     tl.store(Mean, mean, row_mask)
   }
 
-def indexCommutedSourcePastedKernel (X Mean : RegionName) (M N BLOCK_M BLOCK_N : Nat) : ComputeKernel :=
+def mean_dim_kernel_index_commutedKernel (X Mean : RegionName) (M N BLOCK_M BLOCK_N : Nat) : ComputeKernel :=
   with_triton_call sourceSignature call_args [M := M, N := N] in
   triton {
+    # Map the program id to the row of X it should compute.
     pid = BLOCK_M * tl.program_id(0) + tl.arange(0, BLOCK_M)[:, None]
     X = X + pid * N
     Mean = Mean + pid
@@ -61,8 +63,8 @@ def indexCommutedSourcePastedKernel (X Mean : RegionName) (M N BLOCK_M BLOCK_N :
 
 def gridSize (rows : Nat) : Nat := (rows+7)/8
 
-def kernel (M N : Nat) : ComputeKernel := sourceKernel "X" "Mean" M N 8 8
+def kernel (M N : Nat) : ComputeKernel := mean_dim_kernel "X" "Mean" M N 8 8
 
-def indexCommutedKernel (M N : Nat) : ComputeKernel := indexCommutedSourcePastedKernel "X" "Mean" M N 8 8
+def indexCommutedKernel (M N : Nat) : ComputeKernel := mean_dim_kernel_index_commutedKernel "X" "Mean" M N 8 8
 
 end VeriTile.Bench.Repairs.MeanReduction

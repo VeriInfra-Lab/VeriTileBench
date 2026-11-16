@@ -7,7 +7,7 @@ open VeriTile.Triton
 
 def mul2IO (in_ptr0 out_ptr : RegionName)
     (n_elements BLOCK_SIZE : Nat) : MaskedKernelIO₁ where
-  kernel := sourceKernel in_ptr0 out_ptr n_elements BLOCK_SIZE
+  kernel := mul2_kernel in_ptr0 out_ptr n_elements BLOCK_SIZE
   projection := by rfl
   inp := in_ptr0
   out := out_ptr
@@ -19,7 +19,7 @@ def mul2IO (in_ptr0 out_ptr : RegionName)
 def mul2InplaceIO (ptr : RegionName)
     (n_elements BLOCK_SIZE : Nat) : MaskedKernelIO₁ :=
   { mul2IO ptr ptr n_elements BLOCK_SIZE with
-    kernel := inplaceSourceKernel ptr n_elements BLOCK_SIZE
+    kernel := mul2_inplace_kernel ptr n_elements BLOCK_SIZE
     projection := by rfl }
 
 end VeriTile.Bench.Repairs.TritonMul2.IO

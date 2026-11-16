@@ -48,7 +48,7 @@ theorem prefix_good (M : Algebra α) (a : IntegerDot.Arithmetic) (ctx : IntegerD
     cases hp : s.regs .int [] "pid_m" <;> cases hq : s.regs .int [] "pid_n" <;>
     cases hz : s.regs .int [] "pid_sp_k"
   all_goals simp only [addressPrefix,oldSegment,original,Source.gemmHalfHalfKernel,
-    KernelSource.gemmHalfHalfKernel,gemmHalfHalfKernel,ComputeKernel.surfaceBody,
+    KernelSource.gemmHalfHalfKernel,FP16Scale.FP16Output.matmul_kernel,ComputeKernel.surfaceBody,
     List.drop_succ_cons,List.drop_zero,List.take_succ_cons,List.take_zero] at ran
   all_goals simp [IntegerDot.run,IntegerDot.step_unfold,IntegerDot.arithmeticStep,
     IntegerDot.addExpression,IntegerDot.accumulatorStep,mode,FP.Structural.step,evalExpr,
@@ -74,10 +74,10 @@ theorem loads_run (M : Algebra α) (a : IntegerDot.Arithmetic) (ctx : IntegerDot
   cases rowScale <;> cases hp : s.regs .ptr [p.blockRows] "as_ptrs" <;>
     cases hq : s.regs .ptr [p.blockColumns] "bs_ptrs"
   all_goals simp only [oldLoads,newLoads,oldSegment,newSegment,original,candidate,
-    Source.gemmHalfHalfKernel,KernelSource.gemmHalfHalfKernel,gemmHalfHalfKernel,
-    Source.gemmSingleHalfKernel,KernelSource.gemmSingleHalfKernel,gemmSingleHalfKernel,
-    Source.unmaskedGemmHalfHalfKernel,unmaskedGemmHalfHalfKernel,
-    Source.unmaskedGemmSingleHalfKernel,unmaskedGemmSingleHalfKernel,ComputeKernel.surfaceBody,
+    Source.gemmHalfHalfKernel,KernelSource.gemmHalfHalfKernel,FP16Scale.FP16Output.matmul_kernel,
+    Source.gemmSingleHalfKernel,KernelSource.gemmSingleHalfKernel,FP32Scale.FP16Output.matmul_kernel,
+    Source.unmaskedGemmHalfHalfKernel,FP16Scale.FP16Output.matmul_kernel_unmaskedKernel,
+    Source.unmaskedGemmSingleHalfKernel,FP32Scale.FP16Output.matmul_kernel_unmaskedKernel,ComputeKernel.surfaceBody,
     List.drop_succ_cons,List.drop_zero,List.take_succ_cons,List.take_zero]
   all_goals simp [IntegerDot.run,IntegerDot.step_unfold,IntegerDot.arithmeticStep,FP.Structural.step,
     evalExpr,evalComputeOp,evalOp_unfold,evalOffsets,Option.bind,numeric,bop,numericLt,numericEq,
@@ -104,10 +104,10 @@ theorem loads_safe (M : Algebra α) (a : IntegerDot.Arithmetic) (ctx : IntegerDo
   cases rowScale <;> cases hp : s.regs .ptr [p.blockRows] "as_ptrs" <;>
     cases hq : s.regs .ptr [p.blockColumns] "bs_ptrs"
   all_goals simp only [oldLoads,newLoads,oldSegment,newSegment,original,candidate,
-    Source.gemmHalfHalfKernel,KernelSource.gemmHalfHalfKernel,gemmHalfHalfKernel,
-    Source.gemmSingleHalfKernel,KernelSource.gemmSingleHalfKernel,gemmSingleHalfKernel,
-    Source.unmaskedGemmHalfHalfKernel,unmaskedGemmHalfHalfKernel,
-    Source.unmaskedGemmSingleHalfKernel,unmaskedGemmSingleHalfKernel,ComputeKernel.surfaceBody,
+    Source.gemmHalfHalfKernel,KernelSource.gemmHalfHalfKernel,FP16Scale.FP16Output.matmul_kernel,
+    Source.gemmSingleHalfKernel,KernelSource.gemmSingleHalfKernel,FP32Scale.FP16Output.matmul_kernel,
+    Source.unmaskedGemmHalfHalfKernel,FP16Scale.FP16Output.matmul_kernel_unmaskedKernel,
+    Source.unmaskedGemmSingleHalfKernel,FP32Scale.FP16Output.matmul_kernel_unmaskedKernel,ComputeKernel.surfaceBody,
     List.drop_succ_cons,List.drop_zero,List.take_succ_cons,List.take_zero]
   all_goals simp [IntegerDot.traceSafeList_unfold,IntegerDot.stepSafe_unfold,
     Safety.stepSafe_unfold,Safety.safeExpr_unfold,Safety.safeCompute_unfold,Safety.safeOp_unfold,

@@ -15,7 +15,7 @@ def forwardSignature (gate : Storage) : CallSignature where
   readPorts := ["g"]
   writePorts := ["g_o"]
 
-def forwardKernel (gate : Storage) (g g_o : RegionName) (s_qk_h s_qk_t s_qk_d B H T BT BK DK : Nat) (scale : ℝ) : ComputeKernel :=
+def fwd_decay_cumsumKernel (gate : Storage) (g g_o : RegionName) (s_qk_h s_qk_t s_qk_d B H T BT BK DK : Nat) (scale : ℝ) : ComputeKernel :=
   with_triton_call (forwardSignature gate) call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, B := B, H := H, T := T, scale := scale] in triton {
     i_k = tl.program_id(0).to(tl.int64)
     i_c = tl.program_id(1).to(tl.int64)
@@ -33,7 +33,7 @@ def forwardKernel (gate : Storage) (g g_o : RegionName) (s_qk_h s_qk_t s_qk_d B 
         p_go += DK
 }
 
-def forwardCandidateKernel (gate : Storage) (g g_o : RegionName) (s_qk_h s_qk_t s_qk_d B H T BT BK DK : Nat) (scale : ℝ) : ComputeKernel :=
+def fwd_decay_cumsum_index_commutedKernel (gate : Storage) (g g_o : RegionName) (s_qk_h s_qk_t s_qk_d B H T BT BK DK : Nat) (scale : ℝ) : ComputeKernel :=
   with_triton_call (forwardSignature gate) call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, B := B, H := H, T := T, scale := scale] in triton {
     i_k = tl.program_id(0).to(tl.int64)
     i_c = tl.program_id(1).to(tl.int64)
@@ -58,7 +58,7 @@ def prepareSignature (source gate : Storage) : CallSignature where
   readPorts := ["q", "k", "g"]
   writePorts := ["qg", "kg"]
 
-def prepareKernel (source gate : Storage) (q k g qg kg : RegionName) (s_qk_h s_qk_t s_qk_d B H T BT BK DK : Nat) (scale : ℝ) : ComputeKernel :=
+def prepare_qg_kgKernel (source gate : Storage) (q k g qg kg : RegionName) (s_qk_h s_qk_t s_qk_d B H T BT BK DK : Nat) (scale : ℝ) : ComputeKernel :=
   with_triton_call (prepareSignature source gate) call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, B := B, H := H, T := T, scale := scale] in triton {
     i_k = tl.program_id(0).to(tl.int64)
     i_c = tl.program_id(1).to(tl.int64)
@@ -88,7 +88,7 @@ def prepareKernel (source gate : Storage) (q k g qg kg : RegionName) (s_qk_h s_q
         p_qg += DK
 }
 
-def prepareCandidateKernel (source gate : Storage) (q k g qg kg : RegionName) (s_qk_h s_qk_t s_qk_d B H T BT BK DK : Nat) (scale : ℝ) : ComputeKernel :=
+def prepare_qg_kg_index_commutedKernel (source gate : Storage) (q k g qg kg : RegionName) (s_qk_h s_qk_t s_qk_d B H T BT BK DK : Nat) (scale : ℝ) : ComputeKernel :=
   with_triton_call (prepareSignature source gate) call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, B := B, H := H, T := T, scale := scale] in triton {
     i_k = tl.program_id(0).to(tl.int64)
     i_c = tl.program_id(1).to(tl.int64)
@@ -125,7 +125,7 @@ def backwardSignature (source gate : Storage) : CallSignature where
   readPorts := ["dq_inner", "dq_inter", "dk_inner", "dk_inter", "q", "k", "g"]
   writePorts := ["dq_inter", "dk_inter", "dg"]
 
-def backwardKernel (source gate : Storage) (dq_inner dq_inter dk_inner dk_inter q k g dg : RegionName) (s_qk_h s_qk_t s_qk_d B H T BT BK DK : Nat) (scale : ℝ) : ComputeKernel :=
+def bwd_decay_global_cumsumKernel (source gate : Storage) (dq_inner dq_inter dk_inner dk_inter q k g dg : RegionName) (s_qk_h s_qk_t s_qk_d B H T BT BK DK : Nat) (scale : ℝ) : ComputeKernel :=
   with_triton_call (backwardSignature source gate) call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, B := B, H := H, T := T, scale := scale] in triton {
     i_k = tl.program_id(0).to(tl.int64)
     i_c = tl.program_id(1).to(tl.int64)
@@ -170,7 +170,7 @@ def backwardKernel (source gate : Storage) (dq_inner dq_inter dk_inner dk_inter 
         p_dg -= DK
 }
 
-def backwardCandidateKernel (source gate : Storage) (dq_inner dq_inter dk_inner dk_inter q k g dg : RegionName) (s_qk_h s_qk_t s_qk_d B H T BT BK DK : Nat) (scale : ℝ) : ComputeKernel :=
+def bwd_decay_global_cumsum_index_commutedKernel (source gate : Storage) (dq_inner dq_inter dk_inner dk_inter q k g dg : RegionName) (s_qk_h s_qk_t s_qk_d B H T BT BK DK : Nat) (scale : ℝ) : ComputeKernel :=
   with_triton_call (backwardSignature source gate) call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, B := B, H := H, T := T, scale := scale] in triton {
     i_k = tl.program_id(0).to(tl.int64)
     i_c = tl.program_id(1).to(tl.int64)

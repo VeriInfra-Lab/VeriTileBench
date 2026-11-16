@@ -14,7 +14,7 @@ def halfSignature : CallSignature where
   readPorts := ["a_ptr","w1_ptr","w3_ptr","rms_w_ptr"]
   writePorts := ["out_ptr"]
 
-def halfKernel (a_ptr w1_ptr w3_ptr out_ptr rms_w_ptr : RegionName) (M N K stride_am stride_ak stride_w1k stride_w1n stride_w3k stride_w3n stride_outm stride_outn stride_rms_w BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K : Nat) (EPS : ℝ) : ComputeKernel :=
+def FP16.ff_llamaKernel (a_ptr w1_ptr w3_ptr out_ptr rms_w_ptr : RegionName) (M N K stride_am stride_ak stride_w1k stride_w1n stride_w3k stride_w3n stride_outm stride_outn stride_rms_w BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K : Nat) (EPS : ℝ) : ComputeKernel :=
   let USE_FP8 := Bool.false
   with_triton_call halfSignature call_args [M := M, N := N, K := K, stride_am := stride_am, stride_ak := stride_ak, stride_w1k := stride_w1k, stride_w1n := stride_w1n, stride_w3k := stride_w3k, stride_w3n := stride_w3n, stride_outm := stride_outm, stride_outn := stride_outn, stride_rms_w := stride_rms_w] in triton {
     """
@@ -88,7 +88,7 @@ def halfKernel (a_ptr w1_ptr w3_ptr out_ptr rms_w_ptr : RegionName) (M N K strid
     tl.store(out_ptrs, accumulator, mask=out_mask)
 }
 
-def halfCandidateKernel (a_ptr w1_ptr w3_ptr out_ptr rms_w_ptr : RegionName) (M N K stride_am stride_ak stride_w1k stride_w1n stride_w3k stride_w3n stride_outm stride_outn stride_rms_w BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K : Nat) (EPS : ℝ) : ComputeKernel :=
+def FP16.ff_llama_index_commutedKernel (a_ptr w1_ptr w3_ptr out_ptr rms_w_ptr : RegionName) (M N K stride_am stride_ak stride_w1k stride_w1n stride_w3k stride_w3n stride_outm stride_outn stride_rms_w BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K : Nat) (EPS : ℝ) : ComputeKernel :=
   let USE_FP8 := Bool.false
   with_triton_call halfSignature call_args [M := M, N := N, K := K, stride_am := stride_am, stride_ak := stride_ak, stride_w1k := stride_w1k, stride_w1n := stride_w1n, stride_w3k := stride_w3k, stride_w3n := stride_w3n, stride_outm := stride_outm, stride_outn := stride_outn, stride_rms_w := stride_rms_w] in triton {
     """
@@ -169,7 +169,7 @@ def byteSignature : CallSignature where
   readPorts := ["a_ptr","w1_ptr","w3_ptr","rms_w_ptr"]
   writePorts := ["out_ptr"]
 
-def byteKernel (a_ptr w1_ptr w3_ptr out_ptr rms_w_ptr : RegionName) (M N K stride_am stride_ak stride_w1k stride_w1n stride_w3k stride_w3n stride_outm stride_outn stride_rms_w BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K : Nat) (EPS : ℝ) : ComputeKernel :=
+def UInt8.ff_llamaKernel (a_ptr w1_ptr w3_ptr out_ptr rms_w_ptr : RegionName) (M N K stride_am stride_ak stride_w1k stride_w1n stride_w3k stride_w3n stride_outm stride_outn stride_rms_w BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K : Nat) (EPS : ℝ) : ComputeKernel :=
   let USE_FP8 := Bool.true
   with_triton_call byteSignature call_args [M := M, N := N, K := K, stride_am := stride_am, stride_ak := stride_ak, stride_w1k := stride_w1k, stride_w1n := stride_w1n, stride_w3k := stride_w3k, stride_w3n := stride_w3n, stride_outm := stride_outm, stride_outn := stride_outn, stride_rms_w := stride_rms_w] in triton {
     """
@@ -243,7 +243,7 @@ def byteKernel (a_ptr w1_ptr w3_ptr out_ptr rms_w_ptr : RegionName) (M N K strid
     tl.store(out_ptrs, accumulator, mask=out_mask)
 }
 
-def byteCandidateKernel (a_ptr w1_ptr w3_ptr out_ptr rms_w_ptr : RegionName) (M N K stride_am stride_ak stride_w1k stride_w1n stride_w3k stride_w3n stride_outm stride_outn stride_rms_w BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K : Nat) (EPS : ℝ) : ComputeKernel :=
+def UInt8.ff_llama_index_commutedKernel (a_ptr w1_ptr w3_ptr out_ptr rms_w_ptr : RegionName) (M N K stride_am stride_ak stride_w1k stride_w1n stride_w3k stride_w3n stride_outm stride_outn stride_rms_w BLOCK_SIZE_M BLOCK_SIZE_N BLOCK_SIZE_K : Nat) (EPS : ℝ) : ComputeKernel :=
   let USE_FP8 := Bool.true
   with_triton_call byteSignature call_args [M := M, N := N, K := K, stride_am := stride_am, stride_ak := stride_ak, stride_w1k := stride_w1k, stride_w1n := stride_w1n, stride_w3k := stride_w3k, stride_w3n := stride_w3n, stride_outm := stride_outm, stride_outn := stride_outn, stride_rms_w := stride_rms_w] in triton {
     """

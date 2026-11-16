@@ -9,16 +9,16 @@ noncomputable section
 
 def first (X V : RegionName) (I : Region .int) (dtype : SourceDType)
     (size block base : Nat) (index64 : Bool) : ComputeKernel :=
-  (JITSource.stage1Kernel X V I dtype block index64).withScalarArguments
+  (JITSource.argmax_kernel_1_repairedKernel X V I dtype block index64).withScalarArguments
     [ScalarArgument.integer "M" size,ScalarArgument.integer "program_base" base]
 
 def second (V : RegionName) (I O : Region .int) (dtype : SourceDType)
     (size block : Nat) : ComputeKernel :=
-  (JITSource.stage2Kernel V I O dtype block).withScalarArguments [ScalarArgument.integer "mid_size" size]
+  (JITSource.argmax_kernel_2_repairedKernel V I O dtype block).withScalarArguments [ScalarArgument.integer "mid_size" size]
 
 def dimension (X : RegionName) (O : Region .int) (M N K BM BN base : Nat)
     (index64 : Bool) : ComputeKernel :=
-  (JITSource.dimensionKernel X O BM BN index64).withScalarArguments
+  (JITSource.argmax_kernel_repairedKernel X O BM BN index64).withScalarArguments
     [ScalarArgument.integer "M" M,ScalarArgument.integer "N" N,
      ScalarArgument.integer "K" K,ScalarArgument.integer "program_base" base]
 

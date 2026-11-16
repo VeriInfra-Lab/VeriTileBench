@@ -36,7 +36,7 @@ def prologueResult (P : Primitives α) (p : Parameters) (s : State α) : State �
 
 theorem prologueExecution (rest : Algebra α) (P : Primitives α) (p : Parameters) (s : State α) :
     run (backend rest P) (prologue p) s=some (prologueResult P p s) := by
-  simp [prologue,source,typedSurface,VeriTile.Bench.Repairs.AttentionKernelAligned.Pasted.originalHalfKernel,VeriTile.Bench.Repairs.AttentionKernelAligned.Pasted.originalBF16Kernel,VeriTile.Bench.Repairs.AttentionKernelAligned.Pasted.earlyHalfKernel,VeriTile.Bench.Repairs.AttentionKernelAligned.Pasted.earlyBF16Kernel,ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,
+  simp [prologue,source,typedSurface,VeriTile.Bench.Repairs.AttentionKernelAligned.Pasted._fwd_kernel_aligned_fp16Kernel,VeriTile.Bench.Repairs.AttentionKernelAligned.Pasted._fwd_kernel_aligned_bf16Kernel,VeriTile.Bench.Repairs.AttentionKernelAligned.Pasted._fwd_kernel_aligned_fp16_candidateKernel,VeriTile.Bench.Repairs.AttentionKernelAligned.Pasted._fwd_kernel_aligned_bf16_candidateKernel,ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,
     FP.Structural.evalOp,numeric,evalOffsets,backend,prologueResult,
     initialAccumulator,qPointer,kPointer,vPointer,integralMod,natLt,Fin.isLt,
     TileShape.indexToList,scaleValue,qScaled,qValue,qOffset,b1Value,b1Offset,

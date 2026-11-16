@@ -48,7 +48,7 @@ theorem stopOp_eval {α : Type} [Inhabited α] (M : Algebra α)
       some (fun _ => (((p.inner+p.blockInner-1)/p.blockInner : Nat) : Int)) := by
   simp [FPValue.stopOp,FPValue.source,FPValue.typed,FPValue.commonView,
     VeriTile.Bench.Repairs.IvDependentMatmulDotShape.Kernel.preLoadSource,
-    VeriTile.Bench.Repairs.IvDependentMatmulDotShape.Kernel.originalKernel,
+    VeriTile.Bench.Repairs.IvDependentMatmulDotShape.Kernel.iv_dependent_matmul_kernel_i64Kernel,
     ComputeKernel.surfaceBody,evalOp_unfold,numeric,bop,natLt,numericLt,
     integralFloorDiv,integralMod,Option.bind,ceil_nat]
 

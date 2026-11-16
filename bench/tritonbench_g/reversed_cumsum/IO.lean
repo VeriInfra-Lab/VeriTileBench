@@ -44,7 +44,7 @@ def io (h : Call) (c : Config) (program : Geometry.Program h) : AlgorithmProgram
   smask := fun k => k.elim0
   initialUndef := .preserve
   stages := fun _ => [.single
-    {kernel := (Kernels.sourceKernel h c).eraseDType
+    {kernel := (Kernels.chunk_global_reversed_cumsum_vector_kernel h c).eraseDType
      projection := by
        simp only [ComputeKernel.eraseDType,Kernels.source_projects]
        simp [ComputeKernel.toAlgKernel]}

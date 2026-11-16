@@ -39,7 +39,7 @@ theorem program (h : Host.Call) (p : Cleanup.PID h) (s : BlockState) :
     ∃ t, exec (kernel h) (s.withGridIndex p)=some t ∧
       t.mem=(CleanupSource.addresses h p).foldl (store h.Out) s.mem := by
   simp (config := {maxSteps := 300000}) [exec,kernel_body,code,kernel,Kernels.clearUpperKernel,
-    VeriTile.Bench.Repairs.BmmChunkFwd.clearUpperKernel,
+    VeriTile.Bench.Repairs.BmmChunkFwd._clear_causal_upperKernel,
     ComputeKernel.eraseDType,ComputeKernel.toAlgorithm?,ComputeKernel.toAlgKernel,
     ComputeKernel.fromKernelBody,ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,
     ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Kernel.eraseDType,

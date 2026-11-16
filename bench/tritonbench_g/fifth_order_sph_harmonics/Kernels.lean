@@ -10,7 +10,7 @@ def forwardSignature : CallSignature where
   scalars := []
   constexpr := ["block_size", "coord_numel", "output_numel", "col_offset", "output_stride"]
 
-def forwardPastedKernel (coord_ptr output_ptr : RegionName) (block_size coord_numel output_numel col_offset output_stride : Nat) : ComputeKernel :=
+def fifth_order_fwd_repairedKernel (coord_ptr output_ptr : RegionName) (block_size coord_numel output_numel col_offset output_stride : Nat) : ComputeKernel :=
   with_triton_call forwardSignature call_args [] in triton {
       coord_stride = 3
       block_id = tl.program_id(0).to(tl.int64)
@@ -162,7 +162,7 @@ def backwardSignature : CallSignature where
   scalars := [("upstream_row_stride",.integer), ("upstream_col_stride",.integer)]
   constexpr := ["block_size", "coord_numel", "output_numel", "col_offset", "output_stride"]
 
-def backwardPastedKernel (coord_ptr coord_grad_ptr sph_grad_ptr : RegionName) (block_size coord_numel output_numel col_offset output_stride upstream_row_stride upstream_col_stride : Nat) : ComputeKernel :=
+def fifth_order_bwd_repairedKernel (coord_ptr coord_grad_ptr sph_grad_ptr : RegionName) (block_size coord_numel output_numel col_offset output_stride upstream_row_stride upstream_col_stride : Nat) : ComputeKernel :=
   with_triton_call backwardSignature call_args [upstream_row_stride := upstream_row_stride, upstream_col_stride := upstream_col_stride] in triton {
       block_id = tl.program_id(0).to(tl.int64)
       coord_stride = 3
@@ -411,7 +411,7 @@ def backwardPastedKernel (coord_ptr coord_grad_ptr sph_grad_ptr : RegionName) (b
       )
   }
 
-def forwardPowersPastedKernel (coord_ptr output_ptr : RegionName) (block_size coord_numel output_numel col_offset output_stride : Nat) : ComputeKernel :=
+def fifth_order_fwd_repaired_powers_reuseKernel (coord_ptr output_ptr : RegionName) (block_size coord_numel output_numel col_offset output_stride : Nat) : ComputeKernel :=
   with_triton_call forwardSignature call_args [] in triton {
       coord_stride = 3
       block_id = tl.program_id(0).to(tl.int64)
@@ -558,7 +558,7 @@ def forwardPowersPastedKernel (coord_ptr output_ptr : RegionName) (block_size co
       )
   }
 
-def backwardPowersPastedKernel (coord_ptr coord_grad_ptr sph_grad_ptr : RegionName) (block_size coord_numel output_numel col_offset output_stride upstream_row_stride upstream_col_stride : Nat) : ComputeKernel :=
+def fifth_order_bwd_repaired_powers_reuseKernel (coord_ptr coord_grad_ptr sph_grad_ptr : RegionName) (block_size coord_numel output_numel col_offset output_stride upstream_row_stride upstream_col_stride : Nat) : ComputeKernel :=
   with_triton_call backwardSignature call_args [upstream_row_stride := upstream_row_stride, upstream_col_stride := upstream_col_stride] in triton {
       block_id = tl.program_id(0).to(tl.int64)
       coord_stride = 3

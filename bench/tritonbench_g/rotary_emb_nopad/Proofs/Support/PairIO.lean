@@ -7,9 +7,9 @@ open VeriTile.Triton FP.Structural KernelInterface
 noncomputable section
 
 def uInvocation (rest : Algebra α) (ops : Ops α) (g : Geometry) (p q : Nat) : Invocation α :=
-  { RotationIO.uInvocation rest ops g p q with kernel := Kernels.uncachedSharedKernel (Typed.uLayout g.request) }
+  { RotationIO.uInvocation rest ops g p q with kernel := Kernels.rotary_embedding_kernel_sharedKernel (Typed.uLayout g.request) }
 def cInvocation (rest : Algebra α) (ops : Ops α) (g : Geometry) (p q : Nat) : Invocation α :=
-  { RotationIO.cInvocation rest ops g p q with kernel := Kernels.cachedSharedKernel (Typed.cLayout g.request) }
+  { RotationIO.cInvocation rest ops g p q with kernel := Kernels.fused_rotary_embedding_kernel_v2_sharedKernel (Typed.cLayout g.request) }
 
 def uncached (rest : Algebra α) (ops : Ops α) (g : Geometry) (p q : Nat) :
     ProgramIO.Variant (RotationIO.uncachedIO rest ops g p q) where

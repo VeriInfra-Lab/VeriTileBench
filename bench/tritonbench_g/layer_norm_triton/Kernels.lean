@@ -8,7 +8,7 @@ def forwardSignature : CallSignature where
   constexpr := ["BLOCK_SIZE"]
   readPorts := ["X","W","B"]
   writePorts := ["Y","Mean","Rstd"]
-def forwardKernel (X Y W B Mean Rstd : RegionName) (stride N BLOCK_SIZE : Nat)
+def _layer_norm_fwd_fusedKernel (X Y W B Mean Rstd : RegionName) (stride N BLOCK_SIZE : Nat)
     (eps : ℝ) : ComputeKernel :=
   with_triton_call forwardSignature call_args [stride := stride, N := N, eps := eps] integer_args [] arange_args [] in triton {
     row = tl.program_id(0).to(tl.int64)
@@ -49,9 +49,11 @@ def groupedBackwardSignature : CallSignature where
   constexpr := ["GROUP_SIZE_M","BLOCK_SIZE_N"]
   readPorts := ["DY","X","W","Mean","Rstd"]
   writePorts := ["DX","DW","DB"]
-def groupedBackwardKernel (DX DY DW DB X W Mean Rstd : RegionName)
+def _layer_norm_bwd_dx_fusedKernel (DX DY DW DB X W Mean Rstd : RegionName)
     (stride M N GROUP_SIZE_M BLOCK_SIZE_N : Nat) : ComputeKernel :=
   with_triton_call groupedBackwardSignature call_args [stride := stride, M := M, N := N] integer_args [] arange_args [] in triton {
+    # One program owns one original accumulation group. Increasing rows select
+    # a concrete legal order without a spin lock or cross-program publication.
     group = tl.program_id(0).to(tl.int64)
     stride = tl.cast(stride, tl.int64)
     M = tl.cast(M, tl.int64)
@@ -96,7 +98,7 @@ def finalBackwardSignature : CallSignature where
   constexpr := ["BLOCK_SIZE_M","BLOCK_SIZE_N"]
   readPorts := ["DW","DB"]
   writePorts := ["FINAL_DW","FINAL_DB"]
-def finalBackwardKernel (DW DB FINAL_DW FINAL_DB : RegionName)
+def _layer_norm_bwd_dwdbKernel (DW DB FINAL_DW FINAL_DB : RegionName)
     (M N BLOCK_SIZE_M BLOCK_SIZE_N : Nat) : ComputeKernel :=
   with_triton_call finalBackwardSignature call_args [M := M, N := N] integer_args [] arange_args [] in triton {
     pid = tl.program_id(0).to(tl.int64)
@@ -117,7 +119,7 @@ def finalBackwardKernel (DW DB FINAL_DW FINAL_DB : RegionName)
     tl.store(FINAL_DB + cols, sum_db, mask=cols < N)
   }
 
-def forwardCandidateKernel (X Y W B Mean Rstd : RegionName) (stride N BLOCK_SIZE : Nat)
+def _layer_norm_fwd_fused_candidateKernel (X Y W B Mean Rstd : RegionName) (stride N BLOCK_SIZE : Nat)
     (eps : ℝ) : ComputeKernel :=
   with_triton_call forwardSignature call_args [stride := stride, N := N, eps := eps] integer_args [] arange_args [] in triton {
     row = tl.program_id(0).to(tl.int64)
@@ -152,7 +154,7 @@ def forwardCandidateKernel (X Y W B Mean Rstd : RegionName) (stride N BLOCK_SIZE
     tl.store(Y + cols, y, mask=mask)
   }
 
-def groupedBackwardCandidateKernel (DX DY DW DB X W Mean Rstd : RegionName)
+def _layer_norm_bwd_dx_fused_candidateKernel (DX DY DW DB X W Mean Rstd : RegionName)
     (stride M N GROUP_SIZE_M BLOCK_SIZE_N : Nat) : ComputeKernel :=
   with_triton_call groupedBackwardSignature call_args [stride := stride, M := M, N := N] integer_args [] arange_args [] in triton {
     group = tl.program_id(0).to(tl.int64)
@@ -192,7 +194,7 @@ def groupedBackwardCandidateKernel (DX DY DW DB X W Mean Rstd : RegionName)
     tl.store(DB, db_acc, mask=mask)
   }
 
-def finalBackwardCandidateKernel (DW DB FINAL_DW FINAL_DB : RegionName)
+def _layer_norm_bwd_dwdb_candidateKernel (DW DB FINAL_DW FINAL_DB : RegionName)
     (M N BLOCK_SIZE_M BLOCK_SIZE_N : Nat) : ComputeKernel :=
   with_triton_call finalBackwardSignature call_args [M := M, N := N] integer_args [] arange_args [] in triton {
     pid = tl.program_id(0).to(tl.int64)

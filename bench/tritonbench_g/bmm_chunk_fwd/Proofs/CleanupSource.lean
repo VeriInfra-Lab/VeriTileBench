@@ -48,7 +48,7 @@ theorem program {α : Type} [Inhabited α] (rest : Algebra α) (zero : α)
     ∃ t, FP.Structural.exec (engine (algebra rest zero))
       (Kernels.clearUpperKernel h.Out h.shape.chunk (h.shape.chunks*h.shape.groups)) (atIndex h s p)=some t ∧
       t.mem=(addresses h p).foldl (store h.Out zero) s.mem := by
-  simp (config := {maxSteps := 300000}) [FP.Structural.exec,Kernels.clearUpperKernel,VeriTile.Bench.Repairs.BmmChunkFwd.clearUpperKernel,
+  simp (config := {maxSteps := 300000}) [FP.Structural.exec,Kernels.clearUpperKernel,VeriTile.Bench.Repairs.BmmChunkFwd._clear_causal_upperKernel,
     ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,evalOp_unfold,
     Option.bind,engine,Algebra.withDefaultPrecision,resolvePrecision,ComputeDType.eraseDType,
     numeric,natLt,natLe,numericLt,numericLe,bop,ofFloat,toFloat,TileShape.axisDim,

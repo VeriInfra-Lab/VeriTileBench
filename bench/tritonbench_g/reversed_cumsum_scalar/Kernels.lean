@@ -49,7 +49,7 @@ def callSignature (dtype out_dtype : FloatDType) : CallSignature where
   readPorts := ["s"]
   writePorts := ["o"]
 
-def sourceKernel (h : Call) (c : Config) : ComputeKernel :=
+def chunk_global_reversed_cumsum_scalar_kernel (h : Call) (c : Config) : ComputeKernel :=
   let dtype := h.inputDType
   let out_dtype := h.outputDType
   let s := h.input
@@ -80,7 +80,7 @@ def sourceKernel (h : Call) (c : Config) : ComputeKernel :=
         tl.store(p_o, b_o.to(p_o.dtype.element_ty), mask=active)
   }
 
-def indexCommutedKernel (h : Call) (c : Config) : ComputeKernel :=
+def chunk_global_reversed_cumsum_scalar_kernel_index_commutedKernel (h : Call) (c : Config) : ComputeKernel :=
   let dtype := h.inputDType
   let out_dtype := h.outputDType
   let s := h.input

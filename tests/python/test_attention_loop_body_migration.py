@@ -44,7 +44,7 @@ class AttentionLoopBodyMigrationTests(unittest.TestCase):
             record = pinned_pairs(directory)[1]
             python = (ROOT / record['python']).read_text()
             lean = (ROOT / record['lean']).read_text()
-            start = lean.index('def originalKernel ')
+            start = lean.index('def ' + record['lean_definition'].split('::')[-1] + ' ')
             for before, after in [('off_z.to(tl.int64)', 'off_z'),
                                   ('acc.to(Out.type.element_ty)', 'acc'),
                                   ('4 - STAGE, offs_m, offs_n', '0, offs_m, offs_n')]:

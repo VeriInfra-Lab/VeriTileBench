@@ -7,6 +7,10 @@ bash scripts/bench/audit_tritonbench_g.sh --source-only
 python3 -B -m scripts.bench.final_inventory --check
 python3 -B -m scripts.bench.check_body_corpus --check
 python3 -B -m unittest discover -s tests/python -p 'test_*.py'
+# Complete PR checks, including the source gate and active audit-tool tests:
+python3 -B scripts/bench/ci.py checks
+# Three Real/FP pairs and typed-source regressions:
+python3 -B scripts/bench/ci.py smoke
 ```
 
 `final_inventory` selects current repaired task entries, enforces the four
@@ -69,6 +73,9 @@ the source check.
 `audit_tritonbench_g.sh` without arguments builds and audits the complete
 corpus; `--global-only` checks source inventories and review evidence. The full corpus
 CI audit runs daily at 04:00 Asia/Singapore or on manual dispatch.
+See [CI scope and rejection tests](../../documents/bench/ci.md). Full audits
+retain every auxiliary theorem; the required public targets include refutations
+and are checked against the verdict ledger.
 `check_ports.sh` without arguments forwards to the current corpus audit;
 named arguments select one task and all its retained Lean helpers.
 

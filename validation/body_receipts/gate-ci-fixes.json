@@ -1,0 +1,1312 @@
+{
+  "schema": 1,
+  "kind": "acceptance_gate_and_ci_validation",
+  "accepted": true,
+  "completed_at_utc": "2026-11-16T03:53:41.405561+00:00",
+  "scope": {
+    "tritonbench_g": 184,
+    "example_groups": 19,
+    "source_pairs": 601,
+    "public_specifications": 520,
+    "required_public_refutations": 1,
+    "public_goals": 521,
+    "unchanged_owned_lean_modules": 8492,
+    "freshly_replayed_regression_modules": 57
+  },
+  "fixes": {
+    "required_negative_goals": "Every declared DISPROVED verdict and every public refutation must occur in the required replay targets; source deletion or positive substitution fails preflight. Lean checks full names and negative type.",
+    "suite_comments": "Trailing indented comments, including EOF and tabbed/nested suites, are retained; sibling and module comments remain outside the function.",
+    "batch_membership": "Automatically discover all owned modules and all current regressions, replacing 8634 explicit paths including 278 obsolete dependency paths.",
+    "regression_proof": "The signed-window regression normalizes equal closed Real scientific/decimal literals. Its statement, source casts, signed indices and all203case programs are unchanged."
+  },
+  "local_checks": {
+    "python_cases": 767,
+    "audit_tool_tests": 141,
+    "clean_source_only_checkout": "PASS; no Lean, no Mathlib build cache, standard-library-only Python venv and exact pinned library git source",
+    "real_fp_smoke_pairs": 3,
+    "typed_smoke_regressions": 4,
+    "regression_modules_built": 57,
+    "real_auditor_tests": 33,
+    "negative_probes_rejected": 4,
+    "verdict_name_and_negative_type": "PASS",
+    "workflow_yaml_and_shell_syntax": "PASS"
+  },
+  "independent_replay": {
+    "public_refutation": "PASS",
+    "public_refutation_module_theorems": 3,
+    "current_regressions": "PASS",
+    "regression_theorem_occurrences": 945,
+    "all_regression_private_auxiliary_generated_theorems_checked": true,
+    "full_unchanged_case_proof_receipt": {
+      "path": "validation/body_receipts/source-naming-deep-review.json",
+      "sha256": "2227353e000e5ce5a376eb590ce22020c9800ef6ea44893d9ef9f94f6a16ee40"
+    },
+    "scope": "No task/example Lean or Python source changed. Existing complete case replay remains bound to identical sources. All 57 retained regression modules and the public refutation module were independently replayed in this run."
+  },
+  "ci": {
+    "pr_and_main_push": "Source/tool checks and three Real/FP pairs; read-only fork checks enabled",
+    "daily_or_full_manual": "64complete-corpus shards, imported challenge interfaces, official auditor rejection tests",
+    "per_file_timeout_seconds": 1800,
+    "per_batch_timeout_seconds": 1800,
+    "heartbeat_seconds": 30,
+    "github_actions_run": "not_triggered_no_push"
+  },
+  "current_inputs_sha256": {
+    "scripts/bench/ci.py": "7125a8ad58b72192cab10b9470ead501e723956eb8899e04f37a2ffc9c667855",
+    ".github/workflows/bench-audit.yml": "6360215ceb1ab756cdc6a8bfd7933035cc0c9d54ddb8378f1d387665b12dba24",
+    "scripts/bench/check_source_naming.py": "b5d6bdaaac4f1b1018434f86909df93b1944ea0622928ca4bf53a494790b496a",
+    "scripts/bench/final_inventory.py": "517bf11f649c853fea69f40e3d568b7216cbea805bbed5ec12061a7988f979f3",
+    "scripts/bench/replay_body_migrations.py": "dc51c804bebc6fc11c5525ae4dec4cf401ba8ea64b68e0cf8e45ce8d66bb87d0",
+    "scripts/bench/audit_tritonbench_g.sh": "5f8778bc022ae2be1c55233a73a1ad55fec9c03357c8c7f761c29c4990342f03",
+    "scripts/spec_sheet.py": "6d8fe237093babdfec5ffd94a7785a8f6e1eae53d55a62811d524174854f604a",
+    "validation/body-migration-batch.json": "ef47ff01c717b5fd1d761eb1377482ec6ce8a01733bdc76eb1b2d5cc912c73f9",
+    "tests/lean/FPContextAttnMistralSource.lean": "1e93434b345b4d194a70846cceed1ae0fa97dd1890945074882822142ad6c7c6",
+    "scripts/test_audit_gates.py": "98024197fbe4cd4484701d6d49fece36a402213dcc5fe0f2f4b43595bc78fb1a",
+    "scripts/check_comparator.py": "1b45c7a45f5d9fb72d3290a2899b1ead1b38618bf79dd137013253fa171409ba",
+    "scripts/check_comparator_batch.py": "3635192a5e4db9fce52163b0daa662532cfa7eea00d72271b7a62c82293d43c2",
+    "scripts/comparator_common.py": "0092eb746096c535000ba1be40263e7467efac25cec213a8a4d251a63fd797a2",
+    "scripts/audit_process.py": "e7811aa7280251590fcc5be7c2d297f91dc2115827f4d04f918aa7ae44ee39a4",
+    "scripts/bench/audit_trust_prep.py": "f1c3c0f2e3a1a7d66936ae43e41aa702b7b7967d8200714afede71a42e5814da",
+    "validation/task_progress.json": "fd1c88ee4e30fac1134b0f5fd437a5b29decdc03bf6b1b288eefab4212a29b2c",
+    "tests/fixtures/jit-correspondence.json": "d794627e64a5876053a219d22e394e37378a05f68863b1b198d52c9614f1ef09",
+    "scripts/test_audit_process.py": "94912bd85599a14ff5f8c6e3d3406dcf8611e8c77c315b5941009f3b1143f3c4",
+    "scripts/test_audit_shards.py": "d5cf46331ddba3b688a37760773fcc690e758deac313817c8e9c11f3eed0cfad",
+    "scripts/test_check_comparator.py": "4a871c3d691f57136e6aa23e2b5a28a696c6a998e4f86dcf45a9438750402cb4",
+    "scripts/test_bench_ci.py": "500ebc43ecddfab6c2c0bdbf30d5589f9606176f0dfec9de65b37a687b18bf03",
+    "scripts/test_spec_sheets.py": "d7b22f3c8e1b939f9c478ff34cce099a77bf223ebd35c2837fc15e70ac845a6c",
+    "tests/python/test_final_inventory.py": "c6deb140f318391b6ead96ed9329bcefcf37326995d035bef5ec0681dc08c100",
+    "tests/python/test_body_migration_replay.py": "ceb840af87c8520f412c8d9d622ef423beea163165ad506a64de845433510c7a",
+    "tests/python/test_jit_correspondence_generation.py": "320d40ec3cd6fab391848c413ef78a2dcd2696a7a69cd59d4c37f6d939ceb9c9"
+  },
+  "inventory": {
+    "path": "validation/body_receipts/gate-ci-fixes-theorems.json.gz",
+    "sha256": "d70f7532cabc022fcfe7e7dd96d6e0ee1af8bbacc52540d31620d4c7c66966ae",
+    "modules": 8549,
+    "theorem_occurrences": 213922
+  },
+  "evidence": {
+    "archive": "/tmp/veritile-corpus-naming/gate-ci-fixes/gate-ci-fixes-evidence.tar.gz",
+    "sha256": "bd819e881f402f999c80529ad69c8dd00f0d20fbd287b4d8c69273e2e84c0beb"
+  },
+  "cases": [
+    {
+      "path": "bench/examples/AdamUpdateGridLaunch",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "3243132acfecbef078c51ccbba666a135dafc469e5ab87ed3d777c4d1f403fe6"
+    },
+    {
+      "path": "bench/examples/FlatVectorAdd",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "e5b20ca13628d9eefe3d28e50770fbd59c55ae84a58c22a69c93bdb172f371f0"
+    },
+    {
+      "path": "bench/examples/FloatDTypeAdd",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "438361ea2e607d0891561c494bb402f2bb22ae1ca4bb6ee184bd6cc0c068397d"
+    },
+    {
+      "path": "bench/examples/FloatDTypeSoftmax",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "de5913f1e6c116eaba231d78cb5c3826f823ee8239f5380198515a0a9b9a1bec"
+    },
+    {
+      "path": "bench/examples/FusedLayerNorm",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "6f0b7585dae5d716b514b226ee1a4fc1184ad22f1e948f66016c775cd3b6225a"
+    },
+    {
+      "path": "bench/examples/FusedSiLU",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "57cbe36f8197a16439397b5fe0b36df0cd25001bd11dfc22bc04c863e00c1ec9"
+    },
+    {
+      "path": "bench/examples/FusedSwiglu",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "f375bb98d92a03f49e75505872bb58c10fb6dbf40169dcd8f564a86805fce110"
+    },
+    {
+      "path": "bench/examples/HyperConnectionsDepth",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "7c8bb93b0b38b3d64db976f361aa6d97a7d4f494853ae74219e216067529de32"
+    },
+    {
+      "path": "bench/examples/HyperConnectionsWidth",
+      "accepted": true,
+      "source_pairs": 6,
+      "source_fingerprint_sha256": "932f3bd7a9270ebc1f7f9e67e6103cb9a31938f3c788a0ef2e3e70d66b489394"
+    },
+    {
+      "path": "bench/examples/LogExp",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "b2587d70db632de1600dff210e82101077f81d6d16d9207f95c23d037067e097"
+    },
+    {
+      "path": "bench/examples/OnlineSoftmax",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "9e44eefb318df14c7edb243e56703af1da360ff5d3dec4fd4e3eac25fef92f31"
+    },
+    {
+      "path": "bench/examples/RowWiseMax",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "622e1ce0d96dccbc768edaafb89ba73063567ddfc0e774f99cf6c2bc0b274313"
+    },
+    {
+      "path": "bench/examples/RowWiseSum",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "e73da32b2e5825539398203ff810bcab0a10a3049e22e0036ad00a193a818af0"
+    },
+    {
+      "path": "bench/examples/SoftmaxReciprocal",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "02bd425ad1c8158b4ee75ccc512a01c11bff08e97fbadb221995cdf932048bcf"
+    },
+    {
+      "path": "bench/examples/SoftmaxStable",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "2b50e35a341763bf7c4313c47ee689d7d79b05b63e6a0e14c7116541560822e3"
+    },
+    {
+      "path": "bench/examples/StableLogSumExp",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "49b670b49af7d75973c30d4993307a31559b3e03a39dbd0effd3d2bea63ab0b7"
+    },
+    {
+      "path": "bench/examples/TritonBenchVectorAddition",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "004e9d1c5a6705b4917e3528486abc90493c328deb845871b3b4c667ce31de79"
+    },
+    {
+      "path": "bench/examples/VectorAdd",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "eda99ba3c284ae4038072989164857ddce579d179a3f47931ffda56cfd2f02cd"
+    },
+    {
+      "path": "bench/examples/Welford",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "9d4ab73261b8a7100641b90f0f7f037cc3cfd72b0306f49a430a80a90200da11"
+    },
+    {
+      "path": "bench/tritonbench_g/adam_update_triton",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "564be442ea87133e548e0b490136b28baecea73415e06418d76c61ee4c7fd133"
+    },
+    {
+      "path": "bench/tritonbench_g/add_example",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "1aae27446a26f59b980c050c67c89cda3e6dd6fc3bdeba019178b502f6317982"
+    },
+    {
+      "path": "bench/tritonbench_g/add_value",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "cfd6ed88ecb1b574b91c9939cf788bc5ba835a8e9e7bfaa625b6a65ea61890fc"
+    },
+    {
+      "path": "bench/tritonbench_g/apply_penalty",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "eedda2d207033fac474fdda8608931625a8b3c1ae460f37724e3fa2fffb4b10b"
+    },
+    {
+      "path": "bench/tritonbench_g/attention_fwd_triton1",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "556c2562db8d727277031fb37e7aa6717e62783796d5eceb84f1f7eff04abe69"
+    },
+    {
+      "path": "bench/tritonbench_g/attention_kernel",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "f8b0ec470e4d21288afbc1f15bd257ec37e508b4ece5e22b42b90949de0d0911"
+    },
+    {
+      "path": "bench/tritonbench_g/attention_kernel_aligned",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "e16b4f4595440559c1321a908855edf67f7e328e737469bca91c9c34dda8faf2"
+    },
+    {
+      "path": "bench/tritonbench_g/batched_vecmat_mult",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "60a1fa60a040db41e193974b2ceebf48a83395c3f7078578258e0160956e122d"
+    },
+    {
+      "path": "bench/tritonbench_g/bgmv_expand_slice",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "250721bde23f8f140f3162d46267da03fa18473748d2c6f50d66823479f5c691"
+    },
+    {
+      "path": "bench/tritonbench_g/bgmv_shrink_kernel",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "66d936b4ab36d3eb49808adfc2d54a93d80f8fa1e05ff749015ccdeb654f1682"
+    },
+    {
+      "path": "bench/tritonbench_g/bmm_chunk_bwd",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "dfa64e710bf1397aee5218ffb16eb1285a6d6d475c78abb84584a0a5585f8e68"
+    },
+    {
+      "path": "bench/tritonbench_g/bmm_optimized",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "326074adedaded16fbae93a93608281c648b870edc7997d6e96e24f44ae2e78c"
+    },
+    {
+      "path": "bench/tritonbench_g/cache_transform_triton",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "b6b168b4ff96079d31c58e37ef82aa5c42643e44db7cd4872b0a92648f919264"
+    },
+    {
+      "path": "bench/tritonbench_g/chunk_cumsum_kernel",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "658e98554cfb604fbc83119cd65aab15e8652fb660e2cfb09d166ba5053bb810"
+    },
+    {
+      "path": "bench/tritonbench_g/chunk_cumsum_vector",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "fc18e589198b3345d8ba9213e9759d059a1682db310b9b590cf2cf474ee3e9e7"
+    },
+    {
+      "path": "bench/tritonbench_g/chunk_delta_fwd",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "5f793a5f471599faf7469c830f228d46ae0a440bf1de62a37a1d2ccd2ebd6199"
+    },
+    {
+      "path": "bench/tritonbench_g/chunk_gate_recurrence",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "e195ce7c209db43eace46b1a47fe6f1050eb3a47df8b1a66bebb1c43c2d35886"
+    },
+    {
+      "path": "bench/tritonbench_g/chunk_gated_attention",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "ca09c8b2cf848975f06acd182375da0f7cd736dc0db1cf5f3f74d7bc39e02334"
+    },
+    {
+      "path": "bench/tritonbench_g/chunk_gla_simple",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "5a1cd9276f2030213168707751ae2bf648bfa67dbd1d466dafaee4a33738665c"
+    },
+    {
+      "path": "bench/tritonbench_g/chunked_cumsum_fwd",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "5dd81a8d6ae3ab63a2070eb002f95b86b80deaf9f02c9b2d5af2dd8cf4bebc89"
+    },
+    {
+      "path": "bench/tritonbench_g/cosine_compute",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "cc13743c16f1acadc8b83e561c2b657510c9955a1bdfb9d99727129af80d884b"
+    },
+    {
+      "path": "bench/tritonbench_g/cross_entropy1",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "ae190a4e3e7dab3153bb57309b4ea50b179a7c2adeaa2f211b908f5097f7b959"
+    },
+    {
+      "path": "bench/tritonbench_g/cross_entropy2",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "68eff23ae1bd29177de87e35195655b0d1e8b48ee5ad451171907b59a2824743"
+    },
+    {
+      "path": "bench/tritonbench_g/cross_entropy_ops",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "777b12c55270cbf0a0acb5d0e9d1129973d171ed3376c83f7efeec3b0916a6e6"
+    },
+    {
+      "path": "bench/tritonbench_g/dequantize_matmul",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "3ff35fb6b57eb94e76efa3d6fd2e9737974cab0c87bf1639d931472c736e54d9"
+    },
+    {
+      "path": "bench/tritonbench_g/dequantize_rowwise",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "d571709f2bce10a9402efb10921b02cab3e686dd8d2a99c5981a0e860d12f649"
+    },
+    {
+      "path": "bench/tritonbench_g/destindex_copy",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "d145a051a56b17128424d1cb9fdb41311c37e24e4ed3b572426e2ec6b9b0f48f"
+    },
+    {
+      "path": "bench/tritonbench_g/destindex_copy_kv1",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "bd6236d45353c29a49774a6fc2b2644172a4f89a0584d3a75dbdd5eafe2efc8c"
+    },
+    {
+      "path": "bench/tritonbench_g/destindex_copy_kv2",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "f954d41ad9bc6eefdf1faca6049706eade5b60f11f5059a3f027632606240444"
+    },
+    {
+      "path": "bench/tritonbench_g/dropout_triton",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "d002c11a4e47eb766db9f435e009c8d3bbc1a090afafc104e8ce911d4c958b7d"
+    },
+    {
+      "path": "bench/tritonbench_g/embedding_triton_kernel",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "b8f5668b02bf5d317c59d456d10f62f936a61fb4d44c4d38ddbf83b3f644e028"
+    },
+    {
+      "path": "bench/tritonbench_g/f8_conversion_utils",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "18c5680bc85e52e007f797b833af855b696b117a20402507f76bf84e1cf69d47"
+    },
+    {
+      "path": "bench/tritonbench_g/fast_ce_loss",
+      "accepted": true,
+      "source_pairs": 6,
+      "source_fingerprint_sha256": "e9b7168f6e6c3f15c0ebe309fb923b901474295dad186adaa573f6ea367f8bab"
+    },
+    {
+      "path": "bench/tritonbench_g/fast_layernorm",
+      "accepted": true,
+      "source_pairs": 6,
+      "source_fingerprint_sha256": "42f61fdfec75307d2a6a704dfeb9e13ed8c8e66d091c2fa88f9531f4195d72b0"
+    },
+    {
+      "path": "bench/tritonbench_g/fast_rms_layernorm",
+      "accepted": true,
+      "source_pairs": 7,
+      "source_fingerprint_sha256": "fd02cbc01014481eb226ae9db62b24c217a83aee7891c3576d2d5b6ac99528bf"
+    },
+    {
+      "path": "bench/tritonbench_g/fast_rope_embedding",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "f54a58cc188cc9f1bbfe18f726840ab426ad16f3113d4b36ac380521418d93b1"
+    },
+    {
+      "path": "bench/tritonbench_g/flash_decode2_llama",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "046bc9a6f8312192659bbd7ab38702c19a4b86530b7c4ed4ebed2f8933e32b2f"
+    },
+    {
+      "path": "bench/tritonbench_g/flash_decode2_phi",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "5d763ea8ecd49e60b25ececc779de8d2bd61b6728b831968c7b49c9ff4005a93"
+    },
+    {
+      "path": "bench/tritonbench_g/fused_activation",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "db2da12637169ea502c560ba3b71a403f7d55a0e4cb21fd70a1a175d9e301031"
+    },
+    {
+      "path": "bench/tritonbench_g/fused_layernorm_triton",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "f2af681d9d2f0b8cbdba080c2dc955b008efd1e235063bbd05ceab9cd87ce063"
+    },
+    {
+      "path": "bench/tritonbench_g/fused_recurrent_hgrn",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "9a73b7f916f34c18e3adf1f0ca5698b09cc740829a455f3c6c21e2bafad5f19c"
+    },
+    {
+      "path": "bench/tritonbench_g/fused_recurrent_retention",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "0b68a028ef729e9d94c725930c1f221b9ed47753cbe92913ff7f08d8f1aa7efd"
+    },
+    {
+      "path": "bench/tritonbench_g/fused_rotary_embedding",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "1d3f3a490570acb942671d7f3a19e1eb0ff829e4cc6e8e6c7585fcfd6c8fee96"
+    },
+    {
+      "path": "bench/tritonbench_g/fused_rwkv6_kernel",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "22fe5cdbd3047583498084332962ba11f2bdc8f4c20fea6c140124bf63406782"
+    },
+    {
+      "path": "bench/tritonbench_g/geglu_tanh_triton",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "29cf36ece01bd085c87a13d9f0256855cbd8153f3cfd201a03feca592042b9f9"
+    },
+    {
+      "path": "bench/tritonbench_g/index_select_bwd",
+      "accepted": true,
+      "source_pairs": 1,
+      "source_fingerprint_sha256": "bd803103bbe88218c45ec53fc1df24632088b51997ac8530b038ae6a3d9157e0"
+    },
+    {
+      "path": "bench/tritonbench_g/index_select_cat",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "49acb616bc5fb9e9011e8866dab29d69ca7ac658bf5b14c06c26fe38dd9851cd"
+    },
+    {
+      "path": "bench/tritonbench_g/int4_matmul",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "3abdaff4a6b67e011c3aa649fb284c1340af090e4fecd1ddf36333508ff751f9"
+    },
+    {
+      "path": "bench/tritonbench_g/int8_dequant_matmul",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "983f84091c84e1c56a4fd3d5bdbf2ff1daf2e4dc0485e3f9fe5a46f27e088add"
+    },
+    {
+      "path": "bench/tritonbench_g/int8_matmul_kernel",
+      "accepted": true,
+      "source_pairs": 1,
+      "source_fingerprint_sha256": "28019d9ba35afa8f804ed16d9913d9ecab3372e7bd8d80d7351ad061f8f2c511"
+    },
+    {
+      "path": "bench/tritonbench_g/isfinite_kernel",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "d495d30f2d72c9dc2ce2cc00508168bdbaf144212ebec4ce1553584e8f76e7e9"
+    },
+    {
+      "path": "bench/tritonbench_g/kcache_copy_triton",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "137b16e7b84db2002d590d3ea5b5367d88e5efe78bb73d33cfff629e43fb07e6"
+    },
+    {
+      "path": "bench/tritonbench_g/kldiv_compute",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "95991361a975e4191b4a4fbdf7da2902d0c46d8cee7b11aa2e1ba334bcef5848"
+    },
+    {
+      "path": "bench/tritonbench_g/kldiv_ops",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "80ffdd41c93ff90cd257cc15be05ffd5d068296c8e74e268c38c797e7db4f886"
+    },
+    {
+      "path": "bench/tritonbench_g/kldiv_triton",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "0cd9ca97951ad16dc09853f0efd091235c3c8ac00fcc1878238f6046d013ac95"
+    },
+    {
+      "path": "bench/tritonbench_g/ksoftmax_triton",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "a2a582e500a3efe7880a376c797f134d7789d1d218a289aaff8ca153ad0798b4"
+    },
+    {
+      "path": "bench/tritonbench_g/kv_cache_copy",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "3195811b52e2898d2f8d78a66b272dd6ccda180ec6af212c1951591726cdce91"
+    },
+    {
+      "path": "bench/tritonbench_g/l2_norm_bwd",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "7b068d102bf7f0b3ab11d1da65b298554eb1653aa2cc745fcf3c977a37a43fa7"
+    },
+    {
+      "path": "bench/tritonbench_g/l2_norm_triton1",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "78f5644a2468fba84256d06109f7b3a6fdf7ced4bfe2667425c33ec0692b791b"
+    },
+    {
+      "path": "bench/tritonbench_g/l2_norm_triton2",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "7ec8bef09868bfba613fe885d36986c7c9721162d6b5d21e4b35d0ec74cdac46"
+    },
+    {
+      "path": "bench/tritonbench_g/layer_norm_liger",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "f908e74d4d0b2eedde7590d8170b5e5fd1c47c4a56c646d34048cb0c9a134678"
+    },
+    {
+      "path": "bench/tritonbench_g/layer_norm_ops",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "7e53da1e16d8bba78eb0e0472c64165804cb2af43b76cfe35ad26611fafd63fb"
+    },
+    {
+      "path": "bench/tritonbench_g/layer_norm_welfold",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "4f72e3bb3f91cb7883fbee7cb51fbd5fc298a9265c442979a97edde8bcef9a4d"
+    },
+    {
+      "path": "bench/tritonbench_g/layernorm_fwd_triton",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "441308d1ca54e930e5c7463afc51f9f5e7efa89031227d681bc577ea8d414c57"
+    },
+    {
+      "path": "bench/tritonbench_g/log_softmax",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "812cd625fab03af8d27b53cd7284320744697078e2e6a749a39636757a70870e"
+    },
+    {
+      "path": "bench/tritonbench_g/logsumexp_fwd",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "ba6c183c188d751ae11dfce37e01594f87e137edb1bb081f5e6aae186c42a08c"
+    },
+    {
+      "path": "bench/tritonbench_g/lora_expand_gemv",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "f948e0dcbd91334ab2d69a0b421370fcac5069d066a8112114d46fe816f9c094"
+    },
+    {
+      "path": "bench/tritonbench_g/masked_add_cuda",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "3c241e224646ad8fde997e7aa2fd872cf664bebf55d52651b17b90f9b3053364"
+    },
+    {
+      "path": "bench/tritonbench_g/masked_select",
+      "accepted": true,
+      "source_pairs": 1,
+      "source_fingerprint_sha256": "64ba16e12ee650f3fb07bc9525cc1939c017fd42ca355fad44c60b2626b79830"
+    },
+    {
+      "path": "bench/tritonbench_g/matmul_kernel",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "b8c20d7a86fcceaf920462f7f1647f3074d9e3604846fb79d831a4537f4439ea"
+    },
+    {
+      "path": "bench/tritonbench_g/matmul_leakyrelu",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "40a7cda681da82003b9e066df5ac8adace9170f306e47a4d57ba3338131f3394"
+    },
+    {
+      "path": "bench/tritonbench_g/matmul_leakyrelu_fp8",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "e109b1464b63a25d2b306ff2aed879f1288ca8019a066bacc4d7fe7e67bb114f"
+    },
+    {
+      "path": "bench/tritonbench_g/matmul_persistent_triton",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "e13204d262b204474da81a22d031ff39c4bbc083b3f5639b8578a67f6f4c2b1f"
+    },
+    {
+      "path": "bench/tritonbench_g/matmul_tma",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "ca62522ae99176b64e9615ed01f0746ad80c3e82b822044a52aa9ef2c2cd43ce"
+    },
+    {
+      "path": "bench/tritonbench_g/matmul_triton1",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "8d43066eadb7be6d184d4936be5595eca11152b43fe7a67e53a51b2b0d9d7cf0"
+    },
+    {
+      "path": "bench/tritonbench_g/matmul_triton2",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "639a21db5b53d0803c782df01a771473618349bab3cfcf85931dc3e2b38cadfb"
+    },
+    {
+      "path": "bench/tritonbench_g/matmul_triton_autotune",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "62edc90b9ba76a192131089799ba37574da92fbe0ffb80daf0b6b804bb9935da"
+    },
+    {
+      "path": "bench/tritonbench_g/matrix_reduction",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "c25145b289ff27be08edc2d65641bfa3d0108788abf127efb6a764f68fec70d0"
+    },
+    {
+      "path": "bench/tritonbench_g/matrix_transpose",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "3d254f377a40b8c43180041cf5a3087cc830ee274c4ba7fda715ae853ad33b41"
+    },
+    {
+      "path": "bench/tritonbench_g/matrix_vector_multip",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "76837b11160cd65d149ec9b2ba6a739e55bc75d25537fa0d0bb394bc6dcdec9e"
+    },
+    {
+      "path": "bench/tritonbench_g/max_reduction",
+      "accepted": true,
+      "source_pairs": 6,
+      "source_fingerprint_sha256": "25b1a036be04d708b67e6fd04bd29fdf2df1e352e644b551e7f2668967f1b8e0"
+    },
+    {
+      "path": "bench/tritonbench_g/mean_reduction",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "48e6e816edc7a904b72e93cd820f4f92d06762b79e512d9b890308766bf32e94"
+    },
+    {
+      "path": "bench/tritonbench_g/mul_exponent_compensator",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "fd91b347f4eb6853a0b6fd54c5d0f0c9d4f8811935f7f2af15e48e3248edc52a"
+    },
+    {
+      "path": "bench/tritonbench_g/multinomial_sampling",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "356d7f5c1051ae3be7988e0e361adf54e259517f8f521099c684f2e823c6a77d"
+    },
+    {
+      "path": "bench/tritonbench_g/nested_loops_processing",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "a3997e9389533636499050bbee8142570e28effb9f76c82fae6a48bd33f3da8e"
+    },
+    {
+      "path": "bench/tritonbench_g/pow_scalar_tensor",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "bdf13853e8a89fc8710383e2dc0eaa5719e0fe7291f41052bec73426535ac74a"
+    },
+    {
+      "path": "bench/tritonbench_g/quant_transpose_kernel",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "adf6a474761f2bc3a0fd20a18e1dbf7033187d928cd5e995351480782e64d97b"
+    },
+    {
+      "path": "bench/tritonbench_g/quantize_copy_kv",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "3e1f3db37ff32f186ee5913601faacb65c762b40868ad7d27176c89a8b7bf92a"
+    },
+    {
+      "path": "bench/tritonbench_g/quantize_global",
+      "accepted": true,
+      "source_pairs": 1,
+      "source_fingerprint_sha256": "bc07ccd520085e913429b8fa0aaf7c83e12bf4cd3176430e0e024c5b9a0241e8"
+    },
+    {
+      "path": "bench/tritonbench_g/quantize_kv_copy",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "c2d3c10804660b9a21ddfe9fcf81611748f928d21b1aa6aef2dca41ec6067926"
+    },
+    {
+      "path": "bench/tritonbench_g/quantize_kv_transform",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "ed01f0005b3425fdf0596ca24dd291c7ed3bd890a23fc4a4647422e23dbb5c58"
+    },
+    {
+      "path": "bench/tritonbench_g/relu_strided_buffer",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "e8e4868fb33c4d775bb0beb17c3e33a0a4bf6838b97a282b7cea24ca2572d5ba"
+    },
+    {
+      "path": "bench/tritonbench_g/relu_triton_kernel",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "6c00a4fd163c256fd8906a2e87e21acd739de6a692cd0dd1d556c9caf0e32682"
+    },
+    {
+      "path": "bench/tritonbench_g/reversed_cumsum",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "388382b697bb63077ce81c51f6519a29cf5eb22c8aa673c0bc6fc10f62008e88"
+    },
+    {
+      "path": "bench/tritonbench_g/reversed_cumsum_scalar",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "6603026516a18eb36120735be35eebcb4ec9e9a59f7755f28ff361b32de8c851"
+    },
+    {
+      "path": "bench/tritonbench_g/rms_norm_triton",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "b863f45abb125b034e95205ed6ccfd4241dd587584c9c5e15a5a221cd09e2117"
+    },
+    {
+      "path": "bench/tritonbench_g/rmsnorm_fused",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "941c46887e26cecc0ad4c3b40382f5abaa32457cf34298cd6b34a422c92ca538"
+    },
+    {
+      "path": "bench/tritonbench_g/rmsnorm_fused_llama",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "df3c863d84d9dd9c046eff8ece510389b3996c579b6331d7520cc90664fc0327"
+    },
+    {
+      "path": "bench/tritonbench_g/rmsnorm_implementation",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "a1fdd5b24d53f66b89bfdb294683675c38f587a0955e365c4ac8566430075d2c"
+    },
+    {
+      "path": "bench/tritonbench_g/rmsnorm_triton",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "54145b3004fe6e8dc39145373c628f2c15d0f93e0a69233b58fdf53f7850fd02"
+    },
+    {
+      "path": "bench/tritonbench_g/rope_backward_transform",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "b078bb32ad0eb3d3c5df0d40f654a93ef053b3f2483c0ffc0f149a6051be1fa4"
+    },
+    {
+      "path": "bench/tritonbench_g/rope_embedding",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "1a3014cfe0696dc407218e4768663264997167669a6eb1c60ec1fe6d5a25b2b8"
+    },
+    {
+      "path": "bench/tritonbench_g/rope_transform",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "088a199d85bbf868f5ce1437241b13a222170b03dd90aea577e4a77cf5793d82"
+    },
+    {
+      "path": "bench/tritonbench_g/rotary_emb",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "fd6cb7003bd1742f102b2c69194e832f9eaf8a9b8e2fa63fbc498512d6a1329e"
+    },
+    {
+      "path": "bench/tritonbench_g/rotary_emb_nopad",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "99d579ba30b0baae84f2209c12fb3e1e06d1d3688b81350d349d567be5cd036e"
+    },
+    {
+      "path": "bench/tritonbench_g/rowwise_quantization_triton",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "c1ee2a17cf2ed07461cf72f75bdc78c9620e333911cbfc61d564c898c0147f51"
+    },
+    {
+      "path": "bench/tritonbench_g/seeded_dropout",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "592d5d4d9674e2cc4825f37d758711a1b33863c6a3e1d26d68dc40290d470f88"
+    },
+    {
+      "path": "bench/tritonbench_g/sgmv_expand_slice",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "82864a26532f5ca30e7e813f35e7a7c85d3f3583c16dc1a27c4b9e17a4d53c6c"
+    },
+    {
+      "path": "bench/tritonbench_g/sin_computation",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "1f14153c2a2cea9b38f406369103b8c5f441a5df2b150f1123714bb4f3a4d5f6"
+    },
+    {
+      "path": "bench/tritonbench_g/sin_kernel",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "f24e863651bbabe4c0de74ee746da31371c483379089b66d6dd843063eaa5221"
+    },
+    {
+      "path": "bench/tritonbench_g/softmax_optimize",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "d828aac0b22fc4fe885aa218c2c22984ff0261fa7031c75249938c1157123401"
+    },
+    {
+      "path": "bench/tritonbench_g/softmax_reducev",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "f7516beb48a1c77596e495d57219b4df704987d57e9ced2fb32f4f0624f4415e"
+    },
+    {
+      "path": "bench/tritonbench_g/softmax_triton1",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "f232297185a1342ef2c8149078e5df9c817dc2d3694b9806f9610dd903aa8eef"
+    },
+    {
+      "path": "bench/tritonbench_g/softmax_triton2",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "57425e22b920223da3d62c64b31f335f58c041246d5baea68c3a04e15766c2b2"
+    },
+    {
+      "path": "bench/tritonbench_g/softmax_triton3",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "1167baa54def0667dce5a28784bf489fe46d72ac4cf6991cbb62d8fa162e66e3"
+    },
+    {
+      "path": "bench/tritonbench_g/square_matrix",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "610c3a1fa078eef9cfbc5a451e2ff052c677007e091744b6ea533281467f8b5e"
+    },
+    {
+      "path": "bench/tritonbench_g/swiglu_backward",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "5d8b30b659e626b8de47ea65229f87c36d2a963f88e72e08db35650d2eeee24c"
+    },
+    {
+      "path": "bench/tritonbench_g/swiglu_fwd",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "f60fc35f66aa5a1a56af08f832e38d79f15d5e6ebd1469ce0da43b87be88c92c"
+    },
+    {
+      "path": "bench/tritonbench_g/swiglu_triton",
+      "accepted": true,
+      "source_pairs": 5,
+      "source_fingerprint_sha256": "3c24db4328bdc2970c4402d6e1182fe5c7a084abfd50961ee188bc304bf8fd54"
+    },
+    {
+      "path": "bench/tritonbench_g/token_attn_llama2",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "37e03bb4139dcd218bf3fc97738d1246c506ac076ef2b0709c6decea8519fafa"
+    },
+    {
+      "path": "bench/tritonbench_g/token_attn_mistral",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "4c0970a13c326b0227cd415bbf9239e430bd1b086bfbac7cc23bf3c02fbc2a76"
+    },
+    {
+      "path": "bench/tritonbench_g/token_attn_reduceV",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "7f98e1aa1693004271804dc2bf51cf7b366e10d05b4fd2c1daf62456c094b6ba"
+    },
+    {
+      "path": "bench/tritonbench_g/token_softmax_bloom",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "0c80a49d43af4021da068ff69c143d47a4c0f62f9a1f58b89ebfd9cfeb7af5bd"
+    },
+    {
+      "path": "bench/tritonbench_g/token_softmax_llama",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "bf3efbd666faed176cf2ed80384cf2f84aca9221c25bc094c64040a933f15b38"
+    },
+    {
+      "path": "bench/tritonbench_g/triton_argmax",
+      "accepted": true,
+      "source_pairs": 5,
+      "source_fingerprint_sha256": "e55e324074e32ec711936ff48c057ead999873df60637a9d2b9bc344e398045e"
+    },
+    {
+      "path": "bench/tritonbench_g/triton_conv2d_fwd",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "d20627d8ec0a090281b4bc26ea2a021b11e3372a2004c8786e676f2e43663224"
+    },
+    {
+      "path": "bench/tritonbench_g/triton_matmul",
+      "accepted": true,
+      "source_pairs": 1,
+      "source_fingerprint_sha256": "5e4fde9496e2dc7a8bf06ee5a8c3e4b120e5b099531d8fc810eb339257f20eed"
+    },
+    {
+      "path": "bench/tritonbench_g/triton_mul2",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "1b5f0d0c9dc81be7e8f516268ff3fcb3905b353f61b858edf4e935e9764d08e8"
+    },
+    {
+      "path": "bench/tritonbench_g/triton_softmax",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "cd1124860af66552ff13b258df8fa9d494457441a5eab359c8e79cd8e6de051a"
+    },
+    {
+      "path": "bench/tritonbench_g/uniform_sampling",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "a99c6b44ea556b227898f023ac37f3c73965e14ee05abd5236a3a8e292a00d1b"
+    },
+    {
+      "path": "bench/tritonbench_g/var_len_copy",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "d5016075b90c533fcd87af72be2fa1f422aa205a19525e0fc2f6d8b43d317649"
+    },
+    {
+      "path": "bench/tritonbench_g/vector_addition",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "05e1cdd7a1b0b572ece4451a064293a6922c195bc458750d2f2f07b224e8ec63"
+    },
+    {
+      "path": "bench/tritonbench_g/vector_addition_custom",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "734f8de31f8379c4102b668cdcf583ab97f8e6c3636f70624396274db180ff82"
+    },
+    {
+      "path": "bench/tritonbench_g/iv_dependent_matmul",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "83d2e55e76ed06a3186038c2163195d32b9ba2cae7e1e1e4792a3fadc5a499fb"
+    },
+    {
+      "path": "bench/tritonbench_g/rbe_triton_transform",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "a73261b8c3a7056f81fa0732ed0bac126bf0b27fe6bc27911a0c0104173c8685"
+    },
+    {
+      "path": "bench/tritonbench_g/fp4_to_bf16",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "9f7021c611a3054f63e4625b654ee2fc7032e5f4870236235f9c698a9e105bde"
+    },
+    {
+      "path": "bench/tritonbench_g/attention_score",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "12f758ad9be5887f21cf617b1d9192dbc0e147fa9e8dfbcbd450f2b6749474b2"
+    },
+    {
+      "path": "bench/tritonbench_g/flash_attn",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "2a349a2a30c99e311241dfa30fc400ce951165ccac72936b8c3b12da87b52719"
+    },
+    {
+      "path": "bench/tritonbench_g/block_sparse_attn",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "e9ec0db683acd34998025bc1635f3e14f05765855658ee58f3607c98116c5085"
+    },
+    {
+      "path": "bench/tritonbench_g/chunk_bwd_dqkg",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "247a8b4b29bb48b8e3ef52de0f5cf1c3301930685cabbbb8bc88b3377326af55"
+    },
+    {
+      "path": "bench/tritonbench_g/matmul_dequant_int4",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "4e8a20f27188b9ae8f59f1f46365d4cc81a326206b74325bc859eca2fcb85d12"
+    },
+    {
+      "path": "bench/tritonbench_g/matmul_dequantize_int4",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "c92fe8550775575624a34819ee56efa5e0595bc1296ef5084d214d5da1f98623"
+    },
+    {
+      "path": "bench/tritonbench_g/matmul_dequantize",
+      "accepted": true,
+      "source_pairs": 6,
+      "source_fingerprint_sha256": "e99149c8936bf861affd9712a2ade42e6ab0f687ca7d13b19d9a371cc74450a5"
+    },
+    {
+      "path": "bench/tritonbench_g/fifth_order_sph_harmonics",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "cf1a4593730cf77e0ffac2e0e0df0c0fe5f06c22c1cb25dc1b285c826301c190"
+    },
+    {
+      "path": "bench/tritonbench_g/attention_forward_triton",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "2558faf834f355bda6953e93502b41ffa093d04919a48393790d95a52a382c69"
+    },
+    {
+      "path": "bench/tritonbench_g/attention_fwd_triton2",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "ae118394f0bb7f9e1e2fbaadbb5a0da5d8bfa0679e6c83b4643ace5dbd5716fb"
+    },
+    {
+      "path": "bench/tritonbench_g/llama_ff_triton",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "6302db59f7dc15208698d6854c39d15b34cfacc52589088e21e1557d31fddb1d"
+    },
+    {
+      "path": "bench/tritonbench_g/kv_cache_filling",
+      "accepted": true,
+      "source_pairs": 7,
+      "source_fingerprint_sha256": "dbab6bef2c926edb7e15c7c096d519af987d97c4b1f606d7acb6139172c03cf8"
+    },
+    {
+      "path": "bench/tritonbench_g/rotary_transform",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "01b02ccf43e976e99efd40fc289d2b864b30845900694de3bf6f46d3ffac4411"
+    },
+    {
+      "path": "bench/tritonbench_g/rotary_transform_ops",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "b3c1255d2bfd8f167d609c3f40c65032a5b7163605df453d82dff22f951a8559"
+    },
+    {
+      "path": "bench/tritonbench_g/diag_ssm_triton",
+      "accepted": true,
+      "source_pairs": 8,
+      "source_fingerprint_sha256": "ce086bbc96652059a485c6296b1f618c666e7158ca52850d2a6337d284d7e33f"
+    },
+    {
+      "path": "bench/tritonbench_g/decay_cumsum",
+      "accepted": true,
+      "source_pairs": 6,
+      "source_fingerprint_sha256": "5c667b95d921d999b2e1ccaf7754e3ffc08511ef8e3299883f58fa68abfdc9d3"
+    },
+    {
+      "path": "bench/tritonbench_g/triton_linear_activation",
+      "accepted": true,
+      "source_pairs": 6,
+      "source_fingerprint_sha256": "47163771eb12b341a3ccebce8bf47b4114d1757b44caec35a88db238a8c83494"
+    },
+    {
+      "path": "bench/tritonbench_g/int_scaled_matmul",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "395988284a2f5ff3150480c594358e2d6512893e2f4ed91bf82bff2a6cd27387"
+    },
+    {
+      "path": "bench/tritonbench_g/context_attn_llama",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "930543fc7ce7bea378c50b34f8b29a3d9c1a0187706f441b870377c1cd00b778"
+    },
+    {
+      "path": "bench/tritonbench_g/context_attn_mistral",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "8777768b0507b4badf07c3e4cc8220d8ce872582f2b7501a3e720c4c29c814dd"
+    },
+    {
+      "path": "bench/tritonbench_g/context_attn_fwd",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "1dbd4a689f58dc40a0b705e977357dc96957769856d942ee124ddf0a3333a71c"
+    },
+    {
+      "path": "bench/tritonbench_g/context_attn_nopad",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "d277c76a3322f1cd45755451096e96493745569c185abbb7837e4c4585714c47"
+    },
+    {
+      "path": "bench/tritonbench_g/context_attn_bloom",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "7e24b9f1a9b0a664a96c97bd5296b04826b43b00f6b21f8dca7f09962a2e075b"
+    },
+    {
+      "path": "bench/tritonbench_g/layer_norm_fwd",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "43c49e571868893cf62ea848697a9a542c3fe4938d216adb1d6081e9e8508eae"
+    },
+    {
+      "path": "bench/tritonbench_g/layer_norm_triton",
+      "accepted": true,
+      "source_pairs": 6,
+      "source_fingerprint_sha256": "e6739066ff1f5eeeb60d9d5c7e5195700344646593a493e5a3eb5e1150d584b1"
+    },
+    {
+      "path": "bench/tritonbench_g/bmm_chunk_fwd",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "1c8b877388ee366d0c042deb7839b754a5732b47954a0118d8db9d480c12fa5e"
+    },
+    {
+      "path": "bench/tritonbench_g/attention_llama",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "7e3b4868fe5cc8277dc7f44108e05f77d8aab6c96aecdd6129917f6912b03f7c"
+    },
+    {
+      "path": "bench/tritonbench_g/int8_matmul_quantization",
+      "accepted": true,
+      "source_pairs": 10,
+      "source_fingerprint_sha256": "18c2ce2fed715dc151d2198c2db112afd5c2327f0963550742293e6595526ba8"
+    },
+    {
+      "path": "bench/tritonbench_g/spinning_lock_reduction",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "dbd4dcaa79994116d5878656a2dd2992f9dc36e58a4a67c2fe7fbfbec6ff77f1"
+    },
+    {
+      "path": "bench/tritonbench_g/streamk_matmul",
+      "accepted": true,
+      "source_pairs": 12,
+      "source_fingerprint_sha256": "8da300fa10ffacc51d1fd90c6bfa2b622b0f907e438694cd93fa0499a5ab3191"
+    },
+    {
+      "path": "bench/tritonbench_g/attention_fwd_triton3",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "560b6f047c10eb65e0f3a5a15594557508bc62a8bef9c317892b8296a1fd20fb"
+    },
+    {
+      "path": "bench/tritonbench_g/int8_quantization",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "b64f612532c2e7015a62474d05a09f3ab0c8a18e124384034dc027571e809edc"
+    },
+    {
+      "path": "bench/tritonbench_g/fused_recurrent_delta",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "7272d2734eb50da517ff0d7b7c55c794d33181e4b4818329e14baf74eabb0f0f"
+    },
+    {
+      "path": "bench/tritonbench_g/attn_fwd_causal",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "2493c94758f81214ec45a26b5536efd85197fe09ad4840f3c8eab00c61285c29"
+    },
+    {
+      "path": "bench/tritonbench_g/attn_fwd_triton",
+      "accepted": true,
+      "source_pairs": 3,
+      "source_fingerprint_sha256": "15f01c44b986b720ad12cb223d5593a5ad336971a479bbb6ed615745a42a4582"
+    },
+    {
+      "path": "bench/tritonbench_g/chunk_gla_fwd",
+      "accepted": true,
+      "source_pairs": 10,
+      "source_fingerprint_sha256": "59a57fea341bb41e7ba5446aba9f00503278329f421e79ca1e937ec8bbf00c91"
+    },
+    {
+      "path": "bench/tritonbench_g/chunk_linear_attn",
+      "accepted": true,
+      "source_pairs": 5,
+      "source_fingerprint_sha256": "1428893c82192d7727a8ab5a46334607ad0a926e0c67b14653b18fe53d62315c"
+    },
+    {
+      "path": "bench/tritonbench_g/chunk_retention",
+      "accepted": true,
+      "source_pairs": 5,
+      "source_fingerprint_sha256": "ed0cc3d139c10df7262052ceaf028d1f8ba049430a22351b6c8177990a448f29"
+    },
+    {
+      "path": "bench/tritonbench_g/chunk_retention_ops",
+      "accepted": true,
+      "source_pairs": 5,
+      "source_fingerprint_sha256": "ba4ec9c47e3b4b1bc23d69ed1f7c73ac614a12cacb5e59738d39578692b1f86d"
+    },
+    {
+      "path": "bench/tritonbench_g/lightning_attention",
+      "accepted": true,
+      "source_pairs": 6,
+      "source_fingerprint_sha256": "39b681dd010ccdf293b46962fc6b257139804ede59fa55d7fb09fd468c03f382"
+    },
+    {
+      "path": "bench/tritonbench_g/mixed_sparse_attention",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "63263502eaada83537c5948d8a2ab3d771b5249f0c343fbabd9b58ee88006e81"
+    },
+    {
+      "path": "bench/tritonbench_g/parallel_attention",
+      "accepted": true,
+      "source_pairs": 7,
+      "source_fingerprint_sha256": "cf6fff0f34bf90fc93efd50e5a940b2e17a2463f7b011afe6b9da1cf761dd94d"
+    },
+    {
+      "path": "bench/tritonbench_g/parallel_retention_attention",
+      "accepted": true,
+      "source_pairs": 7,
+      "source_fingerprint_sha256": "b1fd84b0585b5a456469f7b7aac3bd244e7121117b1d52fa5d6b35470970be22"
+    },
+    {
+      "path": "bench/tritonbench_g/softmax_flaggems",
+      "accepted": true,
+      "source_pairs": 10,
+      "source_fingerprint_sha256": "7e4f667da741676ea30e55335a29fb4cdf156239742022121a7e54e7bbde505f"
+    },
+    {
+      "path": "bench/tritonbench_g/rms_matmul_rbe",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "eb48b448a1cb30e8e84f556d46e30fbdb971820a88df6728d92b2519b806296f"
+    },
+    {
+      "path": "bench/tritonbench_g/rms_rbe_matmul",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "e7af299ac2cba62e9a2b77192cb2d9ad555be73cde54e2b0dab29c1bde2e28ac"
+    },
+    {
+      "path": "bench/tritonbench_g/triton_attention",
+      "accepted": true,
+      "source_pairs": 4,
+      "source_fingerprint_sha256": "ebdafed0a500054eb92104f6558ec8fef27758c0abe5def9f6036cf31a4ccddf"
+    },
+    {
+      "path": "bench/tritonbench_g/fp4_to_bf16_conversion",
+      "accepted": true,
+      "source_pairs": 2,
+      "source_fingerprint_sha256": "d1300c7b9b0357d550d332e40637d306abafd69990cf8a4f54292842c187c6d9"
+    }
+  ],
+  "boundary": "Numerical assumptions, public theorem conditions and source-model refutation remain unchanged. No GPU experiment, new numerical admission, merge, push or tag. The 334 imported mathematical/backend challenges remain pending."
+}

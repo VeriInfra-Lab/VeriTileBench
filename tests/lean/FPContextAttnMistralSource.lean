@@ -1,5 +1,6 @@
 import bench.tritonbench_g.context_attn_mistral.Proofs.Mathematical_Kernels
 import VeriTile.Meta.StatementAudit
+import Mathlib.Tactic.NormNum
 namespace VeriTile.Bench.TritonBenchG.ContextAttnMistral.SourceTypes
 open VeriTile.Triton
 set_option maxRecDepth 20000
@@ -77,7 +78,10 @@ theorem signed_window (storage : Storage) (candidate : Bool) (BM BN D : Nat) (wi
         (.constInt window))
         (.ref .real [BM,BN] "qk")
         (.broadcast (.const (-1000000000.0 : ℝ)) [BM,BN]))))) := by
-  cases storage <;> cases candidate <;> rfl
+  cases storage <;> cases candidate <;> first
+  | rfl
+  | simp only [show (-1000000000.0 : ℝ) = (-1e9 : ℝ) by norm_num]
+    rfl
 
 #guard_msgs (drop info) in
 #auditModuleAxioms

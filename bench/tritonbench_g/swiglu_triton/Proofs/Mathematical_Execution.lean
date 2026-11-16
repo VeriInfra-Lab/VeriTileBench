@@ -53,7 +53,7 @@ def forward_run (v : Bool) :
   all_goals
     refine ⟨?_, ?_⟩
     swap
-    simp (maxSteps := 500000) [typedFwd,VeriTile.Bench.Repairs.SwigluTriton.forwardKernel,VeriTile.Bench.Repairs.SwigluTriton.forwardIndexCommuted,VeriTile.Bench.Repairs.SwigluTriton.backwardKernel,VeriTile.Bench.Repairs.SwigluTriton.backwardIndexCommuted, VeriTile.Bench.Repairs.SwigluTriton.forwardTypedKernel, VeriTile.Bench.Repairs.SwigluTriton.forwardCommutedTypedKernel, VeriTile.Bench.Repairs.SwigluTriton.backwardTypedKernel, VeriTile.Bench.Repairs.SwigluTriton.backwardCommutedTypedKernel, ComputeKernel.surfaceBody,
+    simp (maxSteps := 500000) [typedFwd,VeriTile.Bench.Repairs.SwigluTriton.forwardKernel,VeriTile.Bench.Repairs.SwigluTriton.forwardIndexCommuted,VeriTile.Bench.Repairs.SwigluTriton.backwardKernel,VeriTile.Bench.Repairs.SwigluTriton.backwardIndexCommuted, VeriTile.Bench.Repairs.SwigluTriton._swiglu_forward_kernel, VeriTile.Bench.Repairs.SwigluTriton._swiglu_forward_kernel_index_commutedKernel, VeriTile.Bench.Repairs.SwigluTriton._swiglu_backward_kernel, VeriTile.Bench.Repairs.SwigluTriton._swiglu_backward_kernel_index_commutedKernel, ComputeKernel.surfaceBody,
       run, step, FP.Structural.evalExpr, evalComputeOp, evalOp_unfold, evalOffsets, evalDeltas,
       Option.bind, engine, Algebra.withDefaultPrecision, resolvePrecision, model,
       ComputeDType.eraseDType, numeric, bop, natLt, initial, Cell.read, ofFloat, toFloat,
@@ -81,7 +81,7 @@ def backward_run (v : Bool) :
   all_goals
     refine ⟨?_, ?_⟩
     swap
-    simp (maxSteps := 500000) [typedBwd, typedBwd_fp16_fp64, VeriTile.Bench.Repairs.SwigluTriton.forwardTypedKernel, VeriTile.Bench.Repairs.SwigluTriton.forwardCommutedTypedKernel, VeriTile.Bench.Repairs.SwigluTriton.backwardTypedKernel, VeriTile.Bench.Repairs.SwigluTriton.backwardCommutedTypedKernel, ComputeKernel.surfaceBody,
+    simp (maxSteps := 500000) [typedBwd, typedBwd_fp16_fp64, VeriTile.Bench.Repairs.SwigluTriton._swiglu_forward_kernel, VeriTile.Bench.Repairs.SwigluTriton._swiglu_forward_kernel_index_commutedKernel, VeriTile.Bench.Repairs.SwigluTriton._swiglu_backward_kernel, VeriTile.Bench.Repairs.SwigluTriton._swiglu_backward_kernel_index_commutedKernel, ComputeKernel.surfaceBody,
       run, step, FP.Structural.evalExpr, evalComputeOp, evalOp_unfold, evalOffsets, evalDeltas,
       Option.bind, engine, Algebra.withDefaultPrecision, resolvePrecision, model,
       ComputeDType.eraseDType, numeric, bop, natLt, initial, Cell.read, ofFloat, toFloat,

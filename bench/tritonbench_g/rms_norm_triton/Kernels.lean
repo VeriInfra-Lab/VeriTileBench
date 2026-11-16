@@ -14,7 +14,7 @@ def callSignature : CallSignature where
   readPorts := ["X","W"]
   writePorts := ["Y"]
 
-def rawKernel (Y X W : RegionName)
+def rms_norm_kernel (Y X W : RegionName)
     (y_stride_r y_stride_c x_stride_r x_stride_c N BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call callSignature call_args [y_stride_r := y_stride_r,
     y_stride_c := y_stride_c, x_stride_r := x_stride_r, x_stride_c := x_stride_c,
@@ -35,7 +35,7 @@ def rawKernel (Y X W : RegionName)
     tl.store(Y + cols * y_stride_c, y, mask=mask)
   }
 
-def rawCommutedKernel (Y X W : RegionName)
+def rms_norm_kernel_index_commutedKernel (Y X W : RegionName)
     (y_stride_r y_stride_c x_stride_r x_stride_c N BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call callSignature call_args [y_stride_r := y_stride_r,
     y_stride_c := y_stride_c, x_stride_r := x_stride_r, x_stride_c := x_stride_c,
@@ -63,7 +63,7 @@ noncomputable def epsilonArgument (eps : ℝ) : ScalarArgument :=
 noncomputable def kernel (Y X W : RegionName)
     (y_stride_r y_stride_c x_stride_r x_stride_c N : Nat)
     (eps : ℝ) (BLOCK_SIZE : Nat) : ComputeKernel :=
-  (rawKernel Y X W y_stride_r y_stride_c x_stride_r x_stride_c N BLOCK_SIZE).withScalarArguments
+  (rms_norm_kernel Y X W y_stride_r y_stride_c x_stride_r x_stride_c N BLOCK_SIZE).withScalarArguments
     [epsilonArgument eps]
 
 end VeriTile.Bench.TritonBenchG.RmsNormTriton
@@ -73,10 +73,10 @@ open VeriTile.Triton
 open VeriTile.Bench.TritonBenchG.RmsNormTriton
 
 def runtimeKernel (Y X W : RegionName) (N B : Nat) : ComputeKernel :=
-  rawKernel Y X W N 1 N 1 N B
+  rms_norm_kernel Y X W N 1 N 1 N B
 
 def runtimeCandidate (Y X W : RegionName) (N B : Nat) : ComputeKernel :=
-  rawCommutedKernel Y X W N 1 N 1 N B
+  rms_norm_kernel_index_commutedKernel Y X W N 1 N 1 N B
 
 noncomputable def kernel (Y X W : RegionName) (N B : Nat) (eps : ℝ) : ComputeKernel :=
   (runtimeKernel Y X W N B).withScalarArguments [epsilonArgument eps]

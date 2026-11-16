@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from check_comparator_batch import build_inventories, canonical_name, require_batch_targets, require_coverage, task_files
+from check_comparator_batch import build_inventories, canonical_name, require_batch_targets, require_coverage, task_files, selected_files, replay_groups, validate_audit
 from scripts.bench.compare_replay import compare, compare_previous_batch
 
 
@@ -131,42 +131,71 @@ class AuditWaveTests(unittest.TestCase):
             self.targets.append({'module': module, 'source': f'Case{i}.lean',
                                  'logs': logs, 'metadata': metadata})
 
-    def test_bounded_waves_preserve_individual_inventories_and_logs(self):
-        with patch('check_comparator_batch.subprocess.run', return_value=SimpleNamespace(returncode=0)) as run:
-            rows = build_inventories(self.root, self.targets, 2)
+    def test_parallel_audits_preserve_order_and_individual_limits(self):
+        def inventory(judge, target, timeout, heartbeat, cancel):
+            return json.loads(target['metadata'].read_text())
+        with patch('check_comparator_batch.build_inventory', side_effect=inventory) as run:
+            rows = build_inventories(self.root, self.targets, 2, timeout=12, heartbeat=1)
         self.assertEqual([r['theorems'] for r in rows], [[f'theorem{i}'] for i in range(5)])
-        self.assertEqual([len(call.args[0]) - 2 for call in run.call_args_list], [2, 2, 1])
-        for i, target in enumerate(self.targets):
-            self.assertEqual((target['logs'] / 'build.log').read_text(), f'audit of module {i}\n')
-            self.assertTrue((target['logs'] / 'build.trace.json').is_file())
-
-    def test_serial_path_remains_available(self):
-        with patch('check_comparator_batch.build_inventory', return_value={'theorems': []}) as run:
-            self.assertEqual(len(build_inventories(self.root, self.targets, 1)), 5)
         self.assertEqual(run.call_count, 5)
+        self.assertTrue(all(call.args[2:4] == (12, 1) for call in run.call_args_list))
 
-    def test_failed_build_cannot_reuse_existing_metadata(self):
-        with patch('check_comparator_batch.subprocess.run', return_value=SimpleNamespace(returncode=1)):
-            with self.assertRaisesRegex(ValueError, 'wave build failed'):
+    def test_a_failed_file_stops_future_waves(self):
+        with patch('check_comparator_batch.build_inventory', side_effect=ValueError('failed file')) as run:
+            with self.assertRaisesRegex(ValueError, 'failed file'):
                 build_inventories(self.root, self.targets, 2)
-
-    def test_missing_individual_trace_is_a_failure(self):
-        (self.root / '.lake/build/lib/lean/VeriTileComparator/Case1.trace').unlink()
-        with patch('check_comparator_batch.subprocess.run', return_value=SimpleNamespace(returncode=0)):
-            with self.assertRaisesRegex(ValueError, 'Missing per-module audit trace'):
-                build_inventories(self.root, self.targets, 2)
-
-    def test_trace_error_cannot_be_hidden_by_a_successful_wave(self):
-        (self.root / '.lake/build/lib/lean/VeriTileComparator/Case1.trace').write_text(
-            json.dumps({'log': [{'level': 'error', 'message': 'failed audit'}]}))
-        with patch('check_comparator_batch.subprocess.run', return_value=SimpleNamespace(returncode=0)):
-            with self.assertRaisesRegex(ValueError, 'compiler trace contains an error'):
-                build_inventories(self.root, self.targets, 2)
+        self.assertLessEqual(run.call_count, 2)
 
     def test_invalid_batch_size_is_rejected(self):
         for size in (0, -1):
             with self.assertRaisesRegex(ValueError, 'must be positive'):
                 build_inventories(self.root, self.targets, size)
+
+    def test_missing_own_trace_or_trace_error_cannot_pass(self):
+        from check_comparator import build_inventory
+        target=self.targets[0]
+        trace=self.root/'.lake/build/lib/lean/VeriTileComparator/Case0.trace'
+        with patch('check_comparator.run_logged', return_value=(SimpleNamespace(returncode=0),.1)):
+            trace.unlink()
+            with self.assertRaisesRegex(ValueError,'Missing per-module audit trace'):
+                build_inventory(self.root,target)
+            trace.write_text(json.dumps({'log':[{'level':'error','message':'bad proof'}]}))
+            with self.assertRaisesRegex(ValueError,'compiler trace contains an error'):
+                build_inventory(self.root,target)
+
+    def test_failed_compiler_cannot_reuse_stale_inventory(self):
+        from check_comparator import build_inventory
+        target=self.targets[0]
+        (target['logs']/'build-all.log').write_text('failed compiler')
+        with patch('check_comparator.run_logged', return_value=(SimpleNamespace(returncode=1),.1)):
+            with self.assertRaisesRegex(ValueError,'elaboration/inventory failed'):
+                build_inventory(self.root,target)
+
+    def test_per_file_trust_markers_are_mandatory(self):
+        target=self.targets[0]
+        (target['logs']/'build.log').write_text('Axiom audit: ok\nSpec audit: ok\n')
+        with self.assertRaisesRegex(ValueError,'Missing per-module trust audit'):
+            validate_audit(target,{'theorems':['a']})
+
+
+class SelectionTests(unittest.TestCase):
+    def test_selected_paths_reject_duplicates_missing_files_and_escape(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)
+            (root/'Safe.lean').touch()
+            self.assertEqual(selected_files(root,['Safe.lean']),['Safe.lean'])
+            for files in [[],['Safe.lean']*2,['missing.lean'],['../Safe.lean'],[str(root/'Safe.lean')]]:
+                with self.subTest(files=files),self.assertRaises(ValueError):
+                    selected_files(root,files)
+
+    def test_groups_preserve_exact_selection_and_bound_each_owner(self):
+        files=['bench/tritonbench_g/a/F1.lean','bench/tritonbench_g/a/F2.lean',
+               'bench/tritonbench_g/a/F3.lean','bench/tritonbench_g/b/F1.lean',
+               'tests/lean/F1.lean','tests/lean/F2.lean']
+        groups=replay_groups(files,2)
+        self.assertEqual([f for group in groups for f in group],files)
+        self.assertTrue(all(len(g)<=2 for g in groups))
+        self.assertEqual(groups[-1],files[-2:])
 
 
 class ReplayComparisonTests(unittest.TestCase):

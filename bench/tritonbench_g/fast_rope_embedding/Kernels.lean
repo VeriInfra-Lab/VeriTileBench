@@ -22,17 +22,17 @@ def sourceSignature (input cosine sine : Storage) : CallSignature where
   readPorts := ["Q","cos","sin"]
   writePorts := ["Q"]
 
-def ropeForKernel (input cosine sine : Storage) (Q cos sin : RegionName)
+def _rope_embeddingKernel (input cosine sine : Storage) (Q cos sin : RegionName)
     (Q_row_stride cos_row_stride sin_row_stride seqlen head_dim n_heads BLOCK_SIZE : Nat)
     (BACKWARD_PASS : Bool) : ComputeKernel :=
   with_triton_call (sourceSignature input cosine sine) call_args [Q_row_stride := Q_row_stride,
     cos_row_stride := cos_row_stride, sin_row_stride := sin_row_stride, seqlen := seqlen] in
   triton {
     """
-            Calculates the RoPE Embedding quickly
-            RoPE is Q * cos + rotate_half(Q) * sin
-            See our blog post for more info
-        """
+        Calculates the RoPE Embedding quickly
+        RoPE is Q * cos + rotate_half(Q) * sin
+        See our blog post for more info
+    """
     ROPE_GROUP_SIZE = 4
     row_position  = tl.program_id(0)
     group_head_position = tl.program_id(1)
@@ -66,17 +66,17 @@ def ropeForKernel (input cosine sine : Storage) (Q cos sin : RegionName)
         tl.store(Q + offs_q2, Q2*cos1 + Q1*sin1, mask = mask)
   }
 
-def commutedForKernel (input cosine sine : Storage) (Q cos sin : RegionName)
+def _rope_embedding_index_commutedKernel (input cosine sine : Storage) (Q cos sin : RegionName)
     (Q_row_stride cos_row_stride sin_row_stride seqlen head_dim n_heads BLOCK_SIZE : Nat)
     (BACKWARD_PASS : Bool) : ComputeKernel :=
   with_triton_call (sourceSignature input cosine sine) call_args [Q_row_stride := Q_row_stride,
     cos_row_stride := cos_row_stride, sin_row_stride := sin_row_stride, seqlen := seqlen] in
   triton {
     """
-            Calculates the RoPE Embedding quickly
-            RoPE is Q * cos + rotate_half(Q) * sin
-            See our blog post for more info
-        """
+        Calculates the RoPE Embedding quickly
+        RoPE is Q * cos + rotate_half(Q) * sin
+        See our blog post for more info
+    """
     ROPE_GROUP_SIZE = 4
     row_position  = tl.program_id(0)
     group_head_position = tl.program_id(1)
@@ -111,7 +111,7 @@ def commutedForKernel (input cosine sine : Storage) (Q cos sin : RegionName)
   }
 
 /-- Selected FP32 source; all 27 previously supported profiles use the same bodies. -/
-def rope := ropeForKernel .fp32 .fp32 .fp32
-def ropeIndexCommuted := commutedForKernel .fp32 .fp32 .fp32
+def rope := _rope_embeddingKernel .fp32 .fp32 .fp32
+def ropeIndexCommuted := _rope_embedding_index_commutedKernel .fp32 .fp32 .fp32
 
 end VeriTile.Bench.Repairs.FastRopeEmbedding.Kernels

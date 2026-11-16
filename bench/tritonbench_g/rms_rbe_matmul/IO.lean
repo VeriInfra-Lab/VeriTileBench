@@ -115,7 +115,7 @@ def candidate (a : KernelSource.Operations α) (fp8 : Bool) (B : Nat)
 
 def originalInvocation (a : KernelSource.Operations α) (fp8 : Bool)
     (p : KernelSource.Parameters) (q : KernelGrid.Program) : Invocation α :=
-  {PublicIO.invocation a fp8 p q with kernel := TypedSource.source fp8 (KernelSource.arguments p)}
+  {PublicIO.invocation a fp8 p q with kernel := TypedSource.rms_matmul_rbeKernel fp8 (KernelSource.arguments p)}
 
 /-- The actual readable original schedule on the unchanged public IO. -/
 def original (a : KernelSource.Operations α) (fp8 : Bool) (B : Nat) (p : KernelSource.Parameters) :
@@ -203,7 +203,7 @@ noncomputable section
 /-- The separate pasted rotary entry, using the existing dense 2-by-1024 launch. -/
 def source (r : Request) (X Y : RegionName) : ComputeKernel :=
   let p := parameters r X Y
-  TypedSource.rbeKernel .fp32 p.input p.output p.rows p.columns p.inputBatchStride p.inputRowStride
+  TypedSource.rbe_tritonKernel .fp32 p.input p.output p.rows p.columns p.inputBatchStride p.inputRowStride
     p.inputColumnStride p.outputBatchStride p.outputRowStride p.outputColumnStride
     p.startToken p.theta p.blockRows p.blockColumns
 

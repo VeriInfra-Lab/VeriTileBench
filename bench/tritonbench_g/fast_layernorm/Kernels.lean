@@ -17,7 +17,7 @@ def forwardCallSignature : CallSignature where
   writePorts := ["Y", "r", "mu"]
 
 /-- Complete original repaired Python body; all caller metadata is outside the quotation. -/
-def forwardBodyPastedKernel (Y X W b r mu : RegionName) (B : Nat) (hasBias : Bool) : ComputeKernel :=
+def layernorm_forwardKernel (Y X W b r mu : RegionName) (B : Nat) (hasBias : Bool) : ComputeKernel :=
   let BLOCK_SIZE : Nat := B
   let HAS_BIAS := hasBias
   with_triton_signature forwardCallSignature pointer_offsets [Y := 0, X := 0, W := 0, b := 0, r := 0, mu := 0] in triton {
@@ -46,7 +46,7 @@ def forwardBodyPastedKernel (Y X W b r mu : RegionName) (B : Nat) (hasBias : Boo
   }
 
 /-- Complete existing equivalence candidate; all caller metadata is outside the quotation. -/
-def forwardCandidateKernel (Y X W b r mu : RegionName) (B : Nat) (hasBias : Bool) : ComputeKernel :=
+def layernorm_forward_index_commutedKernel (Y X W b r mu : RegionName) (B : Nat) (hasBias : Bool) : ComputeKernel :=
   let BLOCK_SIZE : Nat := B
   let HAS_BIAS := hasBias
   with_triton_signature forwardCallSignature pointer_offsets [Y := 0, X := 0, W := 0, b := 0, r := 0, mu := 0] in triton {
@@ -82,7 +82,7 @@ def backwardCallSignature : CallSignature where
   writePorts := ["dX"]
 
 /-- Complete original repaired Python body; all caller metadata is outside the quotation. -/
-def backwardBodyPastedKernel (dX dY X W r mu : RegionName) (B : Nat) : ComputeKernel :=
+def layernorm_backwardKernel (dX dY X W r mu : RegionName) (B : Nat) : ComputeKernel :=
   let BLOCK_SIZE : Nat := B
   with_triton_signature backwardCallSignature pointer_offsets [dX := 0, dY := 0, X := 0, W := 0, r := 0, mu := 0] in triton {
     n_cols = tl.cast(n_cols, tl.int64)
@@ -109,7 +109,7 @@ def backwardBodyPastedKernel (dX dY X W r mu : RegionName) (B : Nat) : ComputeKe
   }
 
 /-- Complete existing equivalence candidate; all caller metadata is outside the quotation. -/
-def backwardCandidateKernel (dX dY X W r mu : RegionName) (B : Nat) : ComputeKernel :=
+def layernorm_backward_index_commutedKernel (dX dY X W r mu : RegionName) (B : Nat) : ComputeKernel :=
   let BLOCK_SIZE : Nat := B
   with_triton_signature backwardCallSignature pointer_offsets [dX := 0, dY := 0, X := 0, W := 0, r := 0, mu := 0] in triton {
     n_cols = tl.cast(n_cols, tl.int64)
@@ -143,7 +143,7 @@ def affineCallSignature : CallSignature where
   writePorts := ["dW", "db"]
 
 /-- Complete original repaired Python body; all caller metadata is outside the quotation. -/
-def affineBodyPastedKernel (dW db dY X r mu : RegionName) (hasBias : Bool) : ComputeKernel :=
+def layernorm_affine_backwardKernel (dW db dY X r mu : RegionName) (hasBias : Bool) : ComputeKernel :=
   let BLOCK_SIZE : Nat := 128
   let HAS_BIAS := hasBias
   with_triton_signature affineCallSignature pointer_offsets [dW := 0, db := 0, dY := 0, X := 0, r := 0, mu := 0] in triton {
@@ -173,7 +173,7 @@ def affineBodyPastedKernel (dW db dY X r mu : RegionName) (hasBias : Bool) : Com
   }
 
 /-- Complete existing equivalence candidate; all caller metadata is outside the quotation. -/
-def affineCandidateKernel (dW db dY X r mu : RegionName) (hasBias : Bool) : ComputeKernel :=
+def layernorm_affine_backward_direct_offsetsKernel (dW db dY X r mu : RegionName) (hasBias : Bool) : ComputeKernel :=
   let BLOCK_SIZE : Nat := 128
   let HAS_BIAS := hasBias
   with_triton_signature affineCallSignature pointer_offsets [dW := 0, db := 0, dY := 0, X := 0, r := 0, mu := 0] in triton {
@@ -203,42 +203,42 @@ def affineCandidateKernel (dW db dY X r mu : RegionName) (hasBias : Bool) : Comp
   }
 
 def forwardKernel (Y X W b r mu : RegionName) (N B : Nat) (eps : ℝ) (hasBias : Bool) : ComputeKernel :=
-  (forwardBodyPastedKernel Y X W b r mu B hasBias).withScalarArguments [
+  (layernorm_forwardKernel Y X W b r mu B hasBias).withScalarArguments [
     ScalarArgument.integer "Y_row_stride" (N : Int),
     ScalarArgument.integer "X_row_stride" (N : Int),
     ScalarArgument.integer "n_cols" (N : Int),
     ScalarArgument.fp32 "eps" eps]
 
 def forwardIndexCommuted (Y X W b r mu : RegionName) (N B : Nat) (eps : ℝ) (hasBias : Bool) : ComputeKernel :=
-  (forwardCandidateKernel Y X W b r mu B hasBias).withScalarArguments [
+  (layernorm_forward_index_commutedKernel Y X W b r mu B hasBias).withScalarArguments [
     ScalarArgument.integer "Y_row_stride" (N : Int),
     ScalarArgument.integer "X_row_stride" (N : Int),
     ScalarArgument.integer "n_cols" (N : Int),
     ScalarArgument.fp32 "eps" eps]
 
 def backwardKernel (dX dY X W r mu : RegionName) (N B : Nat) : ComputeKernel :=
-  (backwardBodyPastedKernel dX dY X W r mu B).withScalarArguments [
+  (layernorm_backwardKernel dX dY X W r mu B).withScalarArguments [
     ScalarArgument.integer "dX_row_stride" (N : Int),
     ScalarArgument.integer "dY_row_stride" (N : Int),
     ScalarArgument.integer "X_row_stride" (N : Int),
     ScalarArgument.integer "n_cols" (N : Int)]
 
 def backwardIndexCommuted (dX dY X W r mu : RegionName) (N B : Nat) : ComputeKernel :=
-  (backwardCandidateKernel dX dY X W r mu B).withScalarArguments [
+  (layernorm_backward_index_commutedKernel dX dY X W r mu B).withScalarArguments [
     ScalarArgument.integer "dX_row_stride" (N : Int),
     ScalarArgument.integer "dY_row_stride" (N : Int),
     ScalarArgument.integer "X_row_stride" (N : Int),
     ScalarArgument.integer "n_cols" (N : Int)]
 
 def affineKernel (dW db dY X r mu : RegionName) (rows N weightCount biasCount : Nat) (hasBias : Bool) : ComputeKernel :=
-  (affineBodyPastedKernel dW db dY X r mu hasBias).withScalarArguments [
+  (layernorm_affine_backwardKernel dW db dY X r mu hasBias).withScalarArguments [
     ScalarArgument.integer "n_rows" (rows : Int),
     ScalarArgument.integer "n_cols" (N : Int),
     ScalarArgument.integer "weight_count" (weightCount : Int),
     ScalarArgument.integer "bias_count" (biasCount : Int)]
 
 def affineDirectOffsets (dW db dY X r mu : RegionName) (rows N weightCount biasCount : Nat) (hasBias : Bool) : ComputeKernel :=
-  (affineCandidateKernel dW db dY X r mu hasBias).withScalarArguments [
+  (layernorm_affine_backward_direct_offsetsKernel dW db dY X r mu hasBias).withScalarArguments [
     ScalarArgument.integer "n_rows" (rows : Int),
     ScalarArgument.integer "n_cols" (N : Int),
     ScalarArgument.integer "weight_count" (weightCount : Int),

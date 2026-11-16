@@ -6,7 +6,7 @@ The original history and earlier proof snapshots remain available in that reposi
 
 | Collection | Contents |
 | --- | --- |
-| [TritonBench-G](bench/tritonbench_g) | 183 selected repairs with Python, Lean source, proof entries, and recorded proof scopes |
+| [TritonBench-G](bench/tritonbench_g) | 184 selected repairs with Python, Lean source, proof entries, and recorded proof scopes |
 | [Bug detection](bench/bug_detection) | 65 independent challenges |
 | [Pretraining kernels](bench/pretrain_kernels) | 269 independent challenges |
 | [Worked examples](bench/examples) | 19 examples with Python sources and public Real/FP proof entries |
@@ -22,8 +22,11 @@ bash scripts/bench/audit_tritonbench_g.sh --source-only
 lake build bench.tritonbench_g.matrix_transpose.RealCorrect bench.tritonbench_g.matrix_transpose.FPEquiv
 ```
 
-The daily or manually dispatched Bench audit builds the imported challenges and
-builds and independently replays the retained TritonBench-G proof modules.
-See the [source acceptance guide](documents/bench/current_source_acceptance.md)
+PRs and main pushes run source/tool checks, then build and independently replay
+changed cases and affected proof dependencies. Daily and full manual audits replay
+every retained TritonBench-G/example module and regression. The 334 pending
+challenge interfaces have a separate workflow and retain their pending status.
+See the [CI checks and local commands](documents/bench/ci.md),
+[source acceptance guide](documents/bench/current_source_acceptance.md)
 and [validation records](validation). Pending proof or backend obligations retain
 their recorded status. Record both Git commit SHAs when reproducing experiments.

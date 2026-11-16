@@ -27,7 +27,7 @@ theorem source_safe (M : Algebra α) (round : α → BitVec 64) (equal : α → 
     QuantizeIntegerStage.TraceSafe (KernelExecution.backend M equal) (some round)
       bounds (IntegerBinding.typedKernel p) s := by
   simp (maxSteps := 1500000) [QuantizeIntegerStage.TraceSafe,IntegerBinding.typedKernel,
-    KernelExecution.kernel,sourceKernel,ComputeKernel.surfaceBody,
+    KernelExecution.kernel,_quantize_rowwiseKernel,ComputeKernel.surfaceBody,
     QuantizeIntegerStage.Safety.traceSafeList_unfold,QuantizeIntegerStage.Safety.stepSafe_unfold,
     QuantizeIntegerStage.Safety.safeExpr_unfold,QuantizeIntegerStage.step,QuantizeIntegerStage.evalExpr,
     QuantizeIntegerStage.store,QuantizeIntegerStage.storedInteger,QuantizeIntegerStage.outputRegister,

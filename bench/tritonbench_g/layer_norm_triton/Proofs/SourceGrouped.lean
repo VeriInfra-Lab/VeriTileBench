@@ -43,7 +43,7 @@ def Ready (B : Nat) (s : State α) : Prop :=
 
 theorem prelude_success [Inhabited α] (m : Model α) (stride M N G B : Nat) (s : State α) :
     ∃ t,run (engine m) (prelude stride M N G B) s=some t ∧ Ready B t := by
-  simp [prelude,code,TypedSource.groupedBackwardKernel,groupedBackwardKernel,ComputeKernel.surfaceBody,
+  simp [prelude,code,TypedSource.groupedBackwardKernel,_layer_norm_bwd_dx_fusedKernel,ComputeKernel.surfaceBody,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,Ready,
     engine,numeric,natLt,numericLt,numericLe,numericEq,bop,
     State.setReg,ComputeDType.eraseDType,
@@ -55,7 +55,7 @@ theorem body_success [Inhabited α] (m : Model α) (stride M N G B : Nat) (i : I
     ∃ t,run (engine m) (body stride M N G B) (s.setReg "row" .int [] (fun _ => i))=some t ∧ Ready B t := by
   obtain ⟨⟨group,hgroup⟩,⟨cols,hcols⟩,⟨mask,hmask⟩,⟨dwp,hdwp⟩,⟨dbp,hdbp⟩,⟨dw,hdw⟩,⟨db,hdb⟩,⟨row,hrow⟩⟩ := h
   by_cases hi : i=group PUnit.unit <;>
-    simp [body,code,TypedSource.groupedBackwardKernel,groupedBackwardKernel,ComputeKernel.surfaceBody,
+    simp [body,code,TypedSource.groupedBackwardKernel,_layer_norm_bwd_dx_fusedKernel,ComputeKernel.surfaceBody,
       run,step,evalExpr,evalComputeOp,evalOp_unfold,Ready,
       engine,numeric,natLt,numericLt,numericLe,numericEq,bop,
       State.setReg,FP.Structural.store,ComputeDType.eraseDType,
@@ -66,7 +66,7 @@ theorem suffix_success [Inhabited α] (m : Model α) (stride M N G B : Nat)
     (s : State α) (h : Ready B s) :
     ∃ t,run (engine m) (suffix stride M N G B) s=some t := by
   obtain ⟨⟨group,hgroup⟩,⟨cols,hcols⟩,⟨mask,hmask⟩,⟨dwp,hdwp⟩,⟨dbp,hdbp⟩,⟨dw,hdw⟩,⟨db,hdb⟩,⟨row,hrow⟩⟩ := h
-  simp [suffix,code,TypedSource.groupedBackwardKernel,groupedBackwardKernel,ComputeKernel.surfaceBody,
+  simp [suffix,code,TypedSource.groupedBackwardKernel,_layer_norm_bwd_dx_fusedKernel,ComputeKernel.surfaceBody,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,
     engine,numeric,natLt,numericLt,numericLe,numericEq,bop,
     State.setReg,FP.Structural.store,ComputeDType.eraseDType,

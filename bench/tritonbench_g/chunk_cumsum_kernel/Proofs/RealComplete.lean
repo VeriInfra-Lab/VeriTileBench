@@ -15,7 +15,7 @@ set_option maxRecDepth 20000
 set_option linter.unusedSimpArgs false
 
 def sourceFor (v : Bool) (input output : RegionName) (T BT : Nat) : ComputeKernel :=
-  if v then sumLeftKernel .fp32 .fp32 input output T BT else repairedKernel .fp32 .fp32 input output T BT
+  if v then chunk_global_cumsum_scalar_kernel_sum_leftKernel .fp32 .fp32 input output T BT else chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T BT
 
 def projected (v : Bool) (input output : RegionName) (T BT : Nat) : Kernel :=
   (sourceFor v input output T BT).eraseDType.toAlgKernel
@@ -33,7 +33,7 @@ theorem program_body (v : Bool) (input output : RegionName) (T BT : Nat) :
         (bodyFor v input output T BT)] := by
   cases v
   all_goals
-    simp only [prelude,bodyFor,projected,sourceFor,repairedKernel,sumLeftKernel,Bool.false_eq_true,↓reduceIte,
+    simp only [prelude,bodyFor,projected,sourceFor,chunk_global_cumsum_scalar_kernel_repairedKernel,chunk_global_cumsum_scalar_kernel_sum_leftKernel,Bool.false_eq_true,↓reduceIte,
       ComputeKernel.surfaceBody,ComputeKernel.eraseDType,ComputeKernel.toAlgKernel,ComputeKernel.toAlgorithm?,
       ComputeKernel.fromKernelBody,ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,
       ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,ComputeDType.eraseDType,
@@ -73,7 +73,7 @@ private theorem body_view (v : Bool) (input output : RegionName) (T BT : Nat) :
       (actualBody input output T BT).take 7 ++ carry v :: (actualBody input output T BT).drop 8 := by
   cases v
   all_goals
-    simp only [bodyFor,projected,sourceFor,repairedKernel,sumLeftKernel,Bool.false_eq_true,↓reduceIte,
+    simp only [bodyFor,projected,sourceFor,chunk_global_cumsum_scalar_kernel_repairedKernel,chunk_global_cumsum_scalar_kernel_sum_leftKernel,Bool.false_eq_true,↓reduceIte,
       ComputeKernel.surfaceBody,ComputeKernel.eraseDType,ComputeKernel.toAlgKernel,ComputeKernel.toAlgorithm?,
       ComputeKernel.fromKernelBody,ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,
       ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,ComputeDType.eraseDType,
@@ -180,7 +180,7 @@ The proof uses only chunk-level arithmetic and frame facts as ghost invariants;
 there is no second whole-kernel execution in its hypotheses or conclusion. -/
 theorem complete (input output : RegionName) (T : Nat) (cfg : Config)
     (s : BlockState) (separate : output≠input) :
-    ∃ t,exec (repairedKernel .fp32 .fp32 input output T cfg.block).eraseDType.toAlgKernel s=some t ∧
+    ∃ t,exec (chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T cfg.block).eraseDType.toAlgKernel s=some t ∧
       (∀ i,i<T → t.readMem output (s.pids 0*T+i)=
         ∑ j ∈ (Finset.range T).filter (fun j => j ≤ i), s.readMem input (s.pids 0*T+j)) ∧
       (∀ r o,(r≠output ∨ ∀ i,i<T → o≠s.pids 0*T+i) → t.mem r o=s.mem r o) :=

@@ -20,8 +20,8 @@ def commuteLoop (N B : Nat) : ComputeStmt → ComputeStmt
 namespace ReadableSource
 /-- A body decomposition, not a second authoritative kernel implementation. -/
 theorem candidate_body (Y X : RegionName) (M N B : Nat) :
-    (indexCommutedKernel Y X M N B).surfaceBody=
-      (sourceKernel Y X M N B).surfaceBody.map (commuteLoop N B) := rfl
+    (softmax_kernel_online_v2_index_commutedKernel Y X M N B).surfaceBody=
+      (softmax_kernel_online_v2_repairedKernel Y X M N B).surfaceBody.map (commuteLoop N B) := rfl
 #axiomsClean candidate_body
 end ReadableSource
 end VeriTile.Bench.Repairs.SoftmaxOptimize

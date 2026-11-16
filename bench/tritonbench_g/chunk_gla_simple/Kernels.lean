@@ -22,11 +22,13 @@ def callSignature (out_dtype : FloatDType) : CallSignature where
   readPorts := ["q","k","v","h","g"]
   writePorts := ["o"]
 
-def originalKernel (out_dtype : FloatDType) (q k v h g o : RegionName)
+def chunk_simple_gla_fwd_kernel_o_repairedKernel (out_dtype : FloatDType) (q k v h g o : RegionName)
     (s_k_h s_k_t s_v_h s_v_t s_h_h s_h_t : Nat) (scale : ℝ)
     (T K V BT BK BV : Nat) : ComputeKernel :=
   with_triton_call (callSignature out_dtype) call_args [s_k_h := s_k_h,s_k_t := s_k_t,
     s_v_h := s_v_h,s_v_t := s_v_t,s_h_h := s_h_h,s_h_t := s_h_t,scale := scale] in triton {
+    # Kernel implementation
+    # Widen before every address product; block-pointer offsets are only i32.
     i_v = tl.program_id(0).to(tl.int64)
     i_t = tl.program_id(1).to(tl.int64)
     i_bh = tl.program_id(2).to(tl.int64)
@@ -66,11 +68,13 @@ def originalKernel (out_dtype : FloatDType) (q k v h g o : RegionName)
     tl.store(p_o, b_o.to(p_o.dtype.element_ty), mask=(rows[:, None] < T) & (cols[None, :] < V))
   }
 
-def rowReusedBodyPastedKernel (out_dtype : FloatDType) (q k v h g o : RegionName)
+def chunk_simple_gla_fwd_kernel_o_row_reusedKernel (out_dtype : FloatDType) (q k v h g o : RegionName)
     (s_k_h s_k_t s_v_h s_v_t s_h_h s_h_t : Nat) (scale : ℝ)
     (T K V BT BK BV : Nat) : ComputeKernel :=
   with_triton_call (callSignature out_dtype) call_args [s_k_h := s_k_h,s_k_t := s_k_t,
     s_v_h := s_v_h,s_v_t := s_v_t,s_h_h := s_h_h,s_h_t := s_h_t,scale := scale] in triton {
+    # Kernel implementation
+    # Widen before every address product; block-pointer offsets are only i32.
     i_v = tl.program_id(0).to(tl.int64)
     i_t = tl.program_id(1).to(tl.int64)
     i_bh = tl.program_id(2).to(tl.int64)
@@ -113,12 +117,12 @@ def rowReusedBodyPastedKernel (out_dtype : FloatDType) (q k v h g o : RegionName
 def fp32Original (out_dtype : FloatDType) (q k v h g o : RegionName)
     (s_k_h s_k_t s_v_h s_v_t s_h_h s_h_t : Nat) (scale : ℝ)
     (T K V BT BK BV : Nat) : ComputeKernel :=
-  originalKernel out_dtype q k v h g o s_k_h s_k_t s_v_h s_v_t s_h_h s_h_t scale T K V BT BK BV
+  chunk_simple_gla_fwd_kernel_o_repairedKernel out_dtype q k v h g o s_k_h s_k_t s_v_h s_v_t s_h_h s_h_t scale T K V BT BK BV
 
 def rowReusedSource (out_dtype : FloatDType) (q k v h g o : RegionName)
     (s_k_h s_k_t s_v_h s_v_t s_h_h s_h_t : Nat) (scale : ℝ)
     (T K V BT BK BV : Nat) : ComputeKernel :=
-  rowReusedBodyPastedKernel out_dtype q k v h g o s_k_h s_k_t s_v_h s_v_t s_h_h s_h_t scale T K V BT BK BV
+  chunk_simple_gla_fwd_kernel_o_row_reusedKernel out_dtype q k v h g o s_k_h s_k_t s_v_h s_v_t s_h_h s_h_t scale T K V BT BK BV
 
 abbrev Shape := Host.Shape
 /-- The repair wrapper admits FP32 tensors. Its complete three-dimensional

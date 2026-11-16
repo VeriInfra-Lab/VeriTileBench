@@ -45,7 +45,7 @@ specification chunk_delta_kernel_correct (p : Parameters) (shape : Geometry.Shap
 
 #stmtSurfaceSubset chunk_delta_kernel_correct ⊆
   [Parameters,Geometry.ShapeValid,PID,List.Perm,grid,Spec.Real,LogicalProgramIO.Implements,kernelIO,formula,LogicalTensors.Inputs,LogicalTensors.Outputs]
-#specNonCircular formula avoiding [ChunkDeltaFwd.sourceKernel,FP.Structural.exec,runGrid,gridMemory]
+#specNonCircular formula avoiding [ChunkDeltaFwd.chunk_delta_rule_fwd_kernel_hKernel,FP.Structural.exec,runGrid,gridMemory]
 #axiomsClean chunk_delta_kernel_correct
 #guard_msgs (drop info) in
 #auditModuleAxioms

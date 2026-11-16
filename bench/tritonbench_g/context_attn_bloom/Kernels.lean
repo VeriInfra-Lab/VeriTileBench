@@ -15,7 +15,7 @@ def signature (dtype : Storage) : CallSignature where
   readPorts := ["Q","K","V","B_Start_Loc","B_Seqlen","Req_to_tokens","B_req_idx","b_prompt_cache_len"]
   writePorts := ["Out"]
 
-def originalKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ)
+def _fwd_kernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ)
     (B_Start_Loc B_Seqlen Out Req_to_tokens B_req_idx : RegionName)
     (stride_qbs stride_qh stride_qd stride_kbs stride_kh stride_kd stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od stride_req_to_tokens_b stride_req_to_tokens_s kv_group_num : Nat)
     (b_prompt_cache_len : RegionName)
@@ -73,7 +73,7 @@ def originalKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ)
     return
   }
 
-def indexSharedKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ)
+def _fwd_kernel_index_sharedKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ)
     (B_Start_Loc B_Seqlen Out Req_to_tokens B_req_idx : RegionName)
     (stride_qbs stride_qh stride_qd stride_kbs stride_kh stride_kd stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od stride_req_to_tokens_b stride_req_to_tokens_s kv_group_num : Nat)
     (b_prompt_cache_len : RegionName)
@@ -131,7 +131,7 @@ def indexSharedKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ)
     return
   }
 
-def scaleFirstKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ)
+def _fwd_kernel_scale_firstKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ)
     (B_Start_Loc B_Seqlen Out Req_to_tokens B_req_idx : RegionName)
     (stride_qbs stride_qh stride_qd stride_kbs stride_kh stride_kd stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od stride_req_to_tokens_b stride_req_to_tokens_s kv_group_num : Nat)
     (b_prompt_cache_len : RegionName)

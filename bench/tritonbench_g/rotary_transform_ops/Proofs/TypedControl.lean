@@ -66,14 +66,14 @@ theorem guard_eval {α : Type} [Inhabited α] (M : Algebra α) (s : Shape)
   by_cases hv : s.varlen = Bool.true <;> by_cases ht : s.offsetTensor = Bool.true
   all_goals
     simp [guard,guardOf,kernel,KernelSource.source,KernelSource.source64_64,
-      VeriTile.Bench.Repairs.RotaryTransformTileChecked.originalTensorKernel,
-      VeriTile.Bench.Repairs.RotaryTransformTileChecked.originalScalarKernel,
-      VeriTile.Bench.Repairs.RotaryTransformTileChecked.opsOriginalTensorKernel,
-      VeriTile.Bench.Repairs.RotaryTransformTileChecked.opsOriginalScalarKernel,
-      VeriTile.Bench.Repairs.RotaryTransformTileChecked.candidateTensorKernel,
-      VeriTile.Bench.Repairs.RotaryTransformTileChecked.candidateScalarKernel,
-      VeriTile.Bench.Repairs.RotaryTransformTileChecked.xorTensorKernel,
-      VeriTile.Bench.Repairs.RotaryTransformTileChecked.xorScalarKernel,ComputeKernel.withScalarArguments,ScalarArgument.statement,ScalarArgument.integer,TypedExecution.indicesCount,ComputeKernel.surfaceBody,setup,hv,ht,evalOp_unfold,numeric,numericLe,bop,
+      VeriTile.Bench.Repairs.RotaryTransformTileChecked.TensorOffsets.rotary_kernel,
+      VeriTile.Bench.Repairs.RotaryTransformTileChecked.ScalarOffsets.rotary_kernel,
+      VeriTile.Bench.Repairs.RotaryTransformTileChecked.Ops.TensorOffsets.rotary_kernel,
+      VeriTile.Bench.Repairs.RotaryTransformTileChecked.Ops.ScalarOffsets.rotary_kernel,
+      VeriTile.Bench.Repairs.RotaryTransformTileChecked.TensorOffsets.rotary_kernel_index_cseKernel,
+      VeriTile.Bench.Repairs.RotaryTransformTileChecked.ScalarOffsets.rotary_kernel_index_cseKernel,
+      VeriTile.Bench.Repairs.RotaryTransformTileChecked.Ops.TensorOffsets.rotary_kernel_xorKernel,
+      VeriTile.Bench.Repairs.RotaryTransformTileChecked.Ops.ScalarOffsets.rotary_kernel_xorKernel,ComputeKernel.withScalarArguments,ScalarArgument.statement,ScalarArgument.integer,TypedExecution.indicesCount,ComputeKernel.surfaceBody,setup,hv,ht,evalOp_unfold,numeric,numericLe,bop,
       ProgramModel.sequenceLength,Int.natCast_mul]
     funext i
     simp only [← decide_not,not_le,lt_sub_iff_add_lt]

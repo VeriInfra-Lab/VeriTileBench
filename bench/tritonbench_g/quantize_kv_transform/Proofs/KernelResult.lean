@@ -141,6 +141,6 @@ theorem written_frame {α : Type} [Inhabited α] (M : Algebra α) (convert : α 
 #axiomsClean written_code
 #axiomsClean written_scale
 #axiomsClean written_frame
-#specNonCircular code avoiding [FP.Structural.exec,sourceKernel]
+#specNonCircular code avoiding [FP.Structural.exec,_fwd_kernel_destindex_copy_quantize_kvKernel]
 end
 end VeriTile.Bench.Repairs.QuantizeKvTransform.KernelResult

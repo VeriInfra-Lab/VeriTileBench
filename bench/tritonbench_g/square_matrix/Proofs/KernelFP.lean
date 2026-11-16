@@ -13,8 +13,8 @@ set_option linter.unusedSimpArgs false
 primitive implementations. This adds no numerical law or finite-value domain. -/
 theorem successful {α : Type} [Inhabited α] (M : Algebra α)
     (n B : Nat) (s : State α) :
-    ∃ t, FP.Structural.exec M (fp32Kernel n B) s = some t := by
-  simp [fp32Kernel, typedKernel, VeriTile.Bench.Repairs.SquareMatrix.fp32Kernel, VeriTile.Bench.Repairs.SquareMatrix.indexCommutedKernel, FP.Structural.exec, ComputeKernel.surfaceBody,
+    ∃ t, FP.Structural.exec M (square_kernel n B) s = some t := by
+  simp [square_kernel, typedKernel, VeriTile.Bench.Repairs.SquareMatrix.square_kernel, VeriTile.Bench.Repairs.SquareMatrix.square_index_commuted_kernel, FP.Structural.exec, ComputeKernel.surfaceBody,
     run, step, evalExpr, evalComputeOp, evalOp_unfold, Option.bind,
     numericLt, natLt, bop, store, ComputeDType.eraseDType, numeric]
 
@@ -22,9 +22,9 @@ theorem successful {α : Type} [Inhabited α] (M : Algebra α)
 The floating multiplication, even in inactive lanes, is unchanged. -/
 theorem variants_equal {α : Type} [Inhabited α] (M : Algebra α)
     (n B : Nat) (s : State α) :
-    FP.Structural.exec M (fp32Kernel n B) s =
-      FP.Structural.exec M (indexCommutedKernel n B) s := by
-  simp [fp32Kernel, indexCommutedKernel, typedKernel, VeriTile.Bench.Repairs.SquareMatrix.fp32Kernel, VeriTile.Bench.Repairs.SquareMatrix.indexCommutedKernel, FP.Structural.exec,
+    FP.Structural.exec M (square_kernel n B) s =
+      FP.Structural.exec M (square_index_commuted_kernel n B) s := by
+  simp [square_kernel, square_index_commuted_kernel, typedKernel, VeriTile.Bench.Repairs.SquareMatrix.square_kernel, VeriTile.Bench.Repairs.SquareMatrix.square_index_commuted_kernel, FP.Structural.exec,
     ComputeKernel.surfaceBody, run, step, evalExpr, evalComputeOp, evalOp_unfold,
     Option.bind, numericLt, natLt, bop, store, ComputeDType.eraseDType, numeric,
     Nat.mul_comm]
@@ -40,7 +40,7 @@ frame. Same-format loads use the established bit-preserving load model; the
 mul operation retains its explicit FP32 profile. -/
 theorem coordinates {α : Type} [Inhabited α] (M : Algebra α)
     (n : Nat) (s : State α) :
-    ∃ t, FP.Structural.exec (FPProof.backend M) (fp32Kernel n (block n)) s = some t ∧
+    ∃ t, FP.Structural.exec (FPProof.backend M) (square_kernel n (block n)) s = some t ∧
       (∀ col, col < n → t.mem "out" (s.pids 0*n+col) =
         .mk .real (FPProof.reference M ((s.mem "x" (s.pids 0*n+col)).read .real))) ∧
       (∀ (r : RegionName) o,

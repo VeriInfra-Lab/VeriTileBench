@@ -19,7 +19,7 @@ theorem source_traceSafe {α : Type} [Inhabited α] (M : Algebra α)
       ((row : Int) * (N : Int) + (lane : Int)).toNat = row * N + lane := by
     rw [← Int.natCast_mul, ← Int.natCast_add, Int.toNat_natCast]
   have index_lt (lane : Nat) : ((lane : Int) < (N : Int)) ↔ lane < N := by omega
-  simp (maxSteps := 1400000) [FP.Structural.TraceSafe, source, templateKernel,
+  simp (maxSteps := 1400000) [FP.Structural.TraceSafe, source, _l2_norm_fwd_1pass_kernel_repairedKernel,
     ComputeKernel.surfaceBody, Safety.traceSafeList_unfold, Safety.stepSafe_unfold,
     Safety.safeExpr_unfold, Safety.safeCompute_unfold, Safety.safeOp_unfold,
     Safety.safeAddress_unfold, Safety.safeMask_unfold, Safety.addressSafe_unfold,
@@ -40,7 +40,7 @@ theorem commuted_traceSafe {α : Type} [Inhabited α] (M : Algebra α)
       ((row : Int) * (N : Int) + (lane : Int)).toNat = row * N + lane := by
     rw [← Int.natCast_mul, ← Int.natCast_add, Int.toNat_natCast]
   have index_lt (lane : Nat) : ((lane : Int) < (N : Int)) ↔ lane < N := by omega
-  simp (maxSteps := 1400000) [FP.Structural.TraceSafe, indexCommuted, commutedTemplateKernel,
+  simp (maxSteps := 1400000) [FP.Structural.TraceSafe, indexCommuted, _l2_norm_fwd_1pass_kernel_index_commutedKernel,
     ComputeKernel.surfaceBody, Safety.traceSafeList_unfold, Safety.stepSafe_unfold,
     Safety.safeExpr_unfold, Safety.safeCompute_unfold, Safety.safeOp_unfold,
     Safety.safeAddress_unfold, Safety.safeMask_unfold, Safety.addressSafe_unfold,

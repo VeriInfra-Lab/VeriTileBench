@@ -38,7 +38,7 @@ open VeriTile.Triton
 noncomputable section
 
 abbrev io (h : Call) (c : Config) (p : Geometry.Program h) : UKernelIO where
-  kernel := (Kernels.sourceKernel h c).eraseDType
+  kernel := (Kernels.chunk_global_cumsum_vector_kernel h c).eraseDType
   projection := sourceProjection h c
   nIn := 1
   nOut := 1

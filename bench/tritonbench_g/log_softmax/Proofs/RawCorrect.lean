@@ -79,8 +79,8 @@ theorem backward_grid_correctness (M N K : Nat)
     apply frame r i
     exact outside
 
-#specNonCircular RealProof.targetForward avoiding [Source.forwardKernel,Source.forwardCommutedKernel]
-#specNonCircular RealProof.targetBackward avoiding [Source.backwardKernel,Source.backwardCommutedKernel]
+#specNonCircular RealProof.targetForward avoiding [Source.log_softmax_kernel_repairedKernel,Source.log_softmax_kernel_repaired_index_commutedKernel]
+#specNonCircular RealProof.targetBackward avoiding [Source.log_softmax_backward_kernel_repairedKernel,Source.log_softmax_backward_kernel_repaired_index_commutedKernel]
 #axiomsClean forward_grid_correctness
 #axiomsClean backward_grid_correctness
 #guard_msgs (drop info) in

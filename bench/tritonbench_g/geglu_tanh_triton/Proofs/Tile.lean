@@ -30,7 +30,7 @@ def execution {α : Type} [Inhabited α] (M : Algebra α) (backward : Bool)
   all_goals
     refine ⟨?_, ?_⟩
     swap
-    simp (maxSteps := 900000) [source, forwardKernel, backwardKernel,
+    simp (maxSteps := 900000) [source, _geglu_tanh_forward_kernel_repairedKernel, _geglu_tanh_backward_kernel_repairedKernel,
       ComputeKernel.surfaceBody,
       run, step, FP.Structural.evalExpr, evalComputeOp, evalOp_unfold,
       evalOffsets, evalDeltas, store, Option.bind, ComputeDType.eraseDType,

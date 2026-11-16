@@ -7,12 +7,12 @@ open VeriTile.Bench.Repairs.LightningAttention.KernelOnly
 
 /-- Preserve the original ordered ports, including the repeated inter reads.
 The source collector's duplicates are meaningful metadata and stay intact. -/
-example (p : Parameters) : (forwardKernel p).inputs=["query","key","value"] ∧
-    (forwardKernel p).outputs=["output"] := ⟨rfl,rfl⟩
-example (p : Parameters) : (intraKernel p).inputs=["key","value","incoming","query"] ∧
-    (intraKernel p).outputs=["queryGradient","keyGradient","valueGradient"] := ⟨rfl,rfl⟩
-example (p : Parameters) : (interKernel p).inputs=["incoming","queryGradient","value","key","key","value",
+example (p : Parameters) : (_fwd_kernel p).inputs=["query","key","value"] ∧
+    (_fwd_kernel p).outputs=["output"] := ⟨rfl,rfl⟩
+example (p : Parameters) : (_bwd_intra_kernel p).inputs=["key","value","incoming","query"] ∧
+    (_bwd_intra_kernel p).outputs=["queryGradient","keyGradient","valueGradient"] := ⟨rfl,rfl⟩
+example (p : Parameters) : (_bwd_inter_kernel p).inputs=["incoming","queryGradient","value","key","key","value",
     "keyGradient","valueGradient","incoming","query"] ∧
-    (interKernel p).outputs=["queryGradient","keyGradient","valueGradient"] := ⟨rfl,rfl⟩
+    (_bwd_inter_kernel p).outputs=["queryGradient","keyGradient","valueGradient"] := ⟨rfl,rfl⟩
 
 end VeriTile.Tests.LightningAttentionPastedBody

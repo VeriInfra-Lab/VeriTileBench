@@ -6,9 +6,9 @@ open VeriTile.Triton
 noncomputable section
 
 theorem projection (input output : RegionName) (T BT : Nat) :
-    (repairedKernel .fp32 .fp32 input output T BT).eraseDType.toAlgorithm? =
-      .ok (repairedKernel .fp32 .fp32 input output T BT).eraseDType.toAlgKernel := by
-  simp [repairedKernel,ComputeKernel.surfaceBody,ComputeKernel.eraseDType,
+    (chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T BT).eraseDType.toAlgorithm? =
+      .ok (chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T BT).eraseDType.toAlgKernel := by
+  simp [chunk_global_cumsum_scalar_kernel_repairedKernel,ComputeKernel.surfaceBody,ComputeKernel.eraseDType,
     ComputeKernel.toAlgorithm?,ComputeKernel.toAlgKernel,ComputeKernel.fromKernelBody,
     ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,
     ComputeOp.toAlgorithm?,Except.bind,bind]

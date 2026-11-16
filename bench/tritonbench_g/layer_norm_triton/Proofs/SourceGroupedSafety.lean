@@ -23,7 +23,7 @@ private theorem append_safe (m : Algebra α) (bounds : RegionName → Nat)
 theorem prelude_safe (m : Model α) (s : State α) (stride M N G B : Nat)
     (bounds : RegionName → Nat) :
     Safety.traceSafeList (engine m) bounds (SourceGrouped.prelude stride M N G B) s := by
-  simp [SourceGrouped.prelude,SourceGrouped.code,TypedSource.groupedBackwardKernel,groupedBackwardKernel,ComputeKernel.surfaceBody,
+  simp [SourceGrouped.prelude,SourceGrouped.code,TypedSource.groupedBackwardKernel,_layer_norm_bwd_dx_fusedKernel,ComputeKernel.surfaceBody,
     Safety.traceSafeList_unfold,Safety.stepSafe_unfold,Safety.safeExpr_unfold,Safety.safeCompute_unfold,Safety.safeOp_unfold,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,engine,numeric,bop,natLt,numericLt,
     State.setReg,Option.bind]
@@ -40,7 +40,7 @@ theorem body_safe (m : Model α) (s t : State α) (stride M N G B group row : Na
       (t.setReg "row" .int [] (fun _ => (row : Int))) := by
   obtain ⟨hmem,hu,hgroup,hcols,hmask,hdwp,hdbp,hdw,hdb⟩ := h
   by_cases same : row=group <;>
-    simp [SourceGrouped.body,SourceGrouped.code,TypedSource.groupedBackwardKernel,groupedBackwardKernel,ComputeKernel.surfaceBody,
+    simp [SourceGrouped.body,SourceGrouped.code,TypedSource.groupedBackwardKernel,_layer_norm_bwd_dx_fusedKernel,ComputeKernel.surfaceBody,
       Safety.traceSafeList_unfold,Safety.stepSafe_unfold,Safety.safeAlg_unfold,
       Safety.safeExpr_unfold,Safety.safeCompute_unfold,Safety.safeOp_unfold,
       Safety.safeAddress_unfold,Safety.safeMask_unfold,Safety.addressSafe_unfold,Safety.maskActive_unfold,
@@ -84,7 +84,7 @@ theorem suffix_safe (m : Model α) (s t : State α) (stride M N G B group : Nat)
     (hb : ∀ j : Fin B,j.val<N → group*N+j.val<bounds "DB") :
     Safety.traceSafeList (engine m) bounds (SourceGrouped.suffix stride M N G B) t := by
   obtain ⟨hmem,hu,hgroup,hcols,hmask,hdwp,hdbp,hdw,hdb⟩ := h
-  simp [SourceGrouped.suffix,SourceGrouped.code,TypedSource.groupedBackwardKernel,groupedBackwardKernel,ComputeKernel.surfaceBody,
+  simp [SourceGrouped.suffix,SourceGrouped.code,TypedSource.groupedBackwardKernel,_layer_norm_bwd_dx_fusedKernel,ComputeKernel.surfaceBody,
     Safety.traceSafeList_unfold,Safety.stepSafe_unfold,Safety.safeAlg_unfold,
     Safety.safeExpr_unfold,Safety.safeCompute_unfold,Safety.safeOp_unfold,
     Safety.safeAddress_unfold,Safety.safeMask_unfold,Safety.addressSafe_unfold,Safety.maskActive_unfold,

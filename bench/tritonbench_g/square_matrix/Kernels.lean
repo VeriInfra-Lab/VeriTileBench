@@ -13,7 +13,7 @@ def callSignature : CallSignature where
 
 
 
-def fp32Kernel (cols B : Nat)
+def square_kernel (cols B : Nat)
     (input_row_stride : Nat := cols) (output_row_stride : Nat := cols)
     (output_ptr : RegionName := "out") (input_ptr : RegionName := "x") : ComputeKernel :=
   let BLOCK_SIZE : Nat := B
@@ -38,7 +38,7 @@ def fp32Kernel (cols B : Nat)
     tl.store(output_ptrs, square_output, mask=col_offsets < n_cols)
   }
 
-def indexCommutedKernel (cols B : Nat)
+def square_index_commuted_kernel (cols B : Nat)
     (input_row_stride : Nat := cols) (output_row_stride : Nat := cols)
     (output_ptr : RegionName := "out") (input_ptr : RegionName := "x") : ComputeKernel :=
   let BLOCK_SIZE : Nat := B

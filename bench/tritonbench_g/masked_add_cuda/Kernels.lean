@@ -17,7 +17,7 @@ def sourceSignature (storage : MaskStorage) : CallSignature where
   readPorts := ["p_mask_ptr","p_ptr","grad_ptr"]
   writePorts := ["grad_ptr"]
 
-def sourceKernel (storage : MaskStorage) (grad data mask : RegionName)
+def masked_add_kernel (storage : MaskStorage) (grad data mask : RegionName)
     (n : Nat) (alpha : ℝ) (block : Nat := blockSize) : ComputeKernel :=
   let grad_ptr := grad
   let p_ptr := data
@@ -37,7 +37,7 @@ def sourceKernel (storage : MaskStorage) (grad data mask : RegionName)
     tl.store(grad_ptr + offsets, grad, mask=mask)
   }
 
-def commutedKernel (storage : MaskStorage) (grad data mask : RegionName)
+def commuted_masked_addKernel (storage : MaskStorage) (grad data mask : RegionName)
     (n : Nat) (alpha : ℝ) (block : Nat := blockSize) : ComputeKernel :=
   let grad_ptr := grad
   let p_ptr := data

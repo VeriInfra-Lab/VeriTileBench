@@ -20,8 +20,8 @@ structure Program where
   alpha : ℝ
 
 def Program.source (p : Program) : ComputeKernel :=
-  if p.candidate then commutedKernel p.storage "grad" "data" "mask" p.n p.alpha
-  else sourceKernel p.storage "grad" "data" "mask" p.n p.alpha
+  if p.candidate then commuted_masked_addKernel p.storage "grad" "data" "mask" p.n p.alpha
+  else masked_add_kernel p.storage "grad" "data" "mask" p.n p.alpha
 
 /-- Both complete sources must succeed and agree on every typed memory cell.
 The leaf condition binds loaded FP32 words; it excludes no bit patterns. -/

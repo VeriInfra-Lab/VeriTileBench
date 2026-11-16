@@ -7,16 +7,16 @@ open VeriTile.Triton
 noncomputable section
 
 def forward (storage : Storage) (swapped : Bool) :=
-  if swapped then VeriTile.Bench.Repairs.DecayCumsum.forwardCandidateKernel storage
-  else VeriTile.Bench.Repairs.DecayCumsum.forwardKernel storage
+  if swapped then VeriTile.Bench.Repairs.DecayCumsum.fwd_decay_cumsum_index_commutedKernel storage
+  else VeriTile.Bench.Repairs.DecayCumsum.fwd_decay_cumsumKernel storage
 
 def prepare (source gate : Storage) (swapped : Bool) :=
-  if swapped then VeriTile.Bench.Repairs.DecayCumsum.prepareCandidateKernel source gate
-  else VeriTile.Bench.Repairs.DecayCumsum.prepareKernel source gate
+  if swapped then VeriTile.Bench.Repairs.DecayCumsum.prepare_qg_kg_index_commutedKernel source gate
+  else VeriTile.Bench.Repairs.DecayCumsum.prepare_qg_kgKernel source gate
 
 def backward (source gate : Storage) (swapped : Bool) :=
-  if swapped then VeriTile.Bench.Repairs.DecayCumsum.backwardCandidateKernel source gate
-  else VeriTile.Bench.Repairs.DecayCumsum.backwardKernel source gate
+  if swapped then VeriTile.Bench.Repairs.DecayCumsum.bwd_decay_global_cumsum_index_commutedKernel source gate
+  else VeriTile.Bench.Repairs.DecayCumsum.bwd_decay_global_cumsumKernel source gate
 
 end
 end VeriTile.Bench.TritonBenchG.DecayCumsum.TypedSource

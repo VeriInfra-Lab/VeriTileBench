@@ -14,7 +14,7 @@ theorem row_safe {α : Type} [Inhabited α] (M : Algebra α) (c : Layout) (eps :
     (output : ∀ i : Fin c.B,i.val<c.N → pid*c.N+i.val<bounds c.Y)
     (epsilon : α := ActualRow.argument M eps) :
     TraceSafe (engine M) bounds (ActualRow.source c) (ActualRow.entry epsilon pid s) := by
-  simp [TraceSafe,ActualRow.source,runtimeKernel,rawKernel,ActualRow.entry,ComputeKernel.surfaceBody,
+  simp [TraceSafe,ActualRow.source,runtimeKernel,rms_norm_kernel,ActualRow.entry,ComputeKernel.surfaceBody,
     Safety.traceSafeList_unfold,Safety.stepSafe_unfold,Safety.safeExpr_unfold,
     Safety.safeCompute_unfold,Safety.safeOp_unfold,Safety.safeAddress_unfold,
     Safety.safeMask_unfold,Safety.addressSafe_unfold,Safety.maskActive_unfold,

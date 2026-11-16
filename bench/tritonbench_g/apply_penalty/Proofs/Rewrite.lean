@@ -11,10 +11,10 @@ set_option maxRecDepth 24000
 set_option maxHeartbeats 4000000
 
 def originalSource (stride B : Nat) : ComputeKernel :=
-  sourceKernel "logits" "presence" "frequency" "repetition" "ids" "counts" "cumsum" stride 1 B
+  _fwd_kernel_apply_penalty_repairedKernel "logits" "presence" "frequency" "repetition" "ids" "counts" "cumsum" stride 1 B
 
 def reciprocalSource (stride B : Nat) : ComputeKernel :=
-  reciprocalKernel "logits" "presence" "frequency" "repetition" "ids" "counts" "cumsum" stride 1 B
+  _fwd_kernel_apply_penalty_reciprocalKernel "logits" "presence" "frequency" "repetition" "ids" "counts" "cumsum" stride 1 B
 
 /-- Comparison availability is a semantic backend requirement, not a numerical
 rewrite assumption and not a Python guard. -/
@@ -27,7 +27,7 @@ def originalExecution {α : Type} [Inhabited α] (M : Algebra α)
     {t : State α // FP.Structural.exec (engine M) (originalSource stride B) s = some t} := by
   refine ⟨?_, ?_⟩
   swap
-  simp [originalSource, sourceKernel, callSignature, FP.Structural.exec, run, step, evalExpr,
+  simp [originalSource, _fwd_kernel_apply_penalty_repairedKernel, callSignature, FP.Structural.exec, run, step, evalExpr,
     evalComputeOp, evalOp_unfold, ComputeDType.eraseDType, Option.bind, numeric, numericLt, natLt, bop,
     store, Region.cast, engine, Algebra.withDefaultPrecision, resolvePrecision, hlt]
   rfl
@@ -38,7 +38,7 @@ def reciprocalExecution {α : Type} [Inhabited α] (M : Algebra α)
     {t : State α // FP.Structural.exec (engine M) (reciprocalSource stride B) s = some t} := by
   refine ⟨?_, ?_⟩
   swap
-  simp [reciprocalSource, reciprocalKernel, callSignature, FP.Structural.exec, run, step, evalExpr,
+  simp [reciprocalSource, _fwd_kernel_apply_penalty_reciprocalKernel, callSignature, FP.Structural.exec, run, step, evalExpr,
     evalComputeOp, evalOp_unfold, ComputeDType.eraseDType, Option.bind, numeric, numericLt, natLt, bop,
     store, Region.cast, engine, Algebra.withDefaultPrecision, resolvePrecision, hlt]
   rfl

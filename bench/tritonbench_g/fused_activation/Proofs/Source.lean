@@ -4,7 +4,7 @@ import bench.tritonbench_g.vector_addition.Proofs.Mathematical_TypedFloat
 namespace VeriTile.Bench.Repairs.FusedActivation
 abbrev Parameters := VeriTile.Bench.TritonBenchG.VectorAddition.ValueProofs.Parameters
 abbrev candidateKernel (p : Parameters) (weights : Nat) (multiplier : ℝ) (activation : Bool) :=
-  sourceKernel p.output p.y p.x weights p.n p.block multiplier activation
+  fused_add_mul_activation_kernel p.output p.y p.x weights p.n p.block multiplier activation
 open VeriTile.Triton FP.Structural
 open VeriTile.Bench.TritonBenchG.VectorAddition.ValueProofs (offset programState gridCount grid_covers)
 noncomputable section
@@ -48,7 +48,7 @@ def execution {α : Type} [Inhabited α] (M : Algebra α)
   all_goals
     refine ⟨?_, ?_⟩
     swap
-    simp [candidateKernel,sourceKernel,FP.Structural.exec,ComputeKernel.surfaceBody,
+    simp [candidateKernel,fused_add_mul_activation_kernel,FP.Structural.exec,ComputeKernel.surfaceBody,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,Option.bind,
     numericLt,natLt,bop,store,Region.cast,ComputeDType.eraseDType]
     rfl
@@ -125,7 +125,7 @@ theorem complete_correct {α : Type} [Inhabited α] (M : Algebra α)
   ⟨(execution M p weights multiplier activation s).val, (execution M p weights multiplier activation s).property,
     execution_memory M p weights multiplier activation s⟩
 
-#specNonCircular expectedMemory avoiding [candidateKernel,sourceKernel, FP.Structural.exec]
+#specNonCircular expectedMemory avoiding [candidateKernel,fused_add_mul_activation_kernel, FP.Structural.exec]
 #axiomsClean expected_cell
 #axiomsClean complete_correct
 #axiomsClean execution

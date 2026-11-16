@@ -16,7 +16,7 @@ theorem body (storage : Storage) (keep : KeepStorage) (swapped : Bool)
       (source keep swapped x mask out n B p).toAlgKernel.body := by
   cases storage <;> cases keep <;> cases swapped
   all_goals simp only [TypedSource.source,source,VeriTile.Bench.Repairs.DropoutTriton.sourceFamily,
-    VeriTile.Bench.Repairs.DropoutTriton.quotedOriginalKernel,VeriTile.Bench.Repairs.DropoutTriton.quotedCommutedKernel,
+    VeriTile.Bench.Repairs.DropoutTriton._dropoutKernel,VeriTile.Bench.Repairs.DropoutTriton._dropout_index_commutedKernel,
     ComputeKernel.surfaceBody,ComputeKernel.eraseDType,
     ComputeKernel.toAlgorithm?,ComputeKernel.toAlgKernel,ComputeKernel.fromKernelBody,
     ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,

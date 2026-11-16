@@ -11,7 +11,7 @@ open scoped VeriTile.Spec
 noncomputable section
 
 /-- This is equality between the displayed source pair, with no dtype erasure. -/
-theorem original_source (h : Call) (c : Config) : (original h c).kernel=Kernels.sourceKernel h c := rfl
+theorem original_source (h : Call) (c : Config) : (original h c).kernel=Kernels.chunk_global_reversed_cumsum_scalar_kernel h c := rfl
 
 /-- Both complete kernels succeed, on any admitted row and total scan backend.
 No successful-execution or output-equality premise is supplied. -/

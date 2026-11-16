@@ -9,7 +9,7 @@ noncomputable section
 /-- One program owns one contiguous row, with padding excluded by both masks.
 This IO uses the same canonical FP32 source as the equivalence proof. -/
 def squareIO (n B : Nat) : MaskedKernelIO₁ where
-  kernel := (fp32Kernel n B).eraseDType
+  kernel := (square_kernel n B).eraseDType
   projection := VeriTile.Bench.TritonBenchG.SquareMatrix.typed_supported
     Bool.false "out" "x" n n n B
   inp := "x"

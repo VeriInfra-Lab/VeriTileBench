@@ -127,10 +127,10 @@ class CorrespondenceGenerationTests(unittest.TestCase):
         self.assertFalse((directory / 'jit-correspondence.json').exists())
         rows = generate(ROOT, directory)
         self.assertEqual({row['python_function']: row['lean_definition'] for row in rows}, {
-            'rms_matmul_rbe': 'rmsSource',
-            'rms_matmul_rbe_qkv': 'qkvKernel',
-            'rms_matmul_rbe_index_commuted': 'rmsIndexCommutedSource',
-            'rms_matmul_rbe_qkv_index_commuted': 'qkvIndexCommutedKernel',
+            'rms_matmul_rbe': 'rms_matmul_rbeSource',
+            'rms_matmul_rbe_qkv': 'rms_matmul_rbe_qkvKernel',
+            'rms_matmul_rbe_index_commuted': 'rms_matmul_rbe_index_commutedSource',
+            'rms_matmul_rbe_qkv_index_commuted': 'rms_matmul_rbe_qkv_index_commutedKernel',
         })
 
     def copy_case(self, name, files):
@@ -143,9 +143,9 @@ class CorrespondenceGenerationTests(unittest.TestCase):
         self.copy_case('rms_matmul_rbe', ['Kernels.lean', 'rms_matmul_rbe.py'])
         self.assertEqual(len(generate(self.root, self.case)), 4)
         text = self.lean.read_text()
-        old = 'source_procedures [rms_matmul_rbe_index_commuted := rmsIndexCommutedSource]'
+        old = 'source_procedures [rms_matmul_rbe_index_commuted := rms_matmul_rbe_index_commutedSource]'
         self.assertEqual(text.count(old), 1)
-        self.lean.write_text(text.replace(old, 'source_procedures [rms_matmul_rbe_index_commuted := rmsSource]'))
+        self.lean.write_text(text.replace(old, 'source_procedures [rms_matmul_rbe_index_commuted := rms_matmul_rbeSource]'))
         with self.assertRaisesRegex(ValueError, 'No exact source pair|Ambiguous source pair'):
             generate(self.root, self.case)
 
@@ -158,10 +158,126 @@ class CorrespondenceGenerationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'No exact source pair'):
             generate(self.root, self.case)
 
+    def test_distinct_kernel_names_keep_parameterized_signature_scopes(self):
+        self.copy_case('triton_argmax', ['Kernels.lean', 'triton_argmax.py'])
+        rows = generate(self.root, self.case)
+        self.assertEqual(len(rows), 5)
+        self.assertTrue(all(row['status'] == 'PASS' for row in check_records(self.root, rows)))
+        stages = [row for row in rows if row['python_function'].startswith('argmax_kernel_1_')]
+        self.assertEqual(len(stages), 2)
+        self.assertTrue(all('::' in row['lean_definition'] for row in stages))
+
+    def test_matching_bodies_cannot_hide_unrelated_source_names(self):
+        from scripts.bench.check_source_naming import check_case
+        self.copy_case('fp4_to_bf16_conversion', ['Kernels.lean', 'fp4_to_bf16_conversion.py'])
+        self.assertEqual(check_case(self.root, self.case)['status'], 'PASS')
+        self.lean.write_text(self.lean.read_text().replace('_fp4_packed_to_bf16Source', 'unrelatedSource'))
+        self.assertEqual(len(generate(self.root, self.case)), 2)
+        with self.assertRaisesRegex(ValueError, 'expected _fp4_packed_to_bf16Source'):
+            check_case(self.root, self.case)
+
+    def test_source_procedure_returned_jit_helper_is_checked(self):
+        self.copy_case('fp4_to_bf16_conversion', ['Kernels.lean', 'fp4_to_bf16_conversion.py'])
+        rows = generate(self.root, self.case)
+        self.assertEqual(len(rows), 2)
+        self.assertTrue(all(r['status']=='PASS' for r in check_records(self.root, rows)))
+        text = self.lean.read_text()
+        self.lean.write_text(text.replace('_fp4_packed_to_bf16 := _fp4_packed_to_bf16Source',
+                                         '_fp4_packed_to_bf16 := missingSource'))
+        with self.assertRaisesRegex(ValueError, 'No exact source pair'):
+            generate(self.root, self.case)
+        with self.assertRaisesRegex(ValueError, 'helper bindings differ'):
+            check_records(self.root, rows)
+
+    def test_comment_gate_retains_leading_and_inline_python_comments(self):
+        from scripts.bench.check_source_naming import check_case
+        python=PYTHON.replace('    offsets =', '    # retain the original index comment\n    offsets =')
+        lean=LEAN.replace('def body ', 'def firstKernel ').replace(
+            '    offsets =', '    # retain the original index comment\n    offsets =')
+        python=python.replace('x = tl.load(x_ptr + offsets)', 'x = tl.load(x_ptr + offsets)  # keep the load')
+        lean=lean.replace('x = tl.load(x_ptr + offsets)', 'x = tl.load(x_ptr + offsets)  # keep the load')
+        self.python.write_text(python)
+        self.lean.write_text(lean)
+        self.assertEqual(check_case(self.root,self.case,check_comments=True)['status'],'PASS')
+        for comment in ['    # retain the original index comment\n','  # keep the load']:
+            self.lean.write_text(lean.replace(comment,''))
+            self.assertEqual(check_case(self.root,self.case)['status'],'PASS')
+            with self.assertRaisesRegex(ValueError,'pasted Python comments differ'):
+                check_case(self.root,self.case,check_comments=True)
+
+    def test_comment_gate_distinguishes_literals_and_accepts_comment_spacing(self):
+        from scripts.bench.check_source_naming import check_case, comment_tokens, python_suite
+        import ast
+        source='def helper(\n    x: "type: annotation",\n):\n    # comment   \n    return "# literal: not a comment"\n'
+        body=python_suite(source,ast.parse(source).body[0])
+        self.assertEqual(comment_tokens(body),['# comment'])
+        self.assertEqual(comment_tokens('return "# literal"\n'),[])
+        self.python.write_text(PYTHON.replace('    offsets =','    # original   \n    offsets ='))
+        self.lean.write_text(LEAN.replace('def body ','def firstKernel ').replace(
+            '    offsets =','    # original\n    offsets ='))
+        self.assertEqual(check_case(self.root,self.case,check_comments=True)['status'],'PASS')
+
+    def test_comment_gate_requires_trailing_suite_comments(self):
+        from scripts.bench.check_source_naming import check_case
+        for ending in ['\n    # trailing comment\n', '\n    # trailing comment',
+                       '\n\n    # trailing comment\n\n']:
+            with self.subTest(ending=ending):
+                self.python.write_text(PYTHON.rstrip()+ending+'\ndef sibling():\n    pass\n')
+                lean=LEAN.replace('def body ','def firstKernel ')
+                self.lean.write_text(lean)
+                with self.assertRaisesRegex(ValueError,'pasted Python comments differ'):
+                    check_case(self.root,self.case,check_comments=True)
+                self.lean.write_text(lean.replace('  }','    # trailing comment\n  }'))
+                self.assertEqual(check_case(self.root,self.case,check_comments=True)['status'],'PASS')
+
+    def test_suite_comments_stop_before_siblings_and_handle_tabs(self):
+        from scripts.bench.check_source_naming import comment_tokens, python_suite
+        import ast
+        samples=[
+            ('def outer():\n    def nested():\n        return 1\n        # nested tail\n    # sibling comment\n    return 2\n',1,['# nested tail']),
+            ('def function():\n\treturn 1\n\t# tabbed tail\n# module comment\ndef sibling():\n    pass\n',0,['# tabbed tail']),
+            ('def function():\n    return 1\n    # EOF tail',0,['# EOF tail']),
+        ]
+        for source,index,expected in samples:
+            with self.subTest(source=source):
+                function=next(n for n in ast.walk(ast.parse(source)) if isinstance(n,ast.FunctionDef)
+                              and n.name==('nested' if index else 'function'))
+                self.assertEqual(comment_tokens(python_suite(source,function)),expected)
+
+    def test_reverse_coverage_rejects_python_shaped_and_legacy_lean_only_candidates(self):
+        from scripts.bench.check_source_naming import check_case
+        original=LEAN.replace('def body ','def firstKernel ')
+        extra=LEAN[LEAN.index('def body '):].replace('def body ','def extraKernel ')
+        extra=extra.replace('tl.store(out_ptr + offsets, x)','tl.store(out_ptr + offsets, x + x)')
+        legacy=extra.replace('    x = tl.load(x_ptr + offsets)',
+                             '    for i in range(0, B) {\n      x = tl.load(x_ptr + offsets)\n    }')
+        for candidate in [extra,legacy]:
+            with self.subTest(candidate=candidate):
+                self.lean.write_text(original+'\n'+candidate)
+                self.assertEqual(len(generate(self.root,self.case)),1)
+                with self.assertRaisesRegex(ValueError,'Lean source body has no Python JIT pair'):
+                    check_case(self.root,self.case,check_lean_coverage=True)
+
+    def test_reverse_coverage_checks_shared_modules_against_all_validated_pairs(self):
+        from scripts.bench.check_source_naming import validate_lean_coverage
+        first=LEAN.replace('def body ','def firstKernel ')
+        second=LEAN[LEAN.index('def body '):].replace('def body ','def secondKernel ')
+        second=second.replace('tl.store(out_ptr + offsets, x)','tl.store(out_ptr + offsets, x + x)')
+        self.lean.write_text(first+'\n'+second)
+        other=Path('bench/tritonbench_g/other')
+        (self.root/other).mkdir()
+        (self.root/other/'Kernels.lean').write_text('import bench.tritonbench_g.sample.Kernels\n')
+        (self.root/other/'other.py').write_text(PYTHON.replace('def first(','def second(').replace(
+            'tl.store(out_ptr + offsets, x)','tl.store(out_ptr + offsets, x + x)'))
+        own=generate(self.root,self.case)
+        with self.assertRaisesRegex(ValueError,'Lean source body has no Python JIT pair'):
+            validate_lean_coverage(self.root,[self.case],own)
+        validate_lean_coverage(self.root,[self.case,other],own+generate(self.root,other))
+
     def test_standardized_cases_match_reviewed_pairs(self):
         batch = json.loads((ROOT / 'validation/body-migration-batch.json').read_text())
         reviewed = pinned_cases()
-        self.assertEqual(len(batch['cases']), 202)
+        self.assertEqual(len(batch['cases']), 203)
         count = 0
         for entry in batch['cases']:
             root = ROOT if (ROOT / entry['path']).is_dir() else library_root(ROOT)
@@ -176,7 +292,7 @@ class CorrespondenceGenerationTests(unittest.TestCase):
                 if entry['path'] in reviewed:
                     self.assertTrue(snapshot_matches(reviewed[entry['path']], rows))
                 count += len(rows)
-        self.assertEqual(count, 594)
+        self.assertEqual(count, 601)
 
 
 if __name__ == '__main__':

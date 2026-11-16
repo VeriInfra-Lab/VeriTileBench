@@ -39,7 +39,7 @@ theorem store_run (a : Operations α) (fp8 : Bool) (p : Parameters)
     simp only [Int.ofNat_lt,row,col]
   cases fp8
   all_goals
-    simp [stores,kernel,TypedSource.kernel,TypedSource.source,arguments,
+    simp [stores,kernel,TypedSource.kernel,TypedSource.rms_matmul_rbeKernel,arguments,
       ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,evalOp_unfold,
       Option.bind,ComputeDType.eraseDType,numeric,bop,natLt,numericLt,
       Region.cast,ofFloat,toFloat,State.setReg,store,

@@ -9,12 +9,12 @@ set_option linter.unusedSimpArgs false
 unspecified inactive payload, full state and failure behavior. -/
 theorem typed {α : Type} [Inhabited α] (A : Algebra α) (X Y W : RegionName)
     (N B : Nat) (s : State α) :
-    FP.Structural.exec A (runtimeCandidateKernel X Y W N B) s=
-      FP.Structural.exec A (runtimeKernel X Y W N B) s := by
-  let original := (runtimeKernel X Y W N B).surfaceBody
-  let candidate := (runtimeCandidateKernel X Y W N B).surfaceBody
+    FP.Structural.exec A (_rms_norm_fwd_fused_index_commutedKernel X Y W N B) s=
+      FP.Structural.exec A (_rms_norm_fwd_fusedKernel X Y W N B) s := by
+  let original := (_rms_norm_fwd_fusedKernel X Y W N B).surfaceBody
+  let candidate := (_rms_norm_fwd_fused_index_commutedKernel X Y W N B).surfaceBody
   have pref : run A (candidate.take 2) s=run A (original.take 2) s := by
-    simp [candidate,original,runtimeCandidateKernel,runtimeKernel,ComputeKernel.surfaceBody,
+    simp [candidate,original,_rms_norm_fwd_fused_index_commutedKernel,_rms_norm_fwd_fusedKernel,ComputeKernel.surfaceBody,
       run,step,evalExpr,evalComputeOp,evalOp_unfold,numeric,bop,State.setReg,Option.bind]
     delta bop
     simp [Broadcast.leftIndex,Broadcast.rightIndex,Nat.mul_comm]
@@ -25,7 +25,7 @@ def grid {α : Type} [Inhabited α] (A : Algebra α) (X Y W : RegionName)
     (rows N B : Nat) (eps : α) (initial : State α) : Nat → Option (State α)
   | 0=>some initial
   | c+1=>(grid A X Y W rows N B eps initial c).bind
-      (fun s=>FP.Structural.exec A (runtimeCandidateKernel X Y W N B) ((RuntimeGrid.setup rows c s).setReg "eps" .real [] (fun _=>eps)))
+      (fun s=>FP.Structural.exec A (_rms_norm_fwd_fused_index_commutedKernel X Y W N B) ((RuntimeGrid.setup rows c s).setReg "eps" .real [] (fun _=>eps)))
 
 theorem grid_eq {α : Type} [Inhabited α] (A : Algebra α) (X Y W : RegionName)
     (rows N B : Nat) (eps : α) (initial : State α) (count : Nat) :

@@ -17,7 +17,7 @@ def callSignature : CallSignature where
   readPorts := ["q","k","v"]
   writePorts := ["h","o"]
 
-def runtimeKernel (q k v h o : RegionName)
+def attention_fwd_kernel (q k v h o : RegionName)
     (s_qh s_qt s_qd s_hh s_ht T : Nat) (scale : ℝ)
     (BT BD NT : Nat) (STORE IFCOND : Bool) : ComputeKernel :=
   with_triton_call callSignature call_args [s_qh := s_qh, s_qt := s_qt,
@@ -52,7 +52,7 @@ def runtimeKernel (q k v h o : RegionName)
         tl.store(p_o, b_o.to(p_o.dtype.element_ty), boundary_check=(0,))
   }
 
-def runtimeCandidateKernel (q k v h o : RegionName)
+def attention_fwd_shifted_kernel (q k v h o : RegionName)
     (s_qh s_qt s_qd s_hh s_ht T : Nat) (scale : ℝ)
     (BD NT : Nat) (STORE IFCOND : Bool) : ComputeKernel :=
   let BT : Nat := 32
@@ -89,13 +89,13 @@ def runtimeCandidateKernel (q k v h o : RegionName)
         tl.store(p_o, b_o.to(p_o.dtype.element_ty), boundary_check=(0,))
   }
 
-def source := runtimeKernel
+def source := attention_fwd_kernel
 
 /-- Existing candidate uses the wrapper's fixed 32-row temporal tile. -/
 def shiftedSource (q k v h o : RegionName)
     (s_qh s_qt s_qd s_hh s_ht T : Nat) (scale : ℝ)
     (BD NT : Nat) (STORE IFCOND : Bool) : ComputeKernel :=
-  runtimeCandidateKernel q k v h o s_qh s_qt s_qd s_hh s_ht T scale BD NT STORE IFCOND
+  attention_fwd_shifted_kernel q k v h o s_qh s_qt s_qd s_hh s_ht T scale BD NT STORE IFCOND
 
 end
 end VeriTile.Bench.Repairs.AttentionFwdTriton1TileChecked

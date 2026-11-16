@@ -11,7 +11,7 @@ set_option maxRecDepth 20000
 set_option linter.unusedSimpArgs false
 
 def actual (input output : RegionName) (T BT : Nat) : Kernel :=
-  (repairedKernel .fp32 .fp32 input output T BT).eraseDType.toAlgKernel
+  (chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T BT).eraseDType.toAlgKernel
 
 
 def mask (T BT : Nat) : MaskOpt .real [BT] :=
@@ -44,7 +44,7 @@ theorem actual_body (input output : RegionName) (T BT : Nat) :
         (.castNatToInt (.div .nat .nil
           (.sub .nat .nil (.add .nat .nil (.constNat T) (.constNat BT)) (.constNat 1)) (.constNat BT))) (.constNat 1)
         (actualBody input output T BT)] := by
-  simp only [actual,repairedKernel,ComputeKernel.surfaceBody,
+  simp only [actual,chunk_global_cumsum_scalar_kernel_repairedKernel,ComputeKernel.surfaceBody,
     ComputeKernel.eraseDType,ComputeKernel.toAlgKernel,ComputeKernel.toAlgorithm?,
     ComputeKernel.fromKernelBody,ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,
     ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,ComputeDType.eraseDType,

@@ -38,7 +38,7 @@ theorem prefix_run (a : Operations α) (fp8 : Bool) (p : Parameters) (s : State 
     ∃ t, run (engine a) (prelude fp8 p) s=some t ∧ Ready p s t 0 (initial a) := by
   have source_zero : (0.0:ℝ)=0 := by norm_num
   cases fp8 <;>
-    simp [prelude,kernel,TypedSource.kernel,TypedSource.source,arguments,
+    simp [prelude,kernel,TypedSource.kernel,TypedSource.rms_matmul_rbeKernel,arguments,
       ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,evalOp_unfold,
       Option.bind,ComputeDType.eraseDType,numeric,numericEq,FP.Structural.bop,natLt,numericLt,
       integralFloorDiv,integralMod,Region.cast,ofFloat,toFloat,State.setReg,

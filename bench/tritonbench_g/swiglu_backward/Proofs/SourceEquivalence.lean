@@ -46,20 +46,20 @@ theorem prefix_run {α : Type} [Inhabited α] (M : Algebra α) (s : State α)
 
 theorem decomposition (v : Bool) (X Y DOUT OUT DX DY : RegionName)
     (sx sy sd so sdx sdy N B : Nat) (R : Bool) :
-    (if v then commutedKernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R else sourceKernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R).surfaceBody =
+    (if v then swiglu_bwd_commutedKernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R else _swiglu_bwd_kernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R).surfaceBody =
       sourcePrefix v X Y DOUT OUT DX DY sx sy sd so sdx sdy B R ++
-        (VeriTile.Bench.Repairs.SwigluBackward.sourceKernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R).surfaceBody.drop 9 := by
+        (VeriTile.Bench.Repairs.SwigluBackward._swiglu_bwd_kernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R).surfaceBody.drop 9 := by
   cases v <;> rfl
 
 theorem source_run {α : Type} [Inhabited α] (M : Algebra α) (s : State α)
     (X Y DOUT OUT DX DY : RegionName) (sx sy sd so sdx sdy N B : Nat) (R : Bool) :
-    exec M (sourceKernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R) s =
-      exec M (commutedKernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R) s := by
-  change run M (VeriTile.Bench.Repairs.SwigluBackward.sourceKernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R).surfaceBody s =
-    run M (VeriTile.Bench.Repairs.SwigluBackward.commutedKernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R).surfaceBody s
-  rw [show (sourceKernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R).surfaceBody = _ from
+    exec M (_swiglu_bwd_kernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R) s =
+      exec M (swiglu_bwd_commutedKernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R) s := by
+  change run M (VeriTile.Bench.Repairs.SwigluBackward._swiglu_bwd_kernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R).surfaceBody s =
+    run M (VeriTile.Bench.Repairs.SwigluBackward.swiglu_bwd_commutedKernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R).surfaceBody s
+  rw [show (_swiglu_bwd_kernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R).surfaceBody = _ from
     decomposition Bool.false X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R,
-    show (commutedKernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R).surfaceBody = _ from
+    show (swiglu_bwd_commutedKernel X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R).surfaceBody = _ from
     decomposition Bool.true X Y DOUT OUT DX DY sx sy sd so sdx sdy N B R]
   exact prefix_run M s X Y DOUT OUT DX DY sx sy sd so sdx sdy B R _
 
@@ -90,12 +90,12 @@ theorem candidate_safe {α : Type} [Inhabited α] (M : Algebra α) (c : Layout)
     (ho : ∀ ch, enabled R ch → ∀ j : Fin B, tile*B+j.val < c.cols →
       row*c.stride ch+(tile*B+j.val) < bounds (c.output ch)) :
     TraceSafe M bounds
-      (commutedKernel c.X c.Y c.DOUT c.OUT c.DX c.DY
+      (swiglu_bwd_commutedKernel c.X c.Y c.DOUT c.OUT c.DX c.DY
         c.sx c.sy c.sd c.so c.sdx c.sdy c.cols B R)
       (tileState M c B row tile s) := by
   cases R
   all_goals
-    simp (maxSteps := 1400000) [TraceSafe,commutedKernel,
+    simp (maxSteps := 1400000) [TraceSafe,swiglu_bwd_commutedKernel,
 
       ComputeKernel.surfaceBody,Safety.traceSafeList_unfold,Safety.stepSafe_unfold,
       Safety.safeExpr_unfold,Safety.safeCompute_unfold,Safety.safeOp_unfold,

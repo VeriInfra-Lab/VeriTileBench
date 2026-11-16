@@ -61,7 +61,7 @@ class InlineAssemblyBodyTests(unittest.TestCase):
         self.record = pinned_pairs(self.directory)[0]
 
     def compare(self, lean):
-        return check(self.python, lean, "matmul_kernel", "sourceKernel", "callSignature",
+        return check(self.python, lean, "matmul_kernel", "matmul_kernel", "callSignature",
                      self.record["expected_signature"],
                      expected_call_bindings=self.record["expected_call_bindings"])
 
@@ -100,7 +100,7 @@ class PastedBodyTests(unittest.TestCase):
         fn = next(n for n in ast.parse(self.python).body
                   if isinstance(n, ast.FunctionDef) and n.name == self.record["python_function"])
         python_body = "\n".join(self.python.splitlines()[fn.body[0].lineno-1:fn.body[-1].end_lineno])
-        lean_body = quotation(self.lean, "bodyKernel")[1]
+        lean_body = quotation(self.lean, "_dequantize_rowwise_repairedKernel")[1]
         self.assertEqual(textwrap.dedent(python_body).strip(), textwrap.dedent(lean_body).strip())
 
     def test_no_metadata_or_antiquotes_in_pasted_body(self):
@@ -123,24 +123,24 @@ class PastedBodyTests(unittest.TestCase):
 
     def test_external_annotations_are_checked_without_in_body_parameters(self):
         python = self.python.replace("inv_127,", "inv_127: tl.float32,", 1)
-        result = check(python, self.lean, self.record["python_function"], "bodyKernel",
+        result = check(python, self.lean, self.record["python_function"], "_dequantize_rowwise_repairedKernel",
                        "callSignature", self.record["expected_signature"])
         self.assertEqual(result["mode"], "pasted_body")
         for annotation in ("tl.int32", "tl.int64"):
             with self.subTest(annotation=annotation), self.assertRaises(ValueError):
                 check(self.python.replace("n_elements,", f"n_elements: {annotation},", 1),
-                      self.lean, self.record["python_function"], "bodyKernel", "callSignature",
+                      self.lean, self.record["python_function"], "_dequantize_rowwise_repairedKernel", "callSignature",
                       self.record["expected_signature"])
 
     def test_pointer_and_quoted_constexpr_annotations(self):
         python = self.python.replace("x_ptr,", "x_ptr: tl.tensor,", 1).replace(
             "BLOCK_SIZE: tl.constexpr", 'BLOCK_SIZE: "tl.constexpr"', 1)
-        self.assertEqual(check(python, self.lean, self.record["python_function"], "bodyKernel",
+        self.assertEqual(check(python, self.lean, self.record["python_function"], "_dequantize_rowwise_repairedKernel",
                                "callSignature", self.record["expected_signature"])["status"], "PASS")
 
     def test_unreviewed_signature_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "reviewed call signature"):
-            check(self.python, self.lean, self.record["python_function"], "bodyKernel", "callSignature")
+            check(self.python, self.lean, self.record["python_function"], "_dequantize_rowwise_repairedKernel", "callSignature")
 
     def test_following_type_declaration_is_not_part_of_the_body(self):
         lean = self.lean[:self.lean.index("/-- Candidate:")]
@@ -316,7 +316,7 @@ class RebindingProcedureBodyTests(unittest.TestCase):
     def test_rebinding_and_cast_width_are_not_erased(self):
         from scripts.bench.jit_correspondence import check_procedure_function
         record = self.records[1]
-        start = self.lean.index('def queryProcedureSource')
+        start = self.lean.index('def _parallel_retention_bwd_dqSource')
         for before, after in [('T = tl.cast(T, tl.int64)', 'T = T'),
                               ('.to(tl.int32)', '.to(tl.int64)'),
                               ('s_qk_h = tl.cast(s_qk_h, tl.int64)', '')]:
@@ -365,35 +365,35 @@ class PastedLoopBodyTests(unittest.TestCase):
                     self.compare(self.lean.replace(before, after, 1))
 
     def test_braces_in_python_comments_and_strings_do_not_close_body(self):
-        lean = '''def bodyKernel := with_triton_signature profile in triton {
+        lean = '''def mv_contiguous_kernel := with_triton_signature profile in triton {
     marker = 'False#} {'
     # } This comment contains a delimiter.
     result = marker
 }
 noncomputable def following := 0
 '''
-        body = quotation(lean, 'bodyKernel', raw_python=True)[1]
+        body = quotation(lean, 'mv_contiguous_kernel', raw_python=True)[1]
         parsed = ast.parse(textwrap.dedent(body))
         self.assertEqual(len(parsed.body), 2)
         self.assertEqual(parsed.body[0].value.value, 'False#} {')
         self.assertNotIn('following', body)
 
     def test_noncomputable_next_declaration_is_not_part_of_kernel(self):
-        quoted = quotation(self.lean, 'fmaKernel', raw_python=True)[1]
+        quoted = quotation(self.lean, 'mv_contiguous_fma_kernel', raw_python=True)[1]
         self.assertEqual(len(ast.parse(textwrap.dedent(quoted)).body), 18)
         self.assertNotIn('arguments', quoted)
 
     def test_scoped_options_before_next_definition_bound_the_quote(self):
-        lean = "def bodyKernel := triton {\n x = 1\n}\nset_option maxHeartbeats 1000000 in\ndef next := 0\n"
-        body = quotation(lean, "bodyKernel", raw_python=True)[1]
+        lean = "def mv_contiguous_kernel := triton {\n x = 1\n}\nset_option maxHeartbeats 1000000 in\ndef next := 0\n"
+        body = quotation(lean, "mv_contiguous_kernel", raw_python=True)[1]
         self.assertEqual(len(ast.parse(textwrap.dedent(body)).body), 1)
         with self.assertRaisesRegex(ValueError, "unexpected code after quotation"):
-            quotation(lean.replace("}\nset_option", "} + extra\nset_option"), "bodyKernel", raw_python=True)
+            quotation(lean.replace("}\nset_option", "} + extra\nset_option"), "mv_contiguous_kernel", raw_python=True)
 
     def test_executable_suffix_after_quote_is_rejected(self):
         with self.assertRaisesRegex(ValueError, 'unexpected code after quotation'):
-            quotation('def bodyKernel := triton {\n x = 1\n} + extra\nnoncomputable def next := 0\n',
-                      'bodyKernel', raw_python=True)
+            quotation('def mv_contiguous_kernel := triton {\n x = 1\n} + extra\nnoncomputable def next := 0\n',
+                      'mv_contiguous_kernel', raw_python=True)
 
 
 class PolymorphicPastedBodyTests(unittest.TestCase):
@@ -563,7 +563,7 @@ class GatedRecurrentBodyTests(unittest.TestCase):
         self.assertEqual(result["statements"], 10)
 
     def test_seed_signed_loop_endpoint_and_dtype_casts_are_checked(self):
-        body = quotation(self.lean, "hKernel", raw_python=True)[1]
+        body = quotation(self.lean, "chunk_gated_abc_fwd_kernel_hKernel", raw_python=True)[1]
         for before, after in [
             ("b_h += tl.load(p_h", "b_h = tl.load(p_h"),
             ("range(tl.cast(0, tl.int64), tl.cast(NT, tl.int64), tl.cast(1, tl.int64))", "range(NT)"),
@@ -1233,7 +1233,7 @@ class FastRmsCopiedBodyTests(unittest.TestCase):
 
     def test_docstring_text_and_rebased_indentation(self):
         self.verify(0, self.lean)
-        start = self.lean.index('    """', self.lean.index('def regularRuntimeKernel'))
+        start = self.lean.index('    """', self.lean.index('def _rms_layernorm_forwardKernel'))
         stop = self.lean.index('\n  }', start)
         rebased = self.lean[:start] + textwrap.indent(self.lean[start:stop], '    ') + self.lean[stop:]
         self.verify(0, rebased)
@@ -1485,7 +1485,7 @@ class BinaryPureJITFunctionCorrespondenceTests(unittest.TestCase):
     def test_call_binding_casts_shapes_and_guard_cannot_be_rewritten(self):
         p = self.directory / 'Kernels.lean'
         source = p.read_text()
-        changes = [('prev_multiple_of := previousMultipleSource', 'prev_multiple_of := commutedPreviousMultipleSource'),
+        changes = [('prev_multiple_of := prev_multiple_ofSource', 'prev_multiple_of := prev_multiple_of_candidateSource'),
                    ('prev_multiple_of(N, TILE_N)', 'tl.cdiv(N, TILE_N) * TILE_N - TILE_N'),
                    ('tl.program_id(0).to(tl.int64)', 'tl.program_id(0)'),
                    ('tl.full((TILE_N,),', 'tl.full((TILE_N),'),
@@ -1788,9 +1788,9 @@ class CrossEntropy2BodyCorrespondenceTests(unittest.TestCase):
             with self.subTest(new=new):
                 self.assertIn(old, self.source)
                 # Only mutate the backward quotation, after the two forward bodies.
-                prefix, backward = self.source.split('def backwardKernel', 1)
+                prefix, backward = self.source.split('def cross_entropy_bwd_kernel', 1)
                 with self.assertRaises(ValueError):
-                    self.verify(self.records[2], prefix + 'def backwardKernel' + backward.replace(old, new, 1))
+                    self.verify(self.records[2], prefix + 'def cross_entropy_bwd_kernel' + backward.replace(old, new, 1))
 
     def test_candidates_change_only_the_existing_integer_product(self):
         def functions(name):
@@ -1846,9 +1846,9 @@ class CrossEntropyOpsBodyCorrespondenceTests(unittest.TestCase):
         for old, new in changes:
             with self.subTest(new=new):
                 self.assertIn(old, self.source)
-                prefix, backward = self.source.split('def backwardKernel', 1)
+                prefix, backward = self.source.split('def cross_entropy_bwd_kernel', 1)
                 with self.assertRaises(ValueError):
-                    self.verify(self.records[2], prefix + 'def backwardKernel' + backward.replace(old, new, 1))
+                    self.verify(self.records[2], prefix + 'def cross_entropy_bwd_kernel' + backward.replace(old, new, 1))
 
     def test_candidates_change_only_the_selected_integer_product(self):
         tree = ast.parse((self.directory / 'cross_entropy_ops.py').read_text())
@@ -1894,17 +1894,17 @@ class FastLayernormBodyCorrespondenceTests(unittest.TestCase):
                     self.verify(self.records[0], self.source.replace(old, new, 1))
 
     def test_backward_padding_and_operation_order_are_retained(self):
-        prefix, body = self.source.split('def backwardBodyPastedKernel', 1)
+        prefix, body = self.source.split('def layernorm_backwardKernel', 1)
         for old, new in [('tl.where(mask, dY_W * normed, 0.0)', 'dY_W * normed'),
                          ('normed * tl.sum(product, axis=0) / n_cols', '(normed / n_cols) * tl.sum(product, axis=0)'),
                          ('tl.cast(dY_row_stride, tl.int64)', 'dY_row_stride')]:
             with self.subTest(new=new):
                 self.assertIn(old, body)
                 with self.assertRaises(ValueError):
-                    self.verify(self.records[2], prefix + 'def backwardBodyPastedKernel' + body.replace(old, new, 1))
+                    self.verify(self.records[2], prefix + 'def layernorm_backwardKernel' + body.replace(old, new, 1))
 
     def test_affine_original_while_counter_and_output_masks_are_retained(self):
-        prefix, body = self.source.split('def affineBodyPastedKernel', 1)
+        prefix, body = self.source.split('def layernorm_affine_backwardKernel', 1)
         for old, new in [('while row < tl.cast(n_rows, tl.int64):', 'for row in range(n_rows):'),
                          ('row += tl.full((), 1, tl.int64)', 'row += 1'),
                          ('row = tl.full((), 0, tl.int64)', 'row = 0'),
@@ -1913,7 +1913,7 @@ class FastLayernormBodyCorrespondenceTests(unittest.TestCase):
             with self.subTest(new=new):
                 self.assertIn(old, body)
                 with self.assertRaises(ValueError):
-                    self.verify(self.records[4], prefix + 'def affineBodyPastedKernel' + body.replace(old, new, 1))
+                    self.verify(self.records[4], prefix + 'def layernorm_affine_backwardKernel' + body.replace(old, new, 1))
 
     def test_derived_candidates_change_only_their_existing_integer_address(self):
         def selected(name):
@@ -1984,11 +1984,11 @@ class MultinomialBodyCorrespondenceTests(unittest.TestCase):
                     self.verify(self.records[0], self.source.replace(old, new, 1))
 
     def test_static_candidate_retains_its_counter_remapping(self):
-        before, after = self.source.split('def unrolledKernel', 1)
+        before, after = self.source.split('def _multinomial_sampling_unrolled_kernel', 1)
         old = 'b_idx = b_idx * BLOCK_N'
         self.assertIn(old, after)
         with self.assertRaises(ValueError):
-            self.verify(self.records[1], before + 'def unrolledKernel' + after.replace(old, 'b_idx = b_idx', 1))
+            self.verify(self.records[1], before + 'def _multinomial_sampling_unrolled_kernel' + after.replace(old, 'b_idx = b_idx', 1))
 
 
 class KldivBodyCorrespondenceTests(unittest.TestCase):
@@ -2031,13 +2031,13 @@ class KldivBodyCorrespondenceTests(unittest.TestCase):
                     self.verify(self.records[0], self.source.replace(old, new, 1))
 
     def test_backward_retains_initial_unused_offsets_and_masks(self):
-        before, after = self.source.split('def backwardKernel', 1)
+        before, after = self.source.split('def _kldiv_kernel_backwardKernel', 1)
         for old in ['    offsets = tl.cast(tl.arange(0, BLOCK_SIZE), tl.int64)\n',
                     '    mask = offsets < n_cols\n']:
             with self.subTest(statement=old):
                 self.assertIn(old, after)
                 with self.assertRaises(ValueError):
-                    self.verify(self.records[2], before + 'def backwardKernel' + after.replace(old, '', 1))
+                    self.verify(self.records[2], before + 'def _kldiv_kernel_backwardKernel' + after.replace(old, '', 1))
 
 
 class ImportedFiniteCorrespondenceTests(unittest.TestCase):
@@ -2077,7 +2077,7 @@ class ImportedFiniteCorrespondenceTests(unittest.TestCase):
     def test_signed_base_and_helper_bindings_are_checked(self):
         for old, new in [('in0_ptr := inputOffset', 'in0_ptr := outputOffset'),
                          ('signed_pointer_offsets', 'pointer_offsets'),
-                         ('isfinite_func := isfiniteSource', 'isfinite_func := unreviewed')]:
+                         ('isfinite_func := isfinite_funcSource', 'isfinite_func := unreviewed')]:
             with self.subTest(old=old), self.assertRaises(ValueError):
                 self.verify(self.source.replace(old, new, 1))
 
@@ -2387,7 +2387,7 @@ class AttentionFwdTriton1BodyCorrespondenceTests(unittest.TestCase):
                          ('(i << 5, 0)', '(i * BT, 0)')]:
             source = self.source
             if old == '(i << 5, 0)':
-                at = source.index('def runtimeCandidateKernel')
+                at = source.index('def attention_fwd_shifted_kernel')
                 source = source[:at] + source[at:].replace(old, new, 1)
             else:
                 source = source.replace(old, new, 1)
@@ -2526,7 +2526,7 @@ class ReluStridedBodyCorrespondenceTests(unittest.TestCase):
         for old, new in [('in0_ptr := input_base', 'in0_ptr := output_base'),
                          ('out0_ptr := output_base', 'out0_ptr := 0'),
                          ('("in0_ptr",.fp32)', '("in0_ptr",.fp16)'),
-                         ('relu_forward := reluForwardSource', 'relu_forward := otherHelper')]:
+                         ('relu_forward := relu_forwardSource', 'relu_forward := otherHelper')]:
             with self.subTest(old=old), self.assertRaises(ValueError):
                 self.verify(source=self.source.replace(old, new, 1))
 
@@ -2719,8 +2719,8 @@ class AttentionKernelBodyTests(unittest.TestCase):
 
     def test_original_cannot_be_replaced_by_the_scheduled_candidate(self):
         from scripts.bench.jit_correspondence import quotation
-        original, _ = quotation(self.source, 'originalKernel', raw_python=True)
-        candidate, _ = quotation(self.source, 'queryEarlyKernel', raw_python=True)
+        original, _ = quotation(self.source, '_fwd_kernel_alignedKernel', raw_python=True)
+        candidate, _ = quotation(self.source, '_fwd_kernel_aligned_candidateKernel', raw_python=True)
         self.assertNotEqual(original, candidate)
         with self.assertRaises(ValueError):
             self.verify(0, self.source.replace(original, candidate, 1))
@@ -3041,7 +3041,7 @@ class StatementHelperBodyTests(unittest.TestCase):
                               ('starting_idx=start_block', 'starting_idx=start_token_position'),
                               ('offs_cn=offs_n', 'offs_cn=offs_m'),
                               ('1 + offs_n[None, :] < K', 'offs_n[None, :] < K'),
-                              ('get_freq_multi_tokens := frequencySource',
+                              ('get_freq_multi_tokens := get_freq_multi_tokensSource',
                                'get_freq_multi_tokens := anotherFunction')]:
             with self.subTest(before=before):
                 self.assertIn(before, self.lean)
@@ -3057,7 +3057,7 @@ class StatementHelperBodyTests(unittest.TestCase):
                               ('constexpr_args [theta, NB_TOKENS]', 'constexpr_args [NB_TOKENS]')]:
             with self.subTest(before=before), self.assertRaises(ValueError):
                 check_statement_function(self.python, self.lean.replace(before, after, 1),
-                                         'get_freq_multi_tokens', 'frequencySource')
+                                         'get_freq_multi_tokens', 'get_freq_multi_tokensSource')
 
     def test_existing_candidate_changes_only_the_two_store_masks(self):
         original_source = variant_source(self.directory / 'rbe_triton_transform.py')
@@ -3110,14 +3110,14 @@ class FP4BodyCorrespondenceTests(unittest.TestCase):
             with self.subTest(before=before), self.assertRaises(ValueError):
                 self.assertIn(before, self.lean)
                 check_statement_function(self.python, self.lean.replace(before, after, 1),
-                                         '_fp4_packed_to_bf16', 'conversionSource')
+                                         '_fp4_packed_to_bf16', '_fp4_packed_to_bf16Source')
 
     def test_signed_addresses_masks_format_and_helper_binding_are_checked(self):
         changes = [('tl.program_id(axis=0).to(tl.int64)', 'tl.program_id(axis=0)'),
                    ('tl.arange(0, BLOCK_SIZE_OUT).to(tl.int64)', 'tl.arange(0, BLOCK_SIZE_OUT)'),
                    ('mask_out = offsets_out < n_elements_out', 'mask_out = offsets_out <= n_elements_out'),
                    ('let f32_exp_bias : Nat := 127', 'let f32_exp_bias : Nat := 128'),
-                   ('_fp4_packed_to_bf16 := conversionSource', '_fp4_packed_to_bf16 := otherFunction')]
+                   ('_fp4_packed_to_bf16 := _fp4_packed_to_bf16Source', '_fp4_packed_to_bf16 := otherFunction')]
         for before, after in changes:
             with self.subTest(before=before), self.assertRaises(ValueError):
                 self.assertIn(before, self.lean)
@@ -3266,7 +3266,7 @@ class ProcedureHelperBodyTests(unittest.TestCase):
         self.assertEqual(sum(row.get('kind') == 'procedure_jit_function' for row in rows), 3)
 
     def test_reverse_loop_cast_mask_store_return_and_parameter_mutations_rejected(self):
-        start = self.lean.index('def keyValueSource')
+        start = self.lean.index('def _parallel_rebased_bwd_dkvSource')
         for before, after in [
                 ('(i_c + 1) * BTL - BTS, -BTS', '(i_c + 1) * BTL - BTS, BTS'),
                 ('.to(b_q.dtype)  # [BV, BTS]', '  # [BV, BTS]'),
@@ -3282,7 +3282,7 @@ class ProcedureHelperBodyTests(unittest.TestCase):
 
     def test_helper_binding_call_order_argument_and_barrier_erasure_rejected(self):
         for before, after in [
-                ('_parallel_rebased_bwd_dq := queryProcedureSource', '_parallel_rebased_bwd_dq := fusedQueryProcedureSource'),
+                ('_parallel_rebased_bwd_dq := _parallel_rebased_bwd_dqSource', '_parallel_rebased_bwd_dq := _parallel_rebased_bwd_dq_fusedSource'),
                 ('q, k, v, do, dz, dq, s_qk_h', 'q, k, v, do, dz, dk, s_qk_h'),
                 ('    tl.debug_barrier()\n    _parallel_rebased_bwd_dkv(', '    _parallel_rebased_bwd_dkv(')]:
             with self.subTest(before=before):

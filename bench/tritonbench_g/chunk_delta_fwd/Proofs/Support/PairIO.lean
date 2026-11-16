@@ -10,7 +10,7 @@ noncomputable section
 def invocation {α : Type} (M : Algebra α)
     (D : VeriTile.Bench.Repairs.ChunkGlaFwd.FPOutput.DotPrimitive α)
     (p : Parameters) (pid : PID) : Invocation α :=
-  { Interface.invocation M D p pid with kernel := ChunkDeltaFwdStaticDot.addressFoldKernel p }
+  { Interface.invocation M D p pid with kernel := ChunkDeltaFwdStaticDot.chunk_delta_rule_fwd_kernel_h_address_foldKernel p }
 
 def io (I : WordPrimitives) (p : Parameters) (schedule : List PID) : ProgramIO (BitVec 32) Expr :=
   Interface.io Native.algebra Native.dot p schedule Expr.bits (Reference.nativeObserve I)

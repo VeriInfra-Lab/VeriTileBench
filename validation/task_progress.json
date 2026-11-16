@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "kind": "final_selected_task_progress",
-  "counting_rule": "Count each of the 183 original task identities once per explicitly labeled review scope. kernel_revision alone records completion under the twelve current kernel-only rules and the approved add_value template. Retained historical and prior contract results stay pinned to their recorded versions; they do not certify subsequent in-progress source edits. Original defects, GPU execution and numerical replay remain separate. Current actual-pair completion follows program_pair_review; a source/native theorem alone does not satisfy FPEquiv. Missing targets/connections are program work, not numerical deferrals.",
+  "counting_rule": "Count each of the 184 original task identities once per explicitly labeled review scope. kernel_revision alone records completion under the twelve current kernel-only rules and the approved add_value template. Retained historical and prior contract results stay pinned to their recorded versions; they do not certify subsequent in-progress source edits. Original defects, GPU execution and numerical replay remain separate. Current actual-pair completion follows program_pair_review; a source/native theorem alone does not satisfy FPEquiv. Missing targets/connections are program work, not numerical deferrals.",
   "policy": "documents/bench/TODO.md",
   "tasks": [
     {
@@ -281,7 +281,7 @@
           "bench/tritonbench_g/bmm_chunk_fwd/RealCorrect.lean",
           "bench/tritonbench_g/bmm_chunk_fwd/FPEquiv.lean"
         ],
-        "proof_scope": "Independent Correct target: Independent full-K chunked A*Bᵀ, signed sequence filtering, padding and causal zeros; actual ordinary main grid and cleanup.. Complete actual selected kernel-stage pairs; exact source, transformation, numerical model/domain and observers are recorded in program_pair_review. Earlier single-source native and optional full-grid/Tensor results remain retained auxiliaries at their recorded scopes."
+        "proof_scope": "Independent Correct target: Independent full-K chunked A*B\u1d40, signed sequence filtering, padding and causal zeros; actual ordinary main grid and cleanup.. Complete actual selected kernel-stage pairs; exact source, transformation, numerical model/domain and observers are recorded in program_pair_review. Earlier single-source native and optional full-grid/Tensor results remain retained auxiliaries at their recorded scopes."
       }
     },
     {
@@ -874,6 +874,21 @@
       }
     },
     {
+      "task": "fp4_to_bf16_conversion",
+      "original_status": "source_defect_pending_repair",
+      "kernel_revision": {
+        "source": "bench/tritonbench_g/fp4_to_bf16_conversion/fp4_to_bf16_conversion.py",
+        "kernel_source": "bench/tritonbench_g/fp4_to_bf16_conversion/Kernels.lean",
+        "public_entries": [
+          "bench/tritonbench_g/fp4_to_bf16_conversion/Contract.lean",
+          "bench/tritonbench_g/fp4_to_bf16_conversion/RealCorrect.lean",
+          "bench/tritonbench_g/fp4_to_bf16_conversion/FPEquiv.lean"
+        ],
+        "proof_scope": "Independent E2M1 times E8M0 power-of-two Real formula (rounding erased; finite scales). Actual 49-statement repaired helper/caller and all five original tiles. Complete valid CTA schedule pair in the explicit FP32/BF16 software model, all byte inputs including NaN scale 255, both safe executions, every output and both full exterior frames. No numerical rewrite assumption or hardware conformance claim.",
+        "validation": "validation/tasks/fp4_to_bf16_conversion/validation.json"
+      }
+    },
+    {
       "task": "fused_activation",
       "original_status": "source_defect_pending_repair",
       "kernel_revision": {
@@ -1263,7 +1278,7 @@
           "bench/tritonbench_g/l2_norm_triton2/RealCorrect.lean",
           "bench/tritonbench_g/l2_norm_triton2/FPEquiv.lean"
         ],
-        "proof_scope": "Independent Correct target: Forward x/sqrt(sum x²+eps); backward dy/sqrt(s+eps)-sum(dy*x)/(s+eps)/sqrt(s+eps)*x. Independent finite sums, arbitrary Real epsilon under total sqrt/division.. Complete actual selected kernel-stage pairs; exact source, transformation, numerical model/domain and observers are recorded in program_pair_review. Earlier single-source native and optional full-grid/Tensor results remain retained auxiliaries at their recorded scopes."
+        "proof_scope": "Independent Correct target: Forward x/sqrt(sum x\u00b2+eps); backward dy/sqrt(s+eps)-sum(dy*x)/(s+eps)/sqrt(s+eps)*x. Independent finite sums, arbitrary Real epsilon under total sqrt/division.. Complete actual selected kernel-stage pairs; exact source, transformation, numerical model/domain and observers are recorded in program_pair_review. Earlier single-source native and optional full-grid/Tensor results remain retained auxiliaries at their recorded scopes."
       }
     },
     {
@@ -1515,7 +1530,96 @@
           "bench/tritonbench_g/matmul_leakyrelu/RealCorrect.lean",
           "bench/tritonbench_g/matmul_leakyrelu/FPEquiv.lean"
         ],
-        "proof_scope": "Original independent Real full-grid matrix product and leaky activation now proved. Original all-word FP32/TF32 K32 source domain and FP16 output, full schedules/geometry/region separation/empty behavior retained. Complete source-to-IO proof of both safe successful schedules, all typed outputs and dual exterior frames. Conditional R contains one actual local dot/add-to-dotAcc relation; future evidence and admission remain explicit, gates NOT_RUN. Strict all-word FP32 slope commutation reused."
+        "proof_scope": "Independent Real full-grid matrix product and leaky activation remain proved. The universal current-table FP32 source-model equivalence is DISPROVED by an explicit TF32-input/FP32-RTZ-dot, FP32-RN-add, FP16-RN-output interpretation: legal finite 1x96 and 96x1 inputs yield normal FP16 outputs 1/32 and 1/64. Input bindings, finite indices, allocation bounds, safe complete actual source schedules and all proof-calculus constructors are checked. This is a source-model result; GPU conformance is outside its scope. The original conditional R theorem, source bodies, IO, region separation, safety and frame conditions are retained. FP32 DOT-ADD-TO-DOTACC remains REJECT (bias FAIL, magnitude PASS); the separate full-budget FP64 Normal control passes both statistical gates but has a signed-zero diagnostic mismatch and supplies no FP32 rule."
+      },
+      "numerical_validation": {
+        "experiment_completed": true,
+        "rule": "DOT-ADD-TO-DOTACC",
+        "decision": "REJECT",
+        "bias": "FAIL",
+        "magnitude": "PASS",
+        "samples": 4294967296,
+        "admitted": false,
+        "instance_key": "dot:d5daed02f18edc70219141fb0d9f57b9edb1ee01621a6d2bf6099d2a291463c2",
+        "veritile_revision": "6d520c6f715d3c9224440df33472652e6a94f859",
+        "proof_verification": {
+          "source_body_check": "PASS",
+          "real_proof": "PASS",
+          "fp_conditional_proof": "PASS",
+          "numerical_admission": false,
+          "modules_replayed": 40,
+          "theorem_occurrences": 1132,
+          "all_helpers_inventoried": true,
+          "batch_replays": 1,
+          "individual_fallbacks": 0,
+          "comparator_report_sha256": "e5553c80498a90770095ebe5ed34c3bba27e72cd084755021ee5f72b5a28c027",
+          "fp_disproof": "PASS",
+          "existing_public_theorem_and_io_conditions_unchanged": true
+        },
+        "fp64_control": {
+          "precision": "fp64",
+          "experiment_completed": true,
+          "samples": 4294967296,
+          "statistical_decision": "ACCEPT",
+          "bias": {
+            "status": "PASS",
+            "mean": 0.0018087388154981454,
+            "standard_error": 0.0018492411269843512,
+            "upper": 0.011054944450419902,
+            "tolerance": 0.05,
+            "strata": [
+              {
+                "probability": 1.0,
+                "n": 4294967296,
+                "mean": 0.0018087388154981454,
+                "m2": 63082196876521.47
+              }
+            ]
+          },
+          "magnitude": {
+            "status": "PASS",
+            "reference_peak": 8.962103648805304e-14,
+            "candidate_peak": 8.962103648805304e-14,
+            "ratio": 1.0,
+            "limit": 10.0
+          },
+          "all_words_admission_eligible": false,
+          "special_classification_mismatches": 1024,
+          "special_case": "A=-0, B=+0, incoming accumulator=-0: separate reference +0, seeded candidate -0",
+          "evidence_repository": "VeriInfra-Lab/VeriTile",
+          "evidence_path": "experiments/floating_point/dot/fp64/report/receipt.json",
+          "source_snapshot_sha256": "477bdb15ca5b0c3d6952f1dcf7e76c1da0eb217d53105869cf111a19fb00d972",
+          "receipt_sha256": "32d4d09bb169c2c21e9709879085c1d186c2365b1c9a4536206fdc4393bcdd2f",
+          "exact_rational_output_audits": 524288,
+          "raw_audits_verified": 16,
+          "paired_fp64_to_fp32_input_groups_checked": 512,
+          "elapsed_seconds": 8031.028221381828,
+          "applies_to_fp32_rule": false
+        }
+      },
+      "fp_verdict": {
+        "status": "DISPROVED",
+        "claim": "Universal original/candidate source equivalence under the current FP.DotAdmission.all table",
+        "public_entry": "bench/tritonbench_g/matmul_leakyrelu/FPEquiv.lean",
+        "public_theorem": "VeriTile.Bench.Repairs.MatmulLeakyrelu.KernelOnly.FPEquiv.source_pair_disproved",
+        "scope": "Declared source-model calculus; GPU conformance is outside this result",
+        "interpretation": {
+          "input": "TF32 truncation",
+          "dot": "sequential FP32 fused accumulation toward zero",
+          "scalar_add": "FP32 nearest even",
+          "output": "FP16 nearest even"
+        },
+        "witness": {
+          "M": 1,
+          "N": 1,
+          "K": 96,
+          "activation": "",
+          "reference_fp16": 0.03125,
+          "candidate_fp16": 0.015625
+        },
+        "numerical_rules": [],
+        "real_correctness": "PROVED",
+        "conditional_fp_theorem": "RETAINED"
       }
     },
     {
@@ -1935,7 +2039,7 @@
           "bench/tritonbench_g/rms_norm_triton/RealCorrect.lean",
           "bench/tritonbench_g/rms_norm_triton/FPEquiv.lean"
         ],
-        "proof_scope": "Independent Correct target: Whole.realFormula: independent x * reciprocal sqrt((sum x²)/N + eps) * w, with the source pre-weight cast in native interpretation and separate Real idealization.. Complete actual selected kernel-stage pairs; exact source, transformation, numerical model/domain and observers are recorded in program_pair_review. Earlier single-source native and optional full-grid/Tensor results remain retained auxiliaries at their recorded scopes."
+        "proof_scope": "Independent Correct target: Whole.realFormula: independent x * reciprocal sqrt((sum x\u00b2)/N + eps) * w, with the source pre-weight cast in native interpretation and separate Real idealization.. Complete actual selected kernel-stage pairs; exact source, transformation, numerical model/domain and observers are recorded in program_pair_review. Earlier single-source native and optional full-grid/Tensor results remain retained auxiliaries at their recorded scopes."
       }
     },
     {

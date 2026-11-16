@@ -31,7 +31,7 @@ theorem head_run (M : Algebra α) (p : Parameters) (s : FP.Structural.State α) 
   cases hk : s.regs .nat [] "k" <;>
     cases ho : s.regs .nat [p.blockInner] "offs_k" <;>
     cases hn : s.regs .nat [p.blockColumns] "offs_bn"
-  all_goals simp [originalHead,candidateHead,originalBody,candidateKernel,KernelSource.kernel,KernelSource.sourceKernel,KernelSource.foldStrideKernel,KernelSource.candidateKernel,
+  all_goals simp [originalHead,candidateHead,originalBody,candidateKernel,KernelSource.kernel,KernelSource.matmul_kernel,KernelSource.foldStrideKernel,KernelSource.matmul_kernel_candidateKernel,
     ComputeKernel.surfaceBody,run,FP.Structural.step,evalExpr,evalComputeOp,evalOp_unfold,
     evalOffsets,Option.bind,numeric,bop,natLt,numericLt,numericEq,
     integralFloorDiv,integralMod,Broadcast.leftIndex,Broadcast.rightIndex,
@@ -51,13 +51,13 @@ theorem pure_safe (M : Algebra α) (bounds : RegionName → Nat) (code : List Co
 theorem original_head_safe (M : Algebra α) (p : Parameters) (bounds : RegionName → Nat) (s : FP.Structural.State α) :
     traceSafeList M bounds (originalHead p) s := by
   apply pure_safe
-  simp [originalHead,originalBody,KernelSource.kernel,KernelSource.sourceKernel,ComputeKernel.surfaceBody]
+  simp [originalHead,originalBody,KernelSource.kernel,KernelSource.matmul_kernel,ComputeKernel.surfaceBody]
   all_goals simp [stepSafe_unfold,safeExpr_unfold,safeCompute_unfold,safeOp_unfold]
 
 theorem candidate_head_safe (M : Algebra α) (p : Parameters) (bounds : RegionName → Nat) (s : FP.Structural.State α) :
     traceSafeList M bounds (candidateHead p) s := by
   apply pure_safe
-  simp [candidateHead,candidateKernel,KernelSource.foldStrideKernel,KernelSource.candidateKernel,ComputeKernel.surfaceBody]
+  simp [candidateHead,candidateKernel,KernelSource.foldStrideKernel,KernelSource.matmul_kernel_candidateKernel,ComputeKernel.surfaceBody]
   all_goals simp [stepSafe_unfold,safeExpr_unfold,safeCompute_unfold,safeOp_unfold]
 
 theorem body_run (M : Algebra α) (p : Parameters) (s : FP.Structural.State α) :

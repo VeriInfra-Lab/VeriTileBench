@@ -35,11 +35,12 @@ def callSignature (storage : Storage) : CallSignature where
   readPorts := ["x_ptr"]
   writePorts := ["output_ptr"]
 
-def runtimeKernel (storage : Storage) (x_ptr output_ptr : RegionName)
+def _seeded_dropoutKernel (storage : Storage) (x_ptr output_ptr : RegionName)
     (n_elements : Nat) (seed : IntegerArgument) (BLOCK_SIZE : Nat)
     (hBlock : Random.ArangeSizeDomain BLOCK_SIZE) : ComputeKernel :=
   with_triton_call (callSignature storage) call_args [n_elements := n_elements]
     integer_args [seed := seed] arange_args [BLOCK_SIZE := hBlock] in triton {
+    # compute memory offsets of elements handled by this instance
     pid = tl.program_id(axis=0)
     block_start = pid * BLOCK_SIZE
     offsets = block_start + tl.arange(0, BLOCK_SIZE)
@@ -54,11 +55,12 @@ def runtimeKernel (storage : Storage) (x_ptr output_ptr : RegionName)
     tl.store(output_ptr + offsets, output, mask=mask)
   }
 
-def runtimeCandidateKernel (storage : Storage) (x_ptr output_ptr : RegionName)
+def _seeded_dropout_index_commutedKernel (storage : Storage) (x_ptr output_ptr : RegionName)
     (n_elements : Nat) (seed : IntegerArgument) (BLOCK_SIZE : Nat)
     (hBlock : Random.ArangeSizeDomain BLOCK_SIZE) : ComputeKernel :=
   with_triton_call (callSignature storage) call_args [n_elements := n_elements]
     integer_args [seed := seed] arange_args [BLOCK_SIZE := hBlock] in triton {
+    # compute memory offsets of elements handled by this instance
     pid = tl.program_id(axis=0)
     block_start = BLOCK_SIZE * pid
     offsets = block_start + tl.arange(0, BLOCK_SIZE)
@@ -80,11 +82,11 @@ noncomputable def probabilityArgument (p : ℝ) : ScalarArgument := ScalarArgume
 
 noncomputable def rawSource (storage : Storage) (X Y : RegionName) (n : Nat)
     (p : ℝ) (seed : IntegerArgument) (B : Nat) (legal : Random.ArangeSizeDomain B) : ComputeKernel :=
-  (runtimeKernel storage X Y n seed B legal).withScalarArguments [probabilityArgument p]
+  (_seeded_dropoutKernel storage X Y n seed B legal).withScalarArguments [probabilityArgument p]
 
 noncomputable def rawCandidate (storage : Storage) (X Y : RegionName) (n : Nat)
     (p : ℝ) (seed : IntegerArgument) (B : Nat) (legal : Random.ArangeSizeDomain B) : ComputeKernel :=
-  (runtimeCandidateKernel storage X Y n seed B legal).withScalarArguments [probabilityArgument p]
+  (_seeded_dropout_index_commutedKernel storage X Y n seed B legal).withScalarArguments [probabilityArgument p]
 
 /-- All retained storage/seed ABI profiles specialize the same copied body.
 The wrapper's fixed block domain and signed/unsigned seed range stay separate. -/

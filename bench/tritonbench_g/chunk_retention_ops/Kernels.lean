@@ -17,9 +17,10 @@ def forwardHSignature : CallSignature where
   readPorts := ["k","v","h0"]
   writePorts := ["h","ht"]
 
-def forwardHKernel (k v h h0 ht : RegionName)
+def chunk_retention_fwd_kernel_hKernel (k v h h0 ht : RegionName)
         (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d s_h_h s_h_t : Nat) (H T K V BT BK BV NT : Nat) (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : ComputeKernel :=
   with_triton_call forwardHSignature call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, s_vo_h := s_vo_h, s_vo_t := s_vo_t, s_vo_d := s_vo_d, s_h_h := s_h_h, s_h_t := s_h_t] in triton {
+    # Triton kernel code for forward pass of chunk retention with initial and final state handling
     i_k, i_v, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2).to(tl.int64)
     i_h = i_bh % H
     b_b = tl.math.log2(1 - tl.math.exp2(-5 - i_h * 1.0))
@@ -52,9 +53,10 @@ def forwardOSignature : CallSignature where
   readPorts := ["q","k","v","h"]
   writePorts := ["o"]
 
-def forwardOKernel (q k v h o : RegionName)
+def chunk_retention_fwd_kernel_oKernel (q k v h o : RegionName)
         (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d s_h_h s_h_t : Nat) (scale : ℝ) (H T K V BT BK BV : Nat) : ComputeKernel :=
   with_triton_call forwardOSignature call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, s_vo_h := s_vo_h, s_vo_t := s_vo_t, s_vo_d := s_vo_d, s_h_h := s_h_h, s_h_t := s_h_t, scale := scale] in triton {
+    # Triton kernel code for forward pass of chunk retention with output scaling
     i_v, i_t, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2).to(tl.int64)
     i_h = i_bh % H
     b_b = tl.math.log2(1 - tl.math.exp2(-5 - i_h * 1.0))
@@ -81,9 +83,10 @@ def forwardOKernel (q k v h o : RegionName)
     tl.store(p_o, b_o.to(p_o.dtype.element_ty), boundary_check=(0, 1))
   }
 
-def forwardOScaleFirstKernel (q k v h o : RegionName)
+def chunk_retention_fwd_kernel_o_candidateKernel (q k v h o : RegionName)
         (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d s_h_h s_h_t : Nat) (scale : ℝ) (H T K V BT BK BV : Nat) : ComputeKernel :=
   with_triton_call forwardOSignature call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, s_vo_h := s_vo_h, s_vo_t := s_vo_t, s_vo_d := s_vo_d, s_h_h := s_h_h, s_h_t := s_h_t, scale := scale] in triton {
+    # Triton kernel code for forward pass of chunk retention with output scaling
     i_v, i_t, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2).to(tl.int64)
     i_h = i_bh % H
     b_b = tl.math.log2(1 - tl.math.exp2(-5 - i_h * 1.0))
@@ -117,9 +120,10 @@ def backwardQKVSignature : CallSignature where
   readPorts := ["q","k","v","h","do","dh"]
   writePorts := ["dq","dk","dv"]
 
-def backwardQKVKernel (q k v h «do» dh dq dk dv : RegionName)
+def chunk_retention_bwd_kernel_dqkvKernel (q k v h «do» dh dq dk dv : RegionName)
         (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d s_h_h s_h_t : Nat) (scale : ℝ) (H T K V BT BK BV NT : Nat) : ComputeKernel :=
   with_triton_call backwardQKVSignature call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, s_vo_h := s_vo_h, s_vo_t := s_vo_t, s_vo_d := s_vo_d, s_h_h := s_h_h, s_h_t := s_h_t, scale := scale] in triton {
+    # Triton kernel code for backward pass of chunk retention, computing gradients for q, k, v
     i_k, i_t, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2).to(tl.int64)
     i_h = i_bh % H
     n_bh = tl.num_programs(2).to(tl.int64)
@@ -169,9 +173,10 @@ def backwardHSignature : CallSignature where
   readPorts := ["q","do","d_ht"]
   writePorts := ["dh","d_h0"]
 
-def backwardHKernel (q «do» dh d_ht d_h0 : RegionName)
+def chunk_retention_bwd_kernel_dhKernel (q «do» dh d_ht d_h0 : RegionName)
         (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d s_h_h s_h_t : Nat) (scale : ℝ) (H T K V BT BK BV NT : Nat) (USE_FINAL_GRAD STORE_INITIAL_GRAD : Bool) : ComputeKernel :=
   with_triton_call backwardHSignature call_args [s_qk_h := s_qk_h, s_qk_t := s_qk_t, s_qk_d := s_qk_d, s_vo_h := s_vo_h, s_vo_t := s_vo_t, s_vo_d := s_vo_d, s_h_h := s_h_h, s_h_t := s_h_t, scale := scale] in triton {
+    # Reverse carry includes the optional terminal loss and yields the initial-state adjoint.
     i_k, i_v, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2).to(tl.int64)
     i_h = i_bh % H
     b_b = tl.math.log2(1 - tl.math.exp2(-5 - i_h * 1.0))

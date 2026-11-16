@@ -1,6 +1,6 @@
 # TritonBench-G
 
-Each of the 183 task directories under `bench/tritonbench_g/` contains one
+Each of the 184 task directories under `bench/tritonbench_g/` contains one
 current repaired Python implementation, `Kernels.lean`, and canonical
 `Contract.lean`, `Correct.lean` and `FPEquiv.lean` entries. Required source,
 mathematical and proof helpers support that implementation. Earlier runnable

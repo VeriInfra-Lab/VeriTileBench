@@ -11,9 +11,9 @@ set_option maxRecDepth 24000
 set_option linter.unusedSimpArgs false
 
 def original (fp8 : Bool) (p : TypedSource.Arguments) : FP.ProfiledRewrite.Program :=
-  ⟨TypedSource.source fp8 p, []⟩
+  ⟨TypedSource.rms_matmul_rbeKernel fp8 p, []⟩
 def indexCommuted (fp8 : Bool) (p : TypedSource.Arguments) : FP.ProfiledRewrite.Program :=
-  ⟨TypedSource.indexCommutedKernel fp8 p, []⟩
+  ⟨TypedSource.rms_matmul_rbe_candidateKernel fp8 p, []⟩
 
 /-- The historical exact address rewrite now covers the actual repaired source. -/
 theorem equivalent (fp8 : Bool) (p : TypedSource.Arguments) :
@@ -51,15 +51,15 @@ theorem row_assignment (M : Algebra α) (s : State α) (n : Nat) :
   simp only [step,evalExpr,evalComputeOp,row_expression]
 
 def candidate (fp8 : Bool) (p : KernelSource.Parameters) :=
-  TypedSource.indexCommutedKernel fp8 (KernelSource.arguments p)
+  TypedSource.rms_matmul_rbe_candidateKernel fp8 (KernelSource.arguments p)
 def candidateStores (fp8 : Bool) (p : KernelSource.Parameters) :=
   (candidate fp8 p).surfaceBody.drop 29
 
 theorem tail_run (M : Algebra α) (fp8 : Bool) (p : KernelSource.Parameters) (s : State α) :
     run M (KernelSource.stores fp8 p) s = run M (candidateStores fp8 p) s := by
   cases fp8 <;>
-    simp only [KernelSource.stores,KernelSource.kernel,TypedSource.kernel,TypedSource.source,candidateStores,
-      candidate,TypedSource.indexCommutedKernel,KernelSource.arguments,
+    simp only [KernelSource.stores,KernelSource.kernel,TypedSource.kernel,TypedSource.rms_matmul_rbeKernel,candidateStores,
+      candidate,TypedSource.rms_matmul_rbe_candidateKernel,KernelSource.arguments,
       ComputeKernel.surfaceBody,List.drop,run,row_assignment]
 
 theorem tail_safe (M : Algebra α) (fp8 : Bool) (p : KernelSource.Parameters)
@@ -67,8 +67,8 @@ theorem tail_safe (M : Algebra α) (fp8 : Bool) (p : KernelSource.Parameters)
     Safety.traceSafeList M bounds (KernelSource.stores fp8 p) s ↔
       Safety.traceSafeList M bounds (candidateStores fp8 p) s := by
   cases fp8 <;>
-    simp only [KernelSource.stores,KernelSource.kernel,TypedSource.kernel,TypedSource.source,candidateStores,
-      candidate,TypedSource.indexCommutedKernel,KernelSource.arguments,
+    simp only [KernelSource.stores,KernelSource.kernel,TypedSource.kernel,TypedSource.rms_matmul_rbeKernel,candidateStores,
+      candidate,TypedSource.rms_matmul_rbe_candidateKernel,KernelSource.arguments,
       ComputeKernel.surfaceBody,List.drop,Safety.traceSafeList_cons,Safety.traceSafeList_nil,
       Safety.stepSafe_unfold,Safety.safeExpr_unfold,Safety.safeAlg_unfold,
       Safety.safeOp_unfold,Safety.safeCompute_unfold,

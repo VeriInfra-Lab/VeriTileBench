@@ -14,7 +14,7 @@ def callSignature (dtype : FloatDType) : CallSignature where
   readPorts := ["B_Seqlen","B_Start_Loc","Logics"]
   writePorts := ["Prob_Out"]
 
-def sourceKernel (dtype : FloatDType)
+def _fwd_kernel_token_softmaxKernel (dtype : FloatDType)
     (Logics : RegionName) (B_Start_Loc B_Seqlen : Region .int) (Prob_Out : RegionName)
     (stride_start stride_length stride_logic_h stride_logic_bs stride_prob_h stride_prob_bs BLOCK_SIZE : Nat) :
     ComputeKernel :=
@@ -44,7 +44,7 @@ structure Parameters where
   (startStride lengthStride : Nat)
   (inputHeadStride inputTokenStride outputHeadStride outputTokenStride width : Nat)
 
-def kernel (d : FloatDType) (p : Parameters) := sourceKernel d p.input p.start p.length p.output
+def kernel (d : FloatDType) (p : Parameters) := _fwd_kernel_token_softmaxKernel d p.input p.start p.length p.output
   p.startStride p.lengthStride p.inputHeadStride p.inputTokenStride p.outputHeadStride p.outputTokenStride p.width
 
 end VeriTile.Bench.Repairs.TokenSoftmaxLlama.Strided
@@ -52,7 +52,7 @@ end VeriTile.Bench.Repairs.TokenSoftmaxLlama.Strided
 namespace VeriTile.Bench.Repairs.TokenSoftmaxLlama.KernelSource
 open VeriTile.Triton Strided
 
-def indexCommutedKernel (dtype : FloatDType)
+def _fwd_kernel_token_softmax_candidateKernel (dtype : FloatDType)
     (Logics : RegionName) (B_Start_Loc B_Seqlen : Region .int) (Prob_Out : RegionName)
     (stride_start stride_length stride_logic_h stride_logic_bs stride_prob_h stride_prob_bs BLOCK_SIZE : Nat) :
     ComputeKernel :=
@@ -64,18 +64,14 @@ def indexCommutedKernel (dtype : FloatDType)
     col_offsets = tl.arange(0, BLOCK_SIZE).to(tl.int64)
     cur_batch_seq_len = tl.load(B_Seqlen + stride_length * cur_batch).to(tl.int64)
     cur_batch_in_all_start_index = tl.load(B_Start_Loc + cur_batch * stride_start).to(tl.int64)
-    row = tl.load(Logics + cur_head * stride_logic_h +
-                  (cur_batch_in_all_start_index + col_offsets) * stride_logic_bs,
-                  mask=col_offsets < cur_batch_seq_len, other=-float('inf')).to(tl.float32)
+    row = tl.load(Logics + cur_head * stride_logic_h + (cur_batch_in_all_start_index + col_offsets) * stride_logic_bs, mask=col_offsets < cur_batch_seq_len, other=-float('inf')).to(tl.float32)
     row_minus_max = row - tl.max(row, axis=0)
     numerator = tl.exp(row_minus_max)
     denominator = tl.sum(numerator, axis=0)
     softmax_output = numerator / denominator
-    tl.store(Prob_Out + cur_head * stride_prob_h +
-             (cur_batch_in_all_start_index + col_offsets) * stride_prob_bs,
-             softmax_output, mask=col_offsets < cur_batch_seq_len)
+    tl.store(Prob_Out + cur_head * stride_prob_h + (cur_batch_in_all_start_index + col_offsets) * stride_prob_bs, softmax_output, mask=col_offsets < cur_batch_seq_len)
   }
 
-def candidateKernel (p : Parameters) := indexCommutedKernel .fp32 p.input p.start p.length p.output
+def candidateKernel (p : Parameters) := _fwd_kernel_token_softmax_candidateKernel .fp32 p.input p.start p.length p.output
   p.startStride p.lengthStride p.inputHeadStride p.inputTokenStride p.outputHeadStride p.outputTokenStride p.width
 end VeriTile.Bench.Repairs.TokenSoftmaxLlama.KernelSource

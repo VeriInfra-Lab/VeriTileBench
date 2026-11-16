@@ -36,19 +36,19 @@ theorem site_values_iff {α : Type} [Inhabited α] (M : Algebra α) (D : Domain 
       ∀ j : TileIndex [p.block], s.pids 0 * p.block + j.1.val < p.n →
         D .finite (combined M p m s j) ∧
         D .finite (loaded M p s p.y ((s.pids 0 * p.block + j.1.val) % W) j) := by
-  cases a <;> simp [additionSite, Site.Holds, Source.prefixBefore, candidateKernel, sourceKernel,
+  cases a <;> simp [additionSite, Site.Holds, Source.prefixBefore, candidateKernel, fused_add_mul_activation_kernel,
     ComputeKernel.surfaceBody, run, step, evalExpr, evalComputeOp, evalOp_unfold,
     Option.bind, numeric, numericLt, natLt, integralMod, bop, Region.cast,
     engine, Algebra.withDefaultPrecision, resolvePrecision, loaded, combined]
 
 def commutedExecution {α : Type} [Inhabited α] (M : Algebra α)
     (p : Parameters) (W : Nat) (m : ℝ) (a : Bool) (s : State α) :
-    {t : State α // FP.Structural.exec M (commutedKernel p.output p.y p.x W p.n p.block m a) s = some t} := by
+    {t : State α // FP.Structural.exec M (fused_add_mul_activation_commuted_kernel p.output p.y p.x W p.n p.block m a) s = some t} := by
   cases a
   all_goals
     refine ⟨?_, ?_⟩
     swap
-    simp [commutedKernel, FP.Structural.exec, ComputeKernel.surfaceBody,
+    simp [fused_add_mul_activation_commuted_kernel, FP.Structural.exec, ComputeKernel.surfaceBody,
       run, step, evalExpr, evalComputeOp, evalOp_unfold, Option.bind,
       numericLt, natLt, bop, store, Region.cast, ComputeDType.eraseDType]
     rfl
@@ -146,7 +146,7 @@ theorem runs_equiv {α : Type} [Inhabited α]
     (p : Parameters) (W : Nat) (m : ℝ) (a : Bool) (s : State α)
     (domain : (additionSite p W m a).Holds M D s) :
     ∃ first second, FP.Structural.exec (engine M) (candidateKernel p W m a) s = some first ∧
-      FP.Structural.exec (engine M) (commutedKernel p.output p.y p.x W p.n p.block m a) s = some second ∧
+      FP.Structural.exec (engine M) (fused_add_mul_activation_commuted_kernel p.output p.y p.x W p.n p.block m a) s = some second ∧
       first.mem = second.mem :=
   ⟨(execution (engine M) p W m a s).val, (commutedExecution (engine M) p W m a s).val,
     (execution (engine M) p W m a s).property, (commutedExecution (engine M) p W m a s).property,

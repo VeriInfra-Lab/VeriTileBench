@@ -26,7 +26,7 @@ theorem head_run (M : Algebra α) (p : Geometry) (s : State α) (valid : s.pids 
   have mod_pid : (s.pids 0 : Int).tmod (p.rows : Int)=(s.pids 0 : Int) := by
     rw [tmod_nat,Nat.mod_eq_of_lt valid]
   simp [original,candidate,Source.quantize,Source.unwrappedQuantizeKernel,KernelSource.quantize,
-    quantizeKernel,unwrappedQuantizeKernel,KernelProducer.parameters,
+    quantize_int8_perrow_kernel,quantize_int8_perrow_kernel_unwrappedKernel,KernelProducer.parameters,
     KernelProducerGrid.parameters,ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,
     evalOp_unfold,evalOffsets,numeric,bop,Option.bind,integralMod,numericLt,numericEq,
     ComputeDType.eraseDType,NumericDType.sub,Int.mul_one,Int.add_zero,mod_pid,
@@ -48,7 +48,7 @@ theorem head_safe (M : Algebra α) (p : Geometry) (bounds : RegionName → Nat) 
     traceSafeList M bounds ((original p).surfaceBody.take 10) s ∧
     traceSafeList M bounds ((candidate p).surfaceBody.take 10) s := by
   constructor <;> apply pure_safe
-  all_goals simp [original,candidate,Source.quantize,Source.unwrappedQuantizeKernel,KernelSource.quantize,quantizeKernel,unwrappedQuantizeKernel,KernelProducer.parameters,
+  all_goals simp [original,candidate,Source.quantize,Source.unwrappedQuantizeKernel,KernelSource.quantize,quantize_int8_perrow_kernel,quantize_int8_perrow_kernel_unwrappedKernel,KernelProducer.parameters,
     KernelProducerGrid.parameters,ComputeKernel.surfaceBody]
   all_goals simp [stepSafe_unfold,safeExpr_unfold,safeCompute_unfold,safeOp_unfold]
 

@@ -3,7 +3,7 @@ import copy
 import hashlib
 from pathlib import Path
 import unittest
-from scripts.bench.jit_correspondence import check
+from scripts.bench.jit_correspondence import check, quotation
 
 from tests.python.layout_fixtures import check_pinned_pairs, pinned_pairs, variant_provenance, variant_source
 
@@ -26,22 +26,23 @@ class ContextAttnMistralBodyMigrationTests(unittest.TestCase):
         self.assertEqual([r['statements'] for r in check_pinned_pairs(ROOT, DIRECTORY)], [25, 25, 25])
 
     def test_cast_masks_guards_and_final_return_are_checked(self):
+        body=quotation(self.lean,self.records[0]['lean_definition'],raw_python=True)[1]
         for before, after in [
             ('tl.program_id(0).to(tl.int64)', 'tl.program_id(0)'),
             ('p = p.to(v.dtype)', 'p = p'),
             ('tl.store(out_ptrs, acc,', 'tl.store(out_ptrs, acc.to(tl.float32),'),
-            ('offs_m[:, None] - (start_n + offs_n[None, :]) < sliding_window',
+            ('(offs_m[:, None] - (start_n + offs_n[None, :])) < sliding_window',
              'start_n + offs_n[None, :] > offs_m[:, None] - sliding_window'),
-            ('m_ij == -1000000000.0', 'm_ij == 0.0'),
+            ('m_ij == -1e9', 'm_ij == 0.0'),
             ('l_i_new == 0.0', 'l_i_new < 0.0'),
             ('block_mask * (start_m + 1) * BLOCK_M', '(start_m + 1) * BLOCK_M'),
             ('        qk *= sm_scale', '        qk = sm_scale * qk'),
             ('    return\n', ''),
         ]:
             with self.subTest(before=before):
-                self.assertIn(before, self.lean)
+                self.assertIn(before, body)
                 with self.assertRaises(ValueError):
-                    self.verify(self.lean.replace(before, after))
+                    self.verify(self.lean.replace(body,body.replace(before,after),1))
 
     def test_call_dtype_and_signed_window_binding_are_checked(self):
         for before, after in [('("B_Seqlen",.i32)', '("B_Seqlen",.i64)'),

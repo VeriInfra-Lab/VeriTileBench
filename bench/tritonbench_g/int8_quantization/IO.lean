@@ -44,7 +44,7 @@ def memory (α : Type) (p : Parameters) : MemoryIO α where
 /-- Exact existing finite launch order and base/program-ID ABI. -/
 def invocation {α : Type} (M : Algebra α) (ops : Model.Primitives α)
     (p : Parameters) (w : Schedule.Program) : Invocation α where
-  kernel := sourceKernel (Grid.parameters p w)
+  kernel := _per_block_int8_repairedKernel (Grid.parameters p w)
   backend := Model.backend M ops
   pids := fun _ => w.pid
   setPids := fun ax => ax == 0
@@ -118,7 +118,7 @@ noncomputable section
 variable {α : Type} [Inhabited α]
 def biasInvocation (M : Algebra α) (ops : Model.Primitives α) (p : Parameters)
     (w : Schedule.Program) : Invocation α :=
-  { invocation M ops p w with kernel := biasFoldKernel (Grid.parameters p w) }
+  { invocation M ops p w with kernel := _per_block_int8_repaired_candidateKernel (Grid.parameters p w) }
 
 def biasVariant (M : Algebra α) (ops : Model.Primitives α) (p : Parameters) :
     ProgramIO.Variant (quantizationIO M ops p) where

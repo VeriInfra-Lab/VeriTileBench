@@ -39,8 +39,8 @@ theorem uncast_run (X W O : RegionName) (sxb sxm sxk sw sob som sok N B : Nat)
       [.forRange "block_n_strart_ptr" 0 N B (uncastVarBody X sxk N B)] ++
       rmsStdPostLoop N B eps ++
       [.forRange "block_n_strart_ptr" 0 N B (rmsOutLoopBody X W O sxk sw sob som sok N B)] := by
-    simp [VeriTile.Bench.Repairs.RmsnormImplementation.originalForKernel,
-    VeriTile.Bench.Repairs.RmsnormImplementation.commutedForKernel,
+    simp [VeriTile.Bench.Repairs.RmsnormImplementation.rmsnorm_tritonKernel,
+    VeriTile.Bench.Repairs.RmsnormImplementation.rmsnorm_triton_index_commutedKernel,
     VeriTile.Bench.Repairs.RmsnormImplementation.family,
     uncastMathKernel, VeriTile.Bench.Repairs.RmsnormImplementation.kernel,
     VeriTile.Bench.Repairs.RmsnormImplementation.indexCommutedKernel,

@@ -47,7 +47,7 @@ def epilogueExecution {α : Type} [Inhabited α] (a : Arithmetic α)
     {t : State (Replicas α) // run a.model (epilogue p) current=some t} := by
   refine ⟨?_,?_⟩
   swap
-  simp [epilogue,source,declared,originalKernel,quotientRemainderKernel,ComputeKernel.surfaceBody,run,FP.Structural.step,
+  simp [epilogue,source,declared,block_sparse_attention_kernel,block_sparse_attention_kernel_candidateKernel,ComputeKernel.surfaceBody,run,FP.Structural.step,
     evalExpr,evalComputeOp,evalOp_unfold,evalOffsets,evalDeltas,numeric,bop,natLt,numericLt,
     ComputeDType.eraseDType,ofFloat,toFloat,Region.cast,Option.bind,
     integralFloorDiv,integralMod,Arithmetic.model,FP.Structural.store,

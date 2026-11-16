@@ -20,8 +20,9 @@
 # A `#axiomsClean` failure means a `sorry`/smuggled axiom leaked into a proof
 # the corpus calls complete: a REAL soundness finding. Do not paper it over.
 #
-# Independent single-file elaborations run in parallel (see scripts/bench/check_ports.sh
-# for the same concurrency model). Override with AUDIT_TRUST_JOBS=N.
+# Audited files have independent deadlines and live progress. Compatible
+# inventories are replayed in bounded batches; every selected file is required.
+# See documents/bench/batch_replay.md for settings and the individual diagnostic mode.
 #
 # Usage:
 #   scripts/bench/audit_trust.sh                 # audit the whole bench corpus
@@ -158,16 +159,36 @@ fi
 
 export PROJECT_ROOT TMPDIR_AUDIT
 
+replay_mode="${AUDIT_TRUST_REPLAY:-batch}"
+expected="$(printf '%s\n' "${target_list}" | sed "s|^${PROJECT_ROOT}/||")"
+if [ "${replay_mode}" = batch ]; then
+  printf '%s\n' "${expected}" > "${TMPDIR_AUDIT}/selected-files.txt"
+  if ! python3 -u scripts/check_comparator_batch.py \
+      --files-from "${TMPDIR_AUDIT}/selected-files.txt" \
+      --workspace "${TMPDIR_AUDIT}/judge" --results "${TMPDIR_AUDIT}/batch-result.json" \
+      --batch-size "${AUDIT_TRUST_BATCH_SIZE:-32}" \
+      --audit-batch-size "${AUDIT_TRUST_AUDIT_JOBS:-2}" \
+      --file-timeout "${AUDIT_TRUST_FILE_TIMEOUT:-1800}" \
+      --batch-timeout "${AUDIT_TRUST_BATCH_TIMEOUT:-1800}" \
+      --heartbeat "${AUDIT_TRUST_HEARTBEAT_SECONDS:-30}"; then
+    printf 'Batch trust audit failed; no partial acceptance is published\n' >&2
+    exit 1
+  fi
+  results="$(python3 "${SCRIPT_DIR}/check_worker_results.py" --batch-report \
+      "${expected}" "${TMPDIR_AUDIT}/batch-result.json")" || exit "$?"
+elif [ "${replay_mode}" = individual ]; then
 launcher_status=0
 results="$(printf '%s\n' "${target_list}" | xargs -P "${JOBS}" -I{} bash -c '
+  set -o pipefail
   src="{}"
   rel="${src#'"${PROJECT_ROOT}"'/}"
   # Nested examples share names such as Proofs/FP.lean. Use the full path
   # so concurrent workers cannot overwrite another example audit log.
   tag="$(printf "%s" "${rel}" | sha256sum | cut -d " " -f 1)"
   tmp="${TMPDIR_AUDIT}/${tag}"
-  if python3 "${PROJECT_ROOT}/scripts/check_comparator.py" --file "${src}" --trust \
-      --workspace "${TMPDIR_AUDIT}/judge" > "${tmp}.log" 2>&1; then
+  if python3 -u "${PROJECT_ROOT}/scripts/check_comparator.py" --file "${src}" --trust \
+      --workspace "${TMPDIR_AUDIT}/judge" --timeout "${AUDIT_TRUST_FILE_TIMEOUT:-1800}" \
+      --heartbeat "${AUDIT_TRUST_HEARTBEAT_SECONDS:-30}" 2>&1 | tee "${tmp}.log" >&2; then
     summary=$(sed -n "/^Axiom audit:/p; /^Spec audit:/p; /^Comparator:/p" "${tmp}.log" | paste -sd ";")
     printf "%s: %s\n" "${rel}" "${summary}" >&2
     printf "  ok    %s\n" "${rel}"
@@ -180,6 +201,11 @@ results="$(printf '%s\n' "${target_list}" | xargs -P "${JOBS}" -I{} bash -c '
 if [ "${launcher_status}" -ne 0 ]; then
   printf 'Trust worker launcher failed (exit %s)\n' "${launcher_status}" >&2
   exit 1
+fi
+
+else
+  printf 'AUDIT_TRUST_REPLAY must be batch or individual\n' >&2
+  exit 2
 fi
 
 expected="$(printf '%s\n' "${target_list}" | sed "s|^${PROJECT_ROOT}/||")"

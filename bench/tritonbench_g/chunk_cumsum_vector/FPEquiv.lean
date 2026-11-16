@@ -28,7 +28,7 @@ specification memory_equiv (M : Algebra α) (dot : DotBackend α)
     (NativeIO.equivalent M dot D model h layout c chosen p)
 
 #print_fp_assumptions memory_equiv
-#specNonCircular carryDomain avoiding [Kernels.sourceKernel,Kernels.sumLeftKernel,run,FPExecution.source_correct]
+#specNonCircular carryDomain avoiding [Kernels.chunk_global_cumsum_vector_kernel,Kernels.chunk_global_cumsum_vector_kernel_sum_leftKernel,run,FPExecution.source_correct]
 #axiomsClean memory_equiv
 #guard_msgs (drop info) in
 #auditModuleAxioms

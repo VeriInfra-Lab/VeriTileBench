@@ -49,6 +49,32 @@ class FinalReviewTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'no public specification'):
             coverage(self.root)
 
+    def refuted_case(self):
+        self.ledger['tasks'][0]['fp_verdict']={
+            'status':'DISPROVED','public_entry':'bench/tritonbench_g/fixture/FPEquiv.lean',
+            'public_theorem':'Fixture.rejected'}
+        self.ledger_path.write_text(json.dumps(self.ledger))
+        reader=self.directory/'FPEquiv.lean'
+        reader.write_text('namespace Fixture\nrefutation rejected : False := by trivial\nend Fixture\n')
+        return reader
+
+    def test_refutation_only_entry_is_a_negative_public_goal(self):
+        self.refuted_case()
+        rows=coverage(self.root)['rows']
+        refutation=next(r for r in rows if r['declaration']=='rejected')
+        self.assertEqual(refutation['declaration_kind'],'refutation')
+        self.assertEqual(refutation['polarity'],'negative')
+
+    def test_disproved_verdict_requires_its_public_refutation(self):
+        reader=self.refuted_case()
+        for source in ['specification pair : True := by trivial\n',
+                       'specification rejected : True := by trivial\n',
+                       '-- refutation rejected : False := by trivial\nspecification pair : True := by trivial\n']:
+            with self.subTest(source=source):
+                reader.write_text(source)
+                with self.assertRaisesRegex(ValueError,'missing required refutation'):
+                    coverage(self.root)
+
     def test_duplicate_or_escaping_entry_is_rejected(self):
         entries = self.selection['public_entries']
         entries.append(entries[0])

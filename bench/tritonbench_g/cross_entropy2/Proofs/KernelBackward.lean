@@ -82,7 +82,7 @@ theorem backward_executes (M : Algebra α) (p : Parameters) (initial : State α)
       simp only [target,Region.cast] at ignored
       refine ⟨?_,?_,?_⟩
       rotate_left
-      · simp [exec,backwardSyntax,backwardKernel,ComputeKernel.withScalarArguments,ScalarArgument.statement,ScalarArgument.integer,hs,ComputeKernel.surfaceBody,run,step,
+      · simp [exec,backwardSyntax,cross_entropy_bwd_kernel,ComputeKernel.withScalarArguments,ScalarArgument.statement,ScalarArgument.integer,hs,ComputeKernel.surfaceBody,run,step,
           evalExpr,evalComputeOp,evalOp_unfold,Option.bind,engine,
           Algebra.withDefaultPrecision,resolvePrecision,ComputeDType.eraseDType,
           numeric,numericEq,numericLe,numericLt,natLt,bop,ofFloat,toFloat,
@@ -138,7 +138,7 @@ theorem backward_outputs (M : Algebra α) (p : Parameters) (initial : State α)
 #axiomsClean backward_outputs
 
 #axiomsClean backward_executes
-#specNonCircular gradientValue avoiding [forwardSyntax,forwardKernel,ComputeKernel.withScalarArguments,ScalarArgument.statement,ScalarArgument.integer,backwardSyntax,backwardKernel,ComputeKernel.withScalarArguments,ScalarArgument.statement,ScalarArgument.integer,Source.forward,Source.backward,exec,run]
+#specNonCircular gradientValue avoiding [forwardSyntax,cross_entropy_fwd_kernel,ComputeKernel.withScalarArguments,ScalarArgument.statement,ScalarArgument.integer,backwardSyntax,cross_entropy_bwd_kernel,ComputeKernel.withScalarArguments,ScalarArgument.statement,ScalarArgument.integer,Source.forward,Source.backward,exec,run]
 #guard_msgs (drop info) in
 #auditModuleAxioms
 end

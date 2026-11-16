@@ -16,7 +16,7 @@ def original (W N B : Nat) (a : Bool) : Program where
   domain := [Rewrite.additionSite (parameters W N B) W (1/2) a]
 
 def commuted (W N B : Nat) (a : Bool) : Program :=
-  { original W N B a with kernel := commutedKernel "x" "bias" "input" W N B (1/2) a }
+  { original W N B a with kernel := fused_add_mul_activation_commuted_kernel "x" "bias" "input" W N B (1/2) a }
 
 /-- Source-level FP32 equivalence by the shared strict addition commutation theorem. Both
 full kernels execute successfully and all memory cells agree. Native FMA

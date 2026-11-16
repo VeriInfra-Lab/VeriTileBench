@@ -35,8 +35,8 @@ theorem suffix_eq (m : Model α) (s t : State α) (M N BM BN : Nat)
     (a : Carries α BM BN) (h : Invariant s BM BN a t) :
     run (engine m) (suffix M N BM BN) t = run (engine m) (SourceFinal.suffix M N BM BN) t := by
   obtain ⟨hm,hcols,hdw,hdb⟩ := h
-  simp [suffix,kernel,TypedSource.finalBackwardCandidateKernel,finalBackwardCandidateKernel,SourceFinal.suffix,SourceFinal.code,
-    TypedSource.finalBackwardKernel,finalBackwardKernel,ComputeKernel.surfaceBody,
+  simp [suffix,kernel,TypedSource.finalBackwardCandidateKernel,_layer_norm_bwd_dwdb_candidateKernel,SourceFinal.suffix,SourceFinal.code,
+    TypedSource.finalBackwardKernel,_layer_norm_bwd_dwdbKernel,ComputeKernel.surfaceBody,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,
     engine,numeric,natLt,numericLt,numericLe,numericEq,bop,
     FP.Structural.store,ComputeDType.eraseDType,
@@ -59,8 +59,8 @@ theorem suffix_safe_iff (m : Model α) (s t : State α) (M N BM BN : Nat)
     Safety.traceSafeList (engine m) bounds (suffix M N BM BN) t ↔
       Safety.traceSafeList (engine m) bounds (SourceFinal.suffix M N BM BN) t := by
   obtain ⟨hm,hcols,hdw,hdb⟩ := h
-  simp [suffix,kernel,TypedSource.finalBackwardCandidateKernel,finalBackwardCandidateKernel,SourceFinal.suffix,SourceFinal.code,
-    TypedSource.finalBackwardKernel,finalBackwardKernel,ComputeKernel.surfaceBody,
+  simp [suffix,kernel,TypedSource.finalBackwardCandidateKernel,_layer_norm_bwd_dwdb_candidateKernel,SourceFinal.suffix,SourceFinal.code,
+    TypedSource.finalBackwardKernel,_layer_norm_bwd_dwdbKernel,ComputeKernel.surfaceBody,
     Safety.traceSafeList_unfold,Safety.stepSafe_unfold,Safety.safeAlg_unfold,
     Safety.safeExpr_unfold,Safety.safeCompute_unfold,Safety.safeOp_unfold,
     Safety.safeAddress_unfold,Safety.safeMask_unfold,Safety.addressSafe_unfold,Safety.maskActive_unfold,

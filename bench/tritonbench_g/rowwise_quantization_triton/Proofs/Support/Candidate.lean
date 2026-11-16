@@ -4,6 +4,6 @@ namespace VeriTile.Bench.Repairs.RowwiseQuantizationTriton.Candidate
 
 /-- The retained comparison uses the same complete pasted candidate body as
 source correspondence, including its signed indices and implicit stores. -/
-abbrev source := earlyMaximumKernel
+abbrev source := _quantize_rowwise_early_maxKernel
 
 end VeriTile.Bench.Repairs.RowwiseQuantizationTriton.Candidate

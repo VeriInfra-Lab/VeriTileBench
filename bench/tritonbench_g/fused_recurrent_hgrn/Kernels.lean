@@ -21,7 +21,7 @@ def backwardSignature : CallSignature where
  writePorts := ["dx","dg"]
 
 /-- Raw body of `fused_recurrent_hgrn_repaired.py:fused_recurrent_hgrn_fwd_kernel`. The call signature carries launch metadata. -/
-def forwardKernel (T D BD : Nat) (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : ComputeKernel :=
+def fused_recurrent_hgrn_fwd_kernel (T D BD : Nat) (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : ComputeKernel :=
   let x : RegionName := "x"
   let g : RegionName := "g"
   let o : RegionName := "o"
@@ -57,7 +57,7 @@ def forwardKernel (T D BD : Nat) (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : 
   }
 
 /-- Raw body of `fused_recurrent_hgrn_stride_folded.py:fused_recurrent_hgrn_fwd_kernel`. The call signature carries launch metadata. -/
-def forwardStrideFoldedKernel (T D BD : Nat) (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : ComputeKernel :=
+def fused_recurrent_hgrn_fwd_kernel_candidateKernel (T D BD : Nat) (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : ComputeKernel :=
   let x : RegionName := "x"
   let g : RegionName := "g"
   let o : RegionName := "o"
@@ -93,7 +93,7 @@ def forwardStrideFoldedKernel (T D BD : Nat) (USE_INITIAL_STATE STORE_FINAL_STAT
   }
 
 /-- Raw body of `fused_recurrent_hgrn_repaired.py:fused_recurrent_hgrn_bwd_kernel`. The call signature carries launch metadata. -/
-def backwardKernel (T D BD : Nat) (USE_INITIAL_STATE USE_FINAL_GRAD : Bool) : ComputeKernel :=
+def fused_recurrent_hgrn_bwd_kernel (T D BD : Nat) (USE_INITIAL_STATE USE_FINAL_GRAD : Bool) : ComputeKernel :=
   let g : RegionName := "g"
   let o : RegionName := "o"
   let dx : RegionName := "dx"

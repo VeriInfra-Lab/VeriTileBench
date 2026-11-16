@@ -43,7 +43,7 @@ def softmax_kernel (output_ptr input_ptr : RegionName)
     tl.store(out_row_start_ptr + columns * output_col_stride, softmax_output, mask=columns < n_cols)
   }
 
-def indexCommutedKernel (output_ptr input_ptr : RegionName)
+def softmax_kernel_candidateKernel (output_ptr input_ptr : RegionName)
     (input_offset output_offset input_row_stride input_col_stride
       output_row_stride output_col_stride n_cols BLOCK_SIZE : Nat) : ComputeKernel :=
   let input_row_stride_value : Int := input_row_stride

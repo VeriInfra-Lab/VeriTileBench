@@ -14,19 +14,19 @@ abbrev gemmSingleHalfKernel := KernelSource.gemmSingleHalfKernel
 abbrev gemmSingleSingleKernel := KernelSource.gemmSingleSingleKernel
 
 def unwrappedQuantizeKernel (p : QuantizeParameters) : ComputeKernel :=
-  VeriTile.Bench.Repairs.Int8MatmulQuantization.unwrappedQuantizeKernel p.input p.output p.scales p.rows p.columns p.inputRowStride p.inputColumnStride p.outputRowStride p.outputColumnStride p.scaleStride p.blockRows p.blockColumns
+  VeriTile.Bench.Repairs.Int8MatmulQuantization.quantize_int8_perrow_kernel_unwrappedKernel p.input p.output p.scales p.rows p.columns p.inputRowStride p.inputColumnStride p.outputRowStride p.outputColumnStride p.scaleStride p.blockRows p.blockColumns
 
 def unmaskedGemmHalfHalfKernel (p : GemmParameters) : ComputeKernel :=
-  VeriTile.Bench.Repairs.Int8MatmulQuantization.unmaskedGemmHalfHalfKernel p.input p.inputScale p.weight p.weightScale p.output p.rows p.columns p.inner p.inputRowStride p.inputInnerStride p.inputScaleStride p.weightInnerStride p.weightColumnStride p.weightScaleStride p.outputRowStride p.outputColumnStride p.blockRows p.blockColumns p.blockInner p.groupRows p.split
+  VeriTile.Bench.Repairs.Int8MatmulQuantization.FP16Scale.FP16Output.matmul_kernel_unmaskedKernel p.input p.inputScale p.weight p.weightScale p.output p.rows p.columns p.inner p.inputRowStride p.inputInnerStride p.inputScaleStride p.weightInnerStride p.weightColumnStride p.weightScaleStride p.outputRowStride p.outputColumnStride p.blockRows p.blockColumns p.blockInner p.groupRows p.split
 
 def unmaskedGemmHalfSingleKernel (p : GemmParameters) : ComputeKernel :=
-  VeriTile.Bench.Repairs.Int8MatmulQuantization.unmaskedGemmHalfSingleKernel p.input p.inputScale p.weight p.weightScale p.output p.rows p.columns p.inner p.inputRowStride p.inputInnerStride p.inputScaleStride p.weightInnerStride p.weightColumnStride p.weightScaleStride p.outputRowStride p.outputColumnStride p.blockRows p.blockColumns p.blockInner p.groupRows p.split
+  VeriTile.Bench.Repairs.Int8MatmulQuantization.FP16Scale.FP32Output.matmul_kernel_unmaskedKernel p.input p.inputScale p.weight p.weightScale p.output p.rows p.columns p.inner p.inputRowStride p.inputInnerStride p.inputScaleStride p.weightInnerStride p.weightColumnStride p.weightScaleStride p.outputRowStride p.outputColumnStride p.blockRows p.blockColumns p.blockInner p.groupRows p.split
 
 def unmaskedGemmSingleHalfKernel (p : GemmParameters) : ComputeKernel :=
-  VeriTile.Bench.Repairs.Int8MatmulQuantization.unmaskedGemmSingleHalfKernel p.input p.inputScale p.weight p.weightScale p.output p.rows p.columns p.inner p.inputRowStride p.inputInnerStride p.inputScaleStride p.weightInnerStride p.weightColumnStride p.weightScaleStride p.outputRowStride p.outputColumnStride p.blockRows p.blockColumns p.blockInner p.groupRows p.split
+  VeriTile.Bench.Repairs.Int8MatmulQuantization.FP32Scale.FP16Output.matmul_kernel_unmaskedKernel p.input p.inputScale p.weight p.weightScale p.output p.rows p.columns p.inner p.inputRowStride p.inputInnerStride p.inputScaleStride p.weightInnerStride p.weightColumnStride p.weightScaleStride p.outputRowStride p.outputColumnStride p.blockRows p.blockColumns p.blockInner p.groupRows p.split
 
 def unmaskedGemmSingleSingleKernel (p : GemmParameters) : ComputeKernel :=
-  VeriTile.Bench.Repairs.Int8MatmulQuantization.unmaskedGemmSingleSingleKernel p.input p.inputScale p.weight p.weightScale p.output p.rows p.columns p.inner p.inputRowStride p.inputInnerStride p.inputScaleStride p.weightInnerStride p.weightColumnStride p.weightScaleStride p.outputRowStride p.outputColumnStride p.blockRows p.blockColumns p.blockInner p.groupRows p.split
+  VeriTile.Bench.Repairs.Int8MatmulQuantization.FP32Scale.FP32Output.matmul_kernel_unmaskedKernel p.input p.inputScale p.weight p.weightScale p.output p.rows p.columns p.inner p.inputRowStride p.inputInnerStride p.inputScaleStride p.weightInnerStride p.weightColumnStride p.weightScaleStride p.outputRowStride p.outputColumnStride p.blockRows p.blockColumns p.blockInner p.groupRows p.split
 
 theorem producer_identity (p : QuantizeParameters) : quantize p = KernelSource.quantize p := rfl
 theorem gemm_half_half_identity (p : GemmParameters) : gemmHalfHalfKernel p = KernelSource.gemmHalfHalfKernel p := rfl

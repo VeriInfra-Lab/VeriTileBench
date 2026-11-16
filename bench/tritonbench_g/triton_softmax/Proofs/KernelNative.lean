@@ -11,7 +11,7 @@ set_option maxRecDepth 16000
 def candidateEvaluate {α} [Inhabited α] (M : Algebra α) (x y : Tensor)
     (B p : Nat) (s : State α) : Option (State α) :=
   exec (SoftmaxTriton1.Floating.backend M)
-    (indexCommutedKernel y.region x.region x.offset y.offset x.rowStride x.colStride
+    (softmax_kernel_candidateKernel y.region x.region x.offset y.offset x.rowStride x.colStride
       y.rowStride y.colStride x.cols B) (Floating.launchState x p s)
 
 theorem execution {α} [Inhabited α] (M : Algebra α) (x y : Tensor)
@@ -20,7 +20,7 @@ theorem execution {α} [Inhabited α] (M : Algebra α) (x y : Tensor)
   have rewritten := KernelRewrite.execution (SoftmaxTriton1.Floating.backend M) y.region x.region
     x.offset y.offset x.rowStride x.colStride y.rowStride y.colStride x.cols B
     (Floating.launchState x p s)
-  simpa [Floating.evaluate,candidateEvaluate,FP.Structural.exec,softmax_kernel,indexCommutedKernel,
+  simpa [Floating.evaluate,candidateEvaluate,FP.Structural.exec,softmax_kernel,softmax_kernel_candidateKernel,
     run,step,evalExpr,FP.Structural.evalOp,store,State.setReg,numeric,natLt,bop,TileShape.axisDim,
     Option.bind,Function.comp_def,ComputeKernel.surfaceBody,evalComputeOp,
     SoftmaxTriton1.Floating.backend,ComputeDType.eraseDType,

@@ -17,17 +17,17 @@ def sourceSignature : CallSignature where
   readPorts := ["Q","cos","sin"]
   writePorts := ["Q"]
 
-def ropeKernel (Q cos sin : RegionName)
+def _rope_embeddingKernel (Q cos sin : RegionName)
     (Q_row_stride cos_row_stride sin_row_stride seqlen head_dim n_heads BLOCK_SIZE : Nat)
     (BACKWARD_PASS : Bool) (ROPE_GROUP_SIZE : Nat := 4) : ComputeKernel :=
   with_triton_call sourceSignature call_args [Q_row_stride := Q_row_stride,
     cos_row_stride := cos_row_stride, sin_row_stride := sin_row_stride, seqlen := seqlen] in
   triton {
     """
-            Calculates the RoPE Embedding quickly
-            RoPE is Q * cos + rotate_half(Q) * sin
-            See our blog post for more info
-        """
+        Calculates the RoPE Embedding quickly
+        RoPE is Q * cos + rotate_half(Q) * sin
+        See our blog post for more info
+    """
     row_position  = tl.program_id(0)
     group_head_position = tl.program_id(1)
     col_offsets  = tl.arange(0, BLOCK_SIZE)
@@ -60,17 +60,17 @@ def ropeKernel (Q cos sin : RegionName)
         tl.store(Q + offs_q2, Q2*cos1 + Q1*sin1, mask = mask)
   }
 
-def indexCommutedKernel (Q cos sin : RegionName)
+def _rope_embedding_index_commutedKernel (Q cos sin : RegionName)
     (Q_row_stride cos_row_stride sin_row_stride seqlen head_dim n_heads BLOCK_SIZE : Nat)
     (BACKWARD_PASS : Bool) (ROPE_GROUP_SIZE : Nat := 4) : ComputeKernel :=
   with_triton_call sourceSignature call_args [Q_row_stride := Q_row_stride,
     cos_row_stride := cos_row_stride, sin_row_stride := sin_row_stride, seqlen := seqlen] in
   triton {
     """
-            Calculates the RoPE Embedding quickly
-            RoPE is Q * cos + rotate_half(Q) * sin
-            See our blog post for more info
-        """
+        Calculates the RoPE Embedding quickly
+        RoPE is Q * cos + rotate_half(Q) * sin
+        See our blog post for more info
+    """
     row_position  = tl.program_id(0)
     group_head_position = tl.program_id(1)
     col_offsets  = tl.arange(0, BLOCK_SIZE)

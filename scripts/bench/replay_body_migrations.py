@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / 'scripts'))
 from scripts.bench.check_body_corpus import inspect
+from scripts.bench.final_inventory import PUBLIC_GOAL_KINDS, required_refutations
 from scripts import check_comparator
 from scripts.comparator_common import require_tools
 from scripts.spec_sheet import split_decls
@@ -42,6 +43,10 @@ def load_batch(root: Path, manifest: Path) -> tuple[list[dict], list[str], list[
     data = json.loads(manifest.read_text())
     if data.get('schema') != 1 or data.get('scope') != 'explicit_body_migration_batch':
         raise ValueError('Not an explicit body-migration batch')
+    refutations = required_refutations(root, {c['path'] for c in data['cases']})
+    for option in ['replay_all_owned_modules', 'replay_all_regressions']:
+        if not isinstance(data.get(option, False), bool):
+            raise ValueError(option + ' must be a boolean')
     cases, builds, replay = [], set(), set()
     for entry in data['cases']:
         base = Path(entry['path'])
@@ -63,19 +68,32 @@ def load_batch(root: Path, manifest: Path) -> tuple[list[dict], list[str], list[
             raise ValueError(f'{base}: explicit Real and FP theorem targets are required')
         for path in public:
             local(root, path)
-            declarations = {d['name'] for d in split_decls((root / path).read_text())
-                            if d['kind'] == 'specification'}
+            goals = [d for d in split_decls((root / path).read_text())
+                     if d['kind'] in PUBLIC_GOAL_KINDS]
+            declarations = {d['name'] for d in goals}
+            missing = {d['name'] for d in goals if d['kind'] == 'refutation'} - {
+                name.rsplit('.', 1)[-1] for name in required[path]}
+            if missing:
+                raise ValueError(path + ': missing required refutation in public targets')
+            if set(refutations.get(path, [])) - set(required[path]):
+                raise ValueError(path + ': missing required refutation in public targets')
             if not declarations or not required[path] or any(
                     name.rsplit('.', 1)[-1] not in declarations for name in required[path]):
                 raise ValueError(f'{path}: a Prop declaration or build is not a proved specification')
         files = sorted(p.relative_to(root).as_posix() for p in (root / base).rglob('*.lean'))
         builds.update(files)
         replay.update(public)
+        if data.get('replay_all_owned_modules', False):
+            replay.update(files)
         cases.append({'path': entry['path'], 'python': python, 'public_entries': public,
                       'public_theorems': required,
                       'source_pairs': row['checked_pairs']})
     if not cases:
         raise ValueError('Empty migration batch')
+    if data.get('replay_all_regressions', False):
+        regressions = {p.relative_to(root).as_posix() for p in (root / 'tests/lean').rglob('*.lean')}
+        builds.update(regressions)
+        replay.update(regressions)
     extra = data.get('extra_replay_sources', [])
     for path in extra:
         if not path.endswith('.lean') or not path.startswith(('bench/', 'tests/lean/', 'VeriTile/')):
@@ -98,6 +116,17 @@ def verify_public_targets(root: Path, cases: list[dict]) -> None:
         raise ValueError('Invalid public theorem name')
     source = ''.join(f'import {path[:-5].replace("/", ".")}\n' for path in sorted(targets))
     source += ''.join(f'#check {name}\n' for name in names)
+    for path, required in targets.items():
+        negative = {d['name'] for d in split_decls((root / path).read_text())
+                    if d['kind'] == 'refutation'}
+        for name in required:
+            if name.rsplit('.', 1)[-1] in negative:
+                source += ('open Lean Elab Command in\nrun_cmd do\n'
+                           '  let negative ← liftTermElabM do\n'
+                           f'    let info ← getConstInfo `{name}\n'
+                           '    Meta.forallTelescope info.type fun _ claim =>\n'
+                           '      pure (claim.isAppOf ``Not)\n'
+                           f'  unless negative do throwError "Expected a refutation: {name}"\n')
     with tempfile.NamedTemporaryFile(mode='w', suffix='.lean', prefix='veritile-public-targets-') as probe:
         probe.write(source)
         probe.flush()

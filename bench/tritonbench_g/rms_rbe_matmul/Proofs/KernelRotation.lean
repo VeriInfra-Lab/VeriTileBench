@@ -15,7 +15,7 @@ theorem rotation_run (a : Operations α) (fp8 : Bool) (p : Parameters)
   have pair_nonnegative (n lane : Nat) : ¬(n:Int)*64+2*(lane:Int)<0 := by omega
   cases fp8 <;> cases hr : p.rotary
   all_goals
-    simp [rotation,kernel,TypedSource.kernel,TypedSource.source,arguments,
+    simp [rotation,kernel,TypedSource.kernel,TypedSource.rms_matmul_rbeKernel,arguments,
       ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,evalOp_unfold,
       Option.bind,ComputeDType.eraseDType,numeric,bop,natLt,numericLt,
       integralFloorDiv,integralMod,Region.cast,ofFloat,toFloat,State.setReg,

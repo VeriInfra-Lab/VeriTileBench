@@ -29,7 +29,7 @@ theorem masked_mem {α ι : Type} (r : RegionName) (off : ι → Nat)
 abbrev split_source := FPRow.split_source .fp32 .fp32
 theorem complete {α : Type} [Inhabited α] (ops : FPRow.Ops α)
     (input output : RegionName) (T BT : Nat) (s : State α) :
-    ∃ t, FP.Structural.exec (engine ops.algebra) (repairedKernel .fp32 .fp32 input output T BT) s=some t ∧
+    ∃ t, FP.Structural.exec (engine ops.algebra) (chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T BT) s=some t ∧
       FPRow.Frame output (s.pids 0) T s t :=
   FPRow.complete ops input output T BT s
 

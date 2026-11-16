@@ -11,15 +11,15 @@ variable {α : Type} [Inhabited α]
 
 def kernel (stage : Stage) (p : Parameters) : ComputeKernel :=
   match stage with
-  | .forward => forwardCandidateKernel p
-  | .intra => intraCandidateKernel p
-  | .inter => interCandidateKernel p
+  | .forward => _fwd_kernel_candidateKernel p
+  | .intra => _bwd_intra_kernel_candidateKernel p
+  | .inter => _bwd_inter_kernel_candidateKernel p
 
 def original (stage : Stage) (p : Parameters) : ComputeKernel :=
   match stage with
-  | .forward => forwardKernel p
-  | .intra => intraKernel p
-  | .inter => interKernel p
+  | .forward => _fwd_kernel p
+  | .intra => _bwd_intra_kernel p
+  | .inter => _bwd_inter_kernel p
 
 def prefixLength : Stage → Nat
   | .forward | .intra => 6
@@ -40,7 +40,7 @@ theorem prefix_eq (M : Algebra α) (stage : Stage) (p : Parameters) (s : State �
     run M (candidatePrefix stage p) s = run M (prelude stage p) s := by
   cases stage <;>
     simp [candidatePrefix,prelude,prefixLength,kernel,original,
-      forwardCandidateKernel,intraCandidateKernel,interCandidateKernel,forwardKernel,intraKernel,interKernel,
+      _fwd_kernel_candidateKernel,_bwd_intra_kernel_candidateKernel,_bwd_inter_kernel_candidateKernel,_fwd_kernel,_bwd_intra_kernel,_bwd_inter_kernel,
       ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,evalOp_unfold,
       numeric,bop,Region.cast,ComputeDType.eraseDType,Option.bind]
 
@@ -55,7 +55,7 @@ theorem prefix_safe (M : Algebra α) (stage : Stage) (p : Parameters) (s : State
       Safety.traceSafeList M bounds (candidatePrefix stage p) s := by
   cases stage <;>
     simp [candidatePrefix,prelude,prefixLength,kernel,original,
-      forwardCandidateKernel,intraCandidateKernel,interCandidateKernel,forwardKernel,intraKernel,interKernel,
+      _fwd_kernel_candidateKernel,_bwd_intra_kernel_candidateKernel,_bwd_inter_kernel_candidateKernel,_fwd_kernel,_bwd_intra_kernel,_bwd_inter_kernel,
       ComputeKernel.surfaceBody,Safety.traceSafeList_unfold,Safety.stepSafe_unfold,
       Safety.safeExpr_unfold,Safety.safeCompute_unfold,Safety.safeOp_unfold,
       run,step,evalExpr,evalComputeOp,evalOp_unfold,

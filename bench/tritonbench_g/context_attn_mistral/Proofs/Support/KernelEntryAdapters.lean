@@ -13,7 +13,7 @@ def kernel (Q K V : RegionName) (sm_scale : ℝ)
         stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od
         kv_group_num : Nat) (sliding_window : Int)
       (BLOCK_M BLOCK_DMODEL BLOCK_N : Nat) : ComputeKernel :=
-  originalKernel .fp32 Q K V sm_scale B_Start_Loc B_Seqlen Out stride_qbs stride_qh stride_qd stride_kbs stride_kh stride_kd stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od kv_group_num sliding_window BLOCK_M BLOCK_DMODEL BLOCK_N
+  _fwd_kernel_repairedKernel .fp32 Q K V sm_scale B_Start_Loc B_Seqlen Out stride_qbs stride_qh stride_qd stride_kbs stride_kh stride_kd stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od kv_group_num sliding_window BLOCK_M BLOCK_DMODEL BLOCK_N
 
 def blockStartReused (Q K V : RegionName) (sm_scale : ℝ)
       (B_Start_Loc B_Seqlen Out : RegionName)
@@ -21,7 +21,7 @@ def blockStartReused (Q K V : RegionName) (sm_scale : ℝ)
         stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od
         kv_group_num : Nat) (sliding_window : Int)
       (BLOCK_M BLOCK_DMODEL BLOCK_N : Nat) : ComputeKernel :=
-  blockStartReusedKernel .fp32 Q K V sm_scale B_Start_Loc B_Seqlen Out stride_qbs stride_qh stride_qd stride_kbs stride_kh stride_kd stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od kv_group_num sliding_window BLOCK_M BLOCK_DMODEL BLOCK_N
+  _fwd_kernel_block_start_reusedKernel .fp32 Q K V sm_scale B_Start_Loc B_Seqlen Out stride_qbs stride_qh stride_qd stride_kbs stride_kh stride_kd stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od kv_group_num sliding_window BLOCK_M BLOCK_DMODEL BLOCK_N
 
 def storageProfile (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ)
       (B_Start_Loc B_Seqlen Out : RegionName)
@@ -29,7 +29,7 @@ def storageProfile (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ)
         stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od
         kv_group_num : Nat) (sliding_window : Int)
       (BLOCK_M BLOCK_DMODEL BLOCK_N : Nat) : ComputeKernel :=
-  originalKernel dtype Q K V sm_scale B_Start_Loc B_Seqlen Out stride_qbs stride_qh stride_qd stride_kbs stride_kh stride_kd stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od kv_group_num sliding_window BLOCK_M BLOCK_DMODEL BLOCK_N
+  _fwd_kernel_repairedKernel dtype Q K V sm_scale B_Start_Loc B_Seqlen Out stride_qbs stride_qh stride_qd stride_kbs stride_kh stride_kd stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od kv_group_num sliding_window BLOCK_M BLOCK_DMODEL BLOCK_N
 
 def storageScaleFirst (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ)
       (B_Start_Loc B_Seqlen Out : RegionName)
@@ -37,7 +37,7 @@ def storageScaleFirst (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ)
         stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od
         kv_group_num : Nat) (sliding_window : Int)
       (BLOCK_M BLOCK_DMODEL BLOCK_N : Nat) : ComputeKernel :=
-  scaleFirstKernel dtype Q K V sm_scale B_Start_Loc B_Seqlen Out stride_qbs stride_qh stride_qd stride_kbs stride_kh stride_kd stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od kv_group_num sliding_window BLOCK_M BLOCK_DMODEL BLOCK_N
+  _fwd_kernel_scale_firstKernel dtype Q K V sm_scale B_Start_Loc B_Seqlen Out stride_qbs stride_qh stride_qd stride_kbs stride_kh stride_kd stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od kv_group_num sliding_window BLOCK_M BLOCK_DMODEL BLOCK_N
 
 def scaleFirst32 (Q K V : RegionName) (sm_scale : ℝ)
       (B_Start_Loc B_Seqlen Out : RegionName)
@@ -45,7 +45,7 @@ def scaleFirst32 (Q K V : RegionName) (sm_scale : ℝ)
         stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od
         kv_group_num : Nat) (sliding_window : Int)
       (BLOCK_M BLOCK_DMODEL BLOCK_N : Nat) : ComputeKernel :=
-  scaleFirstKernel .fp32 Q K V sm_scale B_Start_Loc B_Seqlen Out stride_qbs stride_qh stride_qd stride_kbs stride_kh stride_kd stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od kv_group_num sliding_window BLOCK_M BLOCK_DMODEL BLOCK_N
+  _fwd_kernel_scale_firstKernel .fp32 Q K V sm_scale B_Start_Loc B_Seqlen Out stride_qbs stride_qh stride_qd stride_kbs stride_kh stride_kd stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od kv_group_num sliding_window BLOCK_M BLOCK_DMODEL BLOCK_N
 
 end
 end VeriTile.Bench.Repairs.ContextAttnMistralKernel

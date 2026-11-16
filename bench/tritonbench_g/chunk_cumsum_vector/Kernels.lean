@@ -52,7 +52,7 @@ def callSignature (dtype out_dtype : FloatDType) : CallSignature where
   scalars := []
   constexpr := ["H", "s_s_b", "s_s_h", "s_s_t", "s_s_d", "s_z_b", "s_z_h", "s_z_t", "s_z_d", "T", "S", "BT", "BS"]
 
-def sourceKernel (h : Call) (c : Config) : ComputeKernel :=
+def chunk_global_cumsum_vector_kernel (h : Call) (c : Config) : ComputeKernel :=
   let dtype := h.inputDType
   let out_dtype := h.outputDType
   let s := h.input
@@ -97,7 +97,7 @@ def sourceKernel (h : Call) (c : Config) : ComputeKernel :=
             b_z += tl.sum(b_s, 0)
   }
 
-def sumLeftKernel (h : Call) (c : Config) : ComputeKernel :=
+def chunk_global_cumsum_vector_kernel_sum_leftKernel (h : Call) (c : Config) : ComputeKernel :=
   let dtype := h.inputDType
   let out_dtype := h.outputDType
   let s := h.input

@@ -67,7 +67,7 @@ unchanged numerical suffix; its head-index prelude comes from its own source. -/
 
 theorem source_pair (M : Algebra A) (p : Parameters) :
     CodeEq M (source p).surfaceBody (quotientRemainder p).surfaceBody := by
-  unfold source declared quotientRemainder ComputeKernel.surfaceBody originalKernel quotientRemainderKernel
+  unfold source declared quotientRemainder ComputeKernel.surfaceBody block_sparse_attention_kernel block_sparse_attention_kernel_candidateKernel
   repeat' first
     | exact code_refl M _
     | exact step_refl M _
@@ -77,7 +77,7 @@ theorem source_pair (M : Algebra A) (p : Parameters) :
 /-- Same selected live-FMA and seeded-MMA meanings on both complete programs. -/
 theorem native_pair (M : Algebra A) (p : Parameters) :
     CodeEq M (selectedSource p) (kernel p).surfaceBody := by
-  unfold kernel selectedCandidate selectedSource prelude source declared quotientRemainder ComputeKernel.surfaceBody originalKernel quotientRemainderKernel
+  unfold kernel selectedCandidate selectedSource prelude source declared quotientRemainder ComputeKernel.surfaceBody block_sparse_attention_kernel block_sparse_attention_kernel_candidateKernel
   repeat' first
     | exact code_refl M _
     | exact step_refl M _

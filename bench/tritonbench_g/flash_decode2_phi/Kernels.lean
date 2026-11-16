@@ -12,7 +12,7 @@ def phiCallSignature : CallSignature where
   readPorts := ["B_Seqlen","Mid_O","Mid_O_LogExpSum"]
   writePorts := ["Out"]
 
-def phiKernel (H S D Q BD : Nat) : ComputeKernel :=
+def Phi._fwd_kernel_flash_decode_stage2Kernel (H S D Q BD : Nat) : ComputeKernel :=
   let B_Seqlen : Region .int := ⟨"L"⟩
   let Mid_O : RegionName := "M"
   let Mid_O_LogExpSum : RegionName := "E"
@@ -59,7 +59,7 @@ end VeriTile.Bench.Repairs.FlashDecode2
 namespace VeriTile.Bench.Repairs.FlashDecode2PhiBlockChecked.Candidates
 open VeriTile.Triton FlashDecode2
 
-def phiSharedBaseKernel (H S D Q BD : Nat) : ComputeKernel :=
+def Phi._fwd_kernel_flash_decode_stage2_shared_baseKernel (H S D Q BD : Nat) : ComputeKernel :=
   let B_Seqlen : Region .int := ⟨"L"⟩
   let Mid_O : RegionName := "M"
   let Mid_O_LogExpSum : RegionName := "E"

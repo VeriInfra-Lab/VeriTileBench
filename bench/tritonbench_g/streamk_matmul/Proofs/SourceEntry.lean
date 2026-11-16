@@ -15,10 +15,10 @@ theorem kernels_source_preserved :
 theorem area_kernels_source_preserved :
     SourceAdapter.decode swizzle_tileSource = .ok areaKernels.swizzle ∧
     SourceAdapter.decode linear_tileSource = .ok areaKernels.linear ∧
-    SourceAdapter.decode area_mac_loopSource = .ok areaKernels.mac ∧
+    SourceAdapter.decode mac_loop_areaSource = .ok areaKernels.mac ∧
     SourceAdapter.decode first_waveSource = .ok areaKernels.first ∧
     SourceAdapter.decode full_tilesSource = .ok areaKernels.«full» ∧
-    SourceAdapter.decode area_reduce_streamkSource = .ok areaKernels.reduce :=
+    SourceAdapter.decode reduce_streamk_areaSource = .ok areaKernels.reduce :=
   ⟨swizzle_tileDecoded.property, linear_tileDecoded.property, area_mac_loopDecoded.property, first_waveDecoded.property, full_tilesDecoded.property, area_reduce_streamkDecoded.property⟩
 
 #axiomsClean kernels_source_preserved

@@ -20,10 +20,10 @@ def positioned (s : State A) (p k : Nat) : State A :=
 
 def program (d : Direction) (candidate : Bool) (M N K BM C : Nat) : ComputeKernel :=
   match d,candidate with
-  | .forward,Bool.false => Source.forwardKernel "output" "input" M N K BM C
-  | .forward,Bool.true => Source.forwardCommutedKernel "output" "input" M N K BM C
-  | .backward,Bool.false => Source.backwardKernel "input" "gradient" "output" M N K BM C
-  | .backward,Bool.true => Source.backwardCommutedKernel "input" "gradient" "output" M N K BM C
+  | .forward,Bool.false => Source.log_softmax_kernel_repairedKernel "output" "input" M N K BM C
+  | .forward,Bool.true => Source.log_softmax_kernel_repaired_index_commutedKernel "output" "input" M N K BM C
+  | .backward,Bool.false => Source.log_softmax_backward_kernel_repairedKernel "input" "gradient" "output" M N K BM C
+  | .backward,Bool.true => Source.log_softmax_backward_kernel_repaired_index_commutedKernel "input" "gradient" "output" M N K BM C
 
 def coord (M N K BM C : Nat) (p : Nat × Nat) (i : TileIndex [BM,C]) : Option (Coord M N K) :=
   if h : Kernel.active M N K BM p.1 p.2 i then

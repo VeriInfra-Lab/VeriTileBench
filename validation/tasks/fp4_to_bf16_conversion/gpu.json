@@ -1,0 +1,960 @@
+{
+  "accepted": true,
+  "scope": "Actual repaired Triton execution; not a numerical admission or hardware proof",
+  "source_sha256": "3e345bdff0d7d5d62c36efa7e240ce97ed0d9b7ad9e68a94e2c28dacd288d4bd",
+  "checker_sha256": "2957c49086e95f8c00e7db54dde7c14b166b8790c4a09ee80315b3e2ab407ee4",
+  "distinct_packed_byte_scale_pairs_per_tile": 65536,
+  "torch": "2.9.1+cu128",
+  "triton": "3.5.1",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "cases": [
+    {
+      "count": 65536,
+      "block": 128,
+      "output_lanes": 131072,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1,
+      "block": 128,
+      "output_lanes": 2,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2,
+      "block": 128,
+      "output_lanes": 4,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 15,
+      "block": 128,
+      "output_lanes": 30,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 16,
+      "block": 128,
+      "output_lanes": 32,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 17,
+      "block": 128,
+      "output_lanes": 34,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 127,
+      "block": 128,
+      "output_lanes": 254,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 128,
+      "block": 128,
+      "output_lanes": 256,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 129,
+      "block": 128,
+      "output_lanes": 258,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 255,
+      "block": 128,
+      "output_lanes": 510,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 256,
+      "block": 128,
+      "output_lanes": 512,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 257,
+      "block": 128,
+      "output_lanes": 514,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 511,
+      "block": 128,
+      "output_lanes": 1022,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 512,
+      "block": 128,
+      "output_lanes": 1024,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 513,
+      "block": 128,
+      "output_lanes": 1026,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1023,
+      "block": 128,
+      "output_lanes": 2046,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1024,
+      "block": 128,
+      "output_lanes": 2048,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1025,
+      "block": 128,
+      "output_lanes": 2050,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2047,
+      "block": 128,
+      "output_lanes": 4094,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2048,
+      "block": 128,
+      "output_lanes": 4096,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2049,
+      "block": 128,
+      "output_lanes": 4098,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 65536,
+      "block": 256,
+      "output_lanes": 131072,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1,
+      "block": 256,
+      "output_lanes": 2,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2,
+      "block": 256,
+      "output_lanes": 4,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 15,
+      "block": 256,
+      "output_lanes": 30,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 16,
+      "block": 256,
+      "output_lanes": 32,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 17,
+      "block": 256,
+      "output_lanes": 34,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 127,
+      "block": 256,
+      "output_lanes": 254,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 128,
+      "block": 256,
+      "output_lanes": 256,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 129,
+      "block": 256,
+      "output_lanes": 258,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 255,
+      "block": 256,
+      "output_lanes": 510,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 256,
+      "block": 256,
+      "output_lanes": 512,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 257,
+      "block": 256,
+      "output_lanes": 514,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 511,
+      "block": 256,
+      "output_lanes": 1022,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 512,
+      "block": 256,
+      "output_lanes": 1024,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 513,
+      "block": 256,
+      "output_lanes": 1026,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1023,
+      "block": 256,
+      "output_lanes": 2046,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1024,
+      "block": 256,
+      "output_lanes": 2048,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1025,
+      "block": 256,
+      "output_lanes": 2050,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2047,
+      "block": 256,
+      "output_lanes": 4094,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2048,
+      "block": 256,
+      "output_lanes": 4096,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2049,
+      "block": 256,
+      "output_lanes": 4098,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 65536,
+      "block": 512,
+      "output_lanes": 131072,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1,
+      "block": 512,
+      "output_lanes": 2,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2,
+      "block": 512,
+      "output_lanes": 4,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 15,
+      "block": 512,
+      "output_lanes": 30,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 16,
+      "block": 512,
+      "output_lanes": 32,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 17,
+      "block": 512,
+      "output_lanes": 34,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 127,
+      "block": 512,
+      "output_lanes": 254,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 128,
+      "block": 512,
+      "output_lanes": 256,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 129,
+      "block": 512,
+      "output_lanes": 258,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 255,
+      "block": 512,
+      "output_lanes": 510,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 256,
+      "block": 512,
+      "output_lanes": 512,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 257,
+      "block": 512,
+      "output_lanes": 514,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 511,
+      "block": 512,
+      "output_lanes": 1022,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 512,
+      "block": 512,
+      "output_lanes": 1024,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 513,
+      "block": 512,
+      "output_lanes": 1026,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1023,
+      "block": 512,
+      "output_lanes": 2046,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1024,
+      "block": 512,
+      "output_lanes": 2048,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1025,
+      "block": 512,
+      "output_lanes": 2050,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2047,
+      "block": 512,
+      "output_lanes": 4094,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2048,
+      "block": 512,
+      "output_lanes": 4096,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2049,
+      "block": 512,
+      "output_lanes": 4098,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 65536,
+      "block": 1024,
+      "output_lanes": 131072,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1,
+      "block": 1024,
+      "output_lanes": 2,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2,
+      "block": 1024,
+      "output_lanes": 4,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 15,
+      "block": 1024,
+      "output_lanes": 30,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 16,
+      "block": 1024,
+      "output_lanes": 32,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 17,
+      "block": 1024,
+      "output_lanes": 34,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 127,
+      "block": 1024,
+      "output_lanes": 254,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 128,
+      "block": 1024,
+      "output_lanes": 256,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 129,
+      "block": 1024,
+      "output_lanes": 258,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 255,
+      "block": 1024,
+      "output_lanes": 510,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 256,
+      "block": 1024,
+      "output_lanes": 512,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 257,
+      "block": 1024,
+      "output_lanes": 514,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 511,
+      "block": 1024,
+      "output_lanes": 1022,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 512,
+      "block": 1024,
+      "output_lanes": 1024,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 513,
+      "block": 1024,
+      "output_lanes": 1026,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1023,
+      "block": 1024,
+      "output_lanes": 2046,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1024,
+      "block": 1024,
+      "output_lanes": 2048,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1025,
+      "block": 1024,
+      "output_lanes": 2050,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2047,
+      "block": 1024,
+      "output_lanes": 4094,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2048,
+      "block": 1024,
+      "output_lanes": 4096,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2049,
+      "block": 1024,
+      "output_lanes": 4098,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 65536,
+      "block": 2048,
+      "output_lanes": 131072,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1,
+      "block": 2048,
+      "output_lanes": 2,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2,
+      "block": 2048,
+      "output_lanes": 4,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 15,
+      "block": 2048,
+      "output_lanes": 30,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 16,
+      "block": 2048,
+      "output_lanes": 32,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 17,
+      "block": 2048,
+      "output_lanes": 34,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 127,
+      "block": 2048,
+      "output_lanes": 254,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 128,
+      "block": 2048,
+      "output_lanes": 256,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 129,
+      "block": 2048,
+      "output_lanes": 258,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 255,
+      "block": 2048,
+      "output_lanes": 510,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 256,
+      "block": 2048,
+      "output_lanes": 512,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 257,
+      "block": 2048,
+      "output_lanes": 514,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 511,
+      "block": 2048,
+      "output_lanes": 1022,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 512,
+      "block": 2048,
+      "output_lanes": 1024,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 513,
+      "block": 2048,
+      "output_lanes": 1026,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1023,
+      "block": 2048,
+      "output_lanes": 2046,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1024,
+      "block": 2048,
+      "output_lanes": 2048,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 1025,
+      "block": 2048,
+      "output_lanes": 2050,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2047,
+      "block": 2048,
+      "output_lanes": 4094,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2048,
+      "block": 2048,
+      "output_lanes": 4096,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    },
+    {
+      "count": 2049,
+      "block": 2048,
+      "output_lanes": 4098,
+      "classification_mismatches": 0,
+      "non_nan_bit_mismatches": 0,
+      "nan_payload_differences": 0,
+      "guard_and_input_checks": "PASS"
+    }
+  ],
+  "case_count": 105,
+  "empty_wrapper": "PASS",
+  "elapsed_seconds": 0.935627777595073
+}

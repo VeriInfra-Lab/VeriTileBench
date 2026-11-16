@@ -14,7 +14,7 @@ def callSignature : CallSignature where
 
 
 
-def sourceKernel (M Out : RegionName) (m d : Nat)
+def kernelKernel (M Out : RegionName) (m d : Nat)
     (matrix_stridex : Nat := max d 1) (matrix_stridey : Nat := 1)
     (out_stridex : Nat := max m 1) (out_stridey : Nat := 1) : ComputeKernel :=
   let SIZE_M : Nat := m
@@ -29,7 +29,7 @@ def sourceKernel (M Out : RegionName) (m d : Nat)
     tl.store(out_ptr, tl.trans(matrix))
   }
 
-def indexCommutedKernel (M Out : RegionName) (m d : Nat)
+def kernel_index_commutedKernel (M Out : RegionName) (m d : Nat)
     (matrix_stridex : Nat := max d 1) (matrix_stridey : Nat := 1)
     (out_stridex : Nat := max m 1) (out_stridey : Nat := 1) : ComputeKernel :=
   let SIZE_M : Nat := m

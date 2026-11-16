@@ -23,7 +23,7 @@ def callSignature : CallSignature where
   scalars := [("stride_k_bs",.integer),("stride_k_h",.integer),("stride_k_d",.integer),("stride_dest",.integer),("stride_o_bs",.integer),("stride_o_h",.integer),("stride_o_d",.integer),("stride_os_bs",.integer),("stride_os_h",.integer),("head_num",.integer)]
   constexpr := ["BLOCK_DMODEL","BLOCK_HEAD"]
 
-def originalSourcePastedKernel (p : Parameters) : ComputeKernel :=
+def _fwd_kernel_destindex_copy_quantize_kvKernel (p : Parameters) : ComputeKernel :=
   let K : RegionName := "input"
   let Dest_loc : RegionName := "destination"
   let Out : RegionName := "output"
@@ -37,11 +37,16 @@ def originalSourcePastedKernel (p : Parameters) : ComputeKernel :=
     offs_h = tl.arange(0, BLOCK_HEAD).to(tl.int64)
     offs_d = tl.arange(0, BLOCK_DMODEL).to(tl.int64)
     dest_index = tl.load(Dest_loc + cur_index * stride_dest)
-    src_data = tl.load(K + cur_index * stride_k_bs + offs_h[:, None] * stride_k_h + stride_k_d * offs_d[None, :], mask=offs_h[:, None] < head_num, other=0.0)
+    src_data = tl.load(
+        K + cur_index * stride_k_bs + offs_h[:, None] * stride_k_h
+        + stride_k_d * offs_d[None, :],
+        mask=offs_h[:, None] < head_num, other=0.0,
+    )
     abs_data = tl.abs(src_data)
     maximum = tl.max(abs_data, axis=1)
-    data_scale = (maximum / 127.0).to(tl.float16)[:, None]
-    denominator = tl.where(maximum[:, None] == 0.0, 1.0, data_scale.to(tl.float32))
+    data_scale = (maximum / 127.).to(tl.float16)[:, None]
+    # Preserve the scale=0 representation of a zero row, with defined codes.
+    denominator = tl.where(maximum[:, None] == 0., 1., data_scale.to(tl.float32))
     q_src_data = (src_data / denominator).to(tl.int8)
     o_ptrs = Out + dest_index * stride_o_bs + stride_o_h * offs_h[:, None] + stride_o_d * offs_d[None, :]
     os_ptrs = Out_scale + dest_index * stride_os_bs + stride_os_h * offs_h[:, None]
@@ -49,7 +54,7 @@ def originalSourcePastedKernel (p : Parameters) : ComputeKernel :=
     tl.store(os_ptrs, data_scale, mask=offs_h[:, None] < head_num)
   }
 
-def commutedSourcePastedKernel (p : Parameters) : ComputeKernel :=
+def _fwd_kernel_destindex_copy_quantize_kv_commutedKernel (p : Parameters) : ComputeKernel :=
   let K : RegionName := "input"
   let Dest_loc : RegionName := "destination"
   let Out : RegionName := "output"
@@ -76,7 +81,7 @@ def commutedSourcePastedKernel (p : Parameters) : ComputeKernel :=
   }
 
 def kernel (version : Bool) (p : Parameters) : ComputeKernel :=
-  if version then commutedSourcePastedKernel p else originalSourcePastedKernel p
+  if version then _fwd_kernel_destindex_copy_quantize_kv_commutedKernel p else _fwd_kernel_destindex_copy_quantize_kvKernel p
 
 def originalKernel := kernel Bool.false
 def commutedKernel := kernel Bool.true
