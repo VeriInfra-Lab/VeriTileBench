@@ -3,8 +3,8 @@ import bench.tritonbench_g.rope_backward_transform.Kernels
 /-! All storage profiles and both directions use the shared repaired source. -/
 namespace VeriTile.Bench.Repairs.RopeBackwardTransform.Source
 
-abbrev source := VeriTile.Bench.Repairs.RopeBackwardTransform.Kernels.sourceKernel
+abbrev source := VeriTile.Bench.Repairs.RopeBackwardTransform.Kernels._triton_ropeKernel
 
-theorem source_selected : source=VeriTile.Bench.Repairs.RopeBackwardTransform.Kernels.sourceKernel := rfl
+theorem source_selected : source=VeriTile.Bench.Repairs.RopeBackwardTransform.Kernels._triton_ropeKernel := rfl
 
 end VeriTile.Bench.Repairs.RopeBackwardTransform.Source

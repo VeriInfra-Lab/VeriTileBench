@@ -37,8 +37,8 @@ theorem typed_projection (input weight output : Storage) (v : Bool)
       mathKernel v X W O sxb sxm sxk sw sob som sok N B eps := by
   simp only [ComputeKernel.eraseDType, typed_projects, ComputeKernel.toAlgKernel_fromKernelBody]
   cases input <;> cases weight <;> cases output <;> cases v
-  all_goals simp only [VeriTile.Bench.Repairs.RmsnormImplementation.originalForKernel,
-    VeriTile.Bench.Repairs.RmsnormImplementation.commutedForKernel,
+  all_goals simp only [VeriTile.Bench.Repairs.RmsnormImplementation.rmsnorm_tritonKernel,
+    VeriTile.Bench.Repairs.RmsnormImplementation.rmsnorm_triton_index_commutedKernel,
     VeriTile.Bench.Repairs.RmsnormImplementation.family,
     typedKernel, originalTyped,VeriTile.Bench.Repairs.RmsnormImplementation.kernel, mathKernel, commutedMathKernel, VeriTile.Bench.Repairs.RmsnormImplementation.kernel,
     VeriTile.Bench.Repairs.RmsnormImplementation.indexCommutedKernel,

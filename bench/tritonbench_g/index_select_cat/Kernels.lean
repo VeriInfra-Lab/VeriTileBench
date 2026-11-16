@@ -19,7 +19,7 @@ def sourceSignature : CallSignature where
   writePorts := ["output_ptr"]
 
 /-- Complete actual original Python body. -/
-def sourceKernel (p : Layout) : ComputeKernel :=
+def index_select_cat_fwd_kernel_repairedKernel (p : Layout) : ComputeKernel :=
   let output_ptr := p.output
   let source_ptr := p.source
   let index_ptr := p.index
@@ -40,7 +40,7 @@ def sourceKernel (p : Layout) : ComputeKernel :=
   }
 
 /-- Complete actual pre-existing candidate Python body. -/
-def indexCommutedKernel (p : Layout) : ComputeKernel :=
+def index_select_cat_fwd_kernel_index_commutedKernel (p : Layout) : ComputeKernel :=
   let output_ptr := p.output
   let source_ptr := p.source
   let index_ptr := p.index

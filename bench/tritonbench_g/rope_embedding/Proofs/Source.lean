@@ -22,7 +22,7 @@ the backwards sign, load-to-sine casts and original stores. -/
 def source (p : Parameters) (backward : Bool) : ComputeKernel :=
   if p.fast then VeriTile.Bench.Repairs.FastRopeEmbedding.Kernels.rope p.input p.cosine p.sine
     p.rowStride p.cosineStride p.sineStride p.length p.dimension p.heads p.width backward
-  else Kernels.ropeKernel p.input p.cosine p.sine
+  else Kernels._rope_embeddingKernel p.input p.cosine p.sine
     p.rowStride p.cosineStride p.sineStride p.length p.dimension p.heads p.width backward
 def prelude (p : Parameters) (backward : Bool) := (source p backward).surfaceBody.take (if p.fast then 11 else 10)
 def body (p : Parameters) (backward : Bool) : List ComputeStmt :=
@@ -61,8 +61,8 @@ def prepared {α : Type} [Inhabited α] (M : Algebra α) (p : Parameters) (backw
   cases fast <;> cases backward <;>
     (refine ⟨?_,?_⟩
      swap
-     simp [prelude,source,Kernels.ropeKernel,VeriTile.Bench.Repairs.FastRopeEmbedding.Kernels.rope,
-       VeriTile.Bench.Repairs.FastRopeEmbedding.Kernels.ropeForKernel,ComputeKernel.surfaceBody,
+     simp [prelude,source,Kernels._rope_embeddingKernel,VeriTile.Bench.Repairs.FastRopeEmbedding.Kernels.rope,
+       VeriTile.Bench.Repairs.FastRopeEmbedding.Kernels._rope_embeddingKernel,ComputeKernel.surfaceBody,
        run,step,evalExpr,evalComputeOp,evalOp_unfold,evalOffsets,store,numeric,bop,natLt,numericEq,
        ComputeDType.eraseDType,ofFloat,toFloat,FloatDType.numericDType,FloatDType.toTileDType,
        Region.cast,Option.bind,integralFloorDiv,integralMod]
@@ -108,8 +108,8 @@ def oneHead {α : Type} [Inhabited α] (M : Algebra α) (p : Parameters) (backwa
   cases fast <;> cases backward <;>
     (refine ⟨?_,?_⟩
      swap
-     simp [body,source,Kernels.ropeKernel,VeriTile.Bench.Repairs.FastRopeEmbedding.Kernels.rope,
-       VeriTile.Bench.Repairs.FastRopeEmbedding.Kernels.ropeForKernel,ComputeKernel.surfaceBody,
+     simp [body,source,Kernels._rope_embeddingKernel,VeriTile.Bench.Repairs.FastRopeEmbedding.Kernels.rope,
+       VeriTile.Bench.Repairs.FastRopeEmbedding.Kernels._rope_embeddingKernel,ComputeKernel.surfaceBody,
        run,step,evalExpr,evalComputeOp,evalOp_unfold,evalOffsets,store,numeric,bop,natLt,numericEq,
        ComputeDType.eraseDType,ofFloat,toFloat,FloatDType.numericDType,FloatDType.toTileDType,
        Region.cast,Option.bind,State.setReg,h.row,h.columns,h.half,h.mask,h.cosine,h.sine]

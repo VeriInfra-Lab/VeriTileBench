@@ -72,6 +72,7 @@ def linear_tileSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
 def mac_loopSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
   with_control_function "mac_loop" mac_loopSignature constexpr_bools []
     dtype_constants [ACC_TYPE := .fp32] jit_calls [swizzle_tile := "swizzle",linear_tile := "linear"] in triton {
+    # where are we in the grid
     tile_id = start_iter // iters_per_tile
     if GROUP_M  > 0:
         pid_m, pid_n = swizzle_tile(tile_id, M, N, K, BLOCK_M, BLOCK_N, BLOCK_K, GROUP_M)
@@ -129,6 +130,7 @@ def first_waveSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
 def full_tilesSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
   with_control_function "full_tiles" full_tilesSignature constexpr_bools []
     dtype_constants [ACC_TYPE := .fp32] jit_calls [swizzle_tile := "swizzle",linear_tile := "linear"] in triton {
+    # first wave has done more tiles than there are SMs, we adjust pid
     tile_id = tl.program_id(0).to(tl.int64) + total_tiles_streamk
     if GROUP_M > 0:
         pid_m, pid_n = swizzle_tile(tile_id, M, N, K, BLOCK_M, BLOCK_N, BLOCK_K, GROUP_M)
@@ -183,7 +185,7 @@ def reduce_streamkSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation
             tl.atomic_add(C + offsets, contribution, mask=mask)
 }
 
-def area_swizzle_tileSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
+def swizzle_tile_areaSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
   with_control_function "swizzle_tile_area" swizzle_tileSignature constexpr_bools []
     dtype_constants [] jit_calls [] in triton {
     grid_m = tl.cdiv(M, BLOCK_M)
@@ -197,7 +199,7 @@ def area_swizzle_tileSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocat
     return pid_m, pid_n
 }
 
-def area_linear_tileSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
+def linear_tile_areaSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
   with_control_function "linear_tile_area" linear_tileSignature constexpr_bools []
     dtype_constants [] jit_calls [] in triton {
     pid_m = tile_id // tl.cdiv(N, BLOCK_N)
@@ -205,9 +207,10 @@ def area_linear_tileSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocati
     return pid_m, pid_n
 }
 
-def area_mac_loopSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
+def mac_loop_areaSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
   with_control_function "mac_loop_area" mac_loopSignature constexpr_bools []
     dtype_constants [ACC_TYPE := .fp32] jit_calls [swizzle_tile_area := "swizzle",linear_tile_area := "linear"] in triton {
+    # where are we in the grid
     tile_id = start_iter // iters_per_tile
     if GROUP_M  > 0:
         pid_m, pid_n = swizzle_tile_area(tile_id, M, N, K, BLOCK_M, BLOCK_N, BLOCK_K, GROUP_M)
@@ -240,7 +243,7 @@ def area_mac_loopSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation 
         tl.store(partials + slots, acc)
 }
 
-def area_first_waveSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
+def first_wave_areaSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
   with_control_function "first_wave_area" first_waveSignature constexpr_bools []
     dtype_constants [ACC_TYPE := .fp32] jit_calls [mac_loop_area := "mac"] in triton {
     pid = tl.program_id(0).to(tl.int64)
@@ -262,9 +265,10 @@ def area_first_waveSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocatio
         start_iter = end_iter
 }
 
-def area_full_tilesSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
+def full_tiles_areaSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
   with_control_function "full_tiles_area" full_tilesSignature constexpr_bools []
     dtype_constants [ACC_TYPE := .fp32] jit_calls [swizzle_tile_area := "swizzle",linear_tile_area := "linear"] in triton {
+    # first wave has done more tiles than there are SMs, we adjust pid
     tile_id = tl.program_id(0).to(tl.int64) + total_tiles_streamk
     if GROUP_M > 0:
         pid_m, pid_n = swizzle_tile_area(tile_id, M, N, K, BLOCK_M, BLOCK_N, BLOCK_K, GROUP_M)
@@ -297,7 +301,7 @@ def area_full_tilesSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocatio
     tl.store(C, acc, mask=(rm[:, None] < M) & (rn[None, :] < N))
 }
 
-def area_reduce_streamkSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
+def reduce_streamk_areaSource : VeriTile.Triton.DSL.PastedControlFunctions.Invocation :=
   with_control_function "reduce_streamk_area" reduce_streamkSignature constexpr_bools []
     dtype_constants [] jit_calls [swizzle_tile_area := "swizzle",linear_tile_area := "linear"] in triton {
     tile_id = tl.program_id(0).to(tl.int64)
@@ -349,32 +353,32 @@ abbrev reduce_streamkDecoded : {body : List Statement // SourceAdapter.decode re
   case refine_2 => rfl
 def reduce_streamk : List Statement := reduce_streamkDecoded.val
 
-abbrev area_swizzle_tileDecoded : {body : List Statement // SourceAdapter.decode area_swizzle_tileSource=.ok body} := by
+abbrev area_swizzle_tileDecoded : {body : List Statement // SourceAdapter.decode swizzle_tile_areaSource=.ok body} := by
   refine ⟨?_,?_⟩
   case refine_2 => rfl
 def area_swizzle_tile : List Statement := area_swizzle_tileDecoded.val
 
-abbrev area_linear_tileDecoded : {body : List Statement // SourceAdapter.decode area_linear_tileSource=.ok body} := by
+abbrev area_linear_tileDecoded : {body : List Statement // SourceAdapter.decode linear_tile_areaSource=.ok body} := by
   refine ⟨?_,?_⟩
   case refine_2 => rfl
 def area_linear_tile : List Statement := area_linear_tileDecoded.val
 
-abbrev area_mac_loopDecoded : {body : List Statement // SourceAdapter.decode area_mac_loopSource=.ok body} := by
+abbrev area_mac_loopDecoded : {body : List Statement // SourceAdapter.decode mac_loop_areaSource=.ok body} := by
   refine ⟨?_,?_⟩
   case refine_2 => rfl
 def area_mac_loop : List Statement := area_mac_loopDecoded.val
 
-abbrev area_first_waveDecoded : {body : List Statement // SourceAdapter.decode area_first_waveSource=.ok body} := by
+abbrev area_first_waveDecoded : {body : List Statement // SourceAdapter.decode first_wave_areaSource=.ok body} := by
   refine ⟨?_,?_⟩
   case refine_2 => rfl
 def area_first_wave : List Statement := area_first_waveDecoded.val
 
-abbrev area_full_tilesDecoded : {body : List Statement // SourceAdapter.decode area_full_tilesSource=.ok body} := by
+abbrev area_full_tilesDecoded : {body : List Statement // SourceAdapter.decode full_tiles_areaSource=.ok body} := by
   refine ⟨?_,?_⟩
   case refine_2 => rfl
 def area_full_tiles : List Statement := area_full_tilesDecoded.val
 
-abbrev area_reduce_streamkDecoded : {body : List Statement // SourceAdapter.decode area_reduce_streamkSource=.ok body} := by
+abbrev area_reduce_streamkDecoded : {body : List Statement // SourceAdapter.decode reduce_streamk_areaSource=.ok body} := by
   refine ⟨?_,?_⟩
   case refine_2 => rfl
 def area_reduce_streamk : List Statement := area_reduce_streamkDecoded.val
@@ -384,7 +388,7 @@ abbrev kernelsDecoded : {body : Sources // SourceAdapter.decodeSources swizzle_t
   case refine_2 => rfl
 def kernels : Sources := kernelsDecoded.val
 
-abbrev areaKernelsDecoded : {body : Sources // SourceAdapter.decodeSources area_swizzle_tileSource area_linear_tileSource area_mac_loopSource area_first_waveSource area_full_tilesSource area_reduce_streamkSource=.ok body} := by
+abbrev areaKernelsDecoded : {body : Sources // SourceAdapter.decodeSources swizzle_tile_areaSource linear_tile_areaSource mac_loop_areaSource first_wave_areaSource full_tiles_areaSource reduce_streamk_areaSource=.ok body} := by
   refine ⟨?_,?_⟩
   case refine_2 => rfl
 def areaKernels : Sources := areaKernelsDecoded.val

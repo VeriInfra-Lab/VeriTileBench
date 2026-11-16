@@ -15,7 +15,7 @@ def callSignature : CallSignature where
 def blockSize : Nat := 4
 def gridCount (n : Nat) : Nat := (n + 3) / 4
 
-def sourceKernel (X O : RegionName) (n B : Nat) : ComputeKernel :=
+def sin_kernel (X O : RegionName) (n B : Nat) : ComputeKernel :=
   let in_ptr0 : RegionName := X
   let out_ptr : RegionName := O
   let BLOCK_SIZE : Nat := B
@@ -30,7 +30,7 @@ def sourceKernel (X O : RegionName) (n B : Nat) : ComputeKernel :=
     tl.store(out_ptr + offsets, output, mask=mask)
   }
 
-def indexCommutedKernel (X O : RegionName) (n B : Nat) : ComputeKernel :=
+def sin_kernel_index_commutedKernel (X O : RegionName) (n B : Nat) : ComputeKernel :=
   let in_ptr0 : RegionName := X
   let out_ptr : RegionName := O
   let BLOCK_SIZE : Nat := B
@@ -45,6 +45,6 @@ def indexCommutedKernel (X O : RegionName) (n B : Nat) : ComputeKernel :=
     tl.store(out_ptr + offsets, output, mask=mask)
   }
 
-def originalKernel (n : Nat) : ComputeKernel := sourceKernel "in_ptr0" "out_ptr" n blockSize
-def candidateKernel (n : Nat) : ComputeKernel := indexCommutedKernel "in_ptr0" "out_ptr" n blockSize
+def originalKernel (n : Nat) : ComputeKernel := sin_kernel "in_ptr0" "out_ptr" n blockSize
+def candidateKernel (n : Nat) : ComputeKernel := sin_kernel_index_commutedKernel "in_ptr0" "out_ptr" n blockSize
 end VeriTile.Bench.Repairs.SinComputation.Contiguous

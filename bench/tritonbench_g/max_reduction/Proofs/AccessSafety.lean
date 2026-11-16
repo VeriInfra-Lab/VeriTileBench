@@ -16,7 +16,7 @@ theorem stage (e : Source.Engine α) (second candidate : Bool) (inp out : Region
     (ho : stageOutput second (s.pids 0)<bounds out) :
     TraceSafe e.algebra bounds (stageSource second candidate inp out N B) s := by
   cases second <;> cases candidate <;>
-    simp [stageSource,stage1Kernel, VeriTile.Bench.Repairs.MaxReduction.stage1Kernel, VeriTile.Bench.Repairs.MaxReduction.stage1CommutedKernel, VeriTile.Bench.Repairs.MaxReduction.stage2Kernel, VeriTile.Bench.Repairs.MaxReduction.stage2ComplementKernel, VeriTile.Bench.Repairs.MaxReduction.dimensionKernel, VeriTile.Bench.Repairs.MaxReduction.dimensionCommutedKernel, stage1CommutedKernel,stage2Kernel, stage2ComplementKernel, TraceSafe,
+    simp [stageSource,max_kernel_1Kernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel_1Kernel, VeriTile.Bench.Repairs.MaxReduction.max_stage1_commutedKernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel_2Kernel, VeriTile.Bench.Repairs.MaxReduction.max_stage2_complementKernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel, VeriTile.Bench.Repairs.MaxReduction.max_dimension_commutedKernel, max_stage1_commutedKernel,max_kernel_2Kernel, max_stage2_complementKernel, TraceSafe,
       ComputeKernel.surfaceBody,Safety.traceSafeList_unfold,Safety.stepSafe_unfold,
       Safety.safeExpr_unfold,Safety.safeCompute_unfold,Safety.safeOp_unfold,
       Safety.safeAddress_unfold,Safety.safeMask_unfold,Safety.addressSafe_unfold,
@@ -34,9 +34,9 @@ theorem dimension (e : Source.Engine α) (candidate : Bool) (inp ov oi : RegionN
     (hv : ∀ i : Fin BM,s.pids 0*BM+i.val<M → (s.pids 0*BM+i.val)*K+s.pids 1<bounds ov)
     (hx : ∀ i : Fin BM,s.pids 0*BM+i.val<M → (s.pids 0*BM+i.val)*K+s.pids 1<bounds oi) :
     TraceSafe e.algebra bounds
-      (if candidate then dimensionCommutedKernel inp ov oi M N K BM BN else MaxReduction.dimensionKernel inp ov oi M N K BM BN) s := by
+      (if candidate then max_dimension_commutedKernel inp ov oi M N K BM BN else MaxReduction.max_kernel inp ov oi M N K BM BN) s := by
   cases candidate <;>
-    simp [MaxReduction.dimensionKernel,dimensionCommutedKernel, VeriTile.Bench.Repairs.MaxReduction.stage1Kernel, VeriTile.Bench.Repairs.MaxReduction.stage1CommutedKernel, VeriTile.Bench.Repairs.MaxReduction.stage2Kernel, VeriTile.Bench.Repairs.MaxReduction.stage2ComplementKernel, VeriTile.Bench.Repairs.MaxReduction.dimensionKernel, VeriTile.Bench.Repairs.MaxReduction.dimensionCommutedKernel, TraceSafe,ComputeKernel.surfaceBody,
+    simp [MaxReduction.max_kernel,max_dimension_commutedKernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel_1Kernel, VeriTile.Bench.Repairs.MaxReduction.max_stage1_commutedKernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel_2Kernel, VeriTile.Bench.Repairs.MaxReduction.max_stage2_complementKernel, VeriTile.Bench.Repairs.MaxReduction.max_kernel, VeriTile.Bench.Repairs.MaxReduction.max_dimension_commutedKernel, TraceSafe,ComputeKernel.surfaceBody,
       Safety.traceSafeList_unfold,Safety.stepSafe_unfold,
       Safety.safeExpr_unfold,Safety.safeCompute_unfold,Safety.safeOp_unfold,
       Safety.safeAddress_unfold,Safety.safeMask_unfold,Safety.addressSafe_unfold,

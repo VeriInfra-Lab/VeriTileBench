@@ -7,8 +7,8 @@ open VeriTile Triton FP.ProfiledRewrite
 noncomputable section
 
 def assumptions : Spec.Assumptions FP.GuardedFragment := []
-def original (h : Call) (c : Config) : Program := ⟨Kernels.sourceKernel h c,[]⟩
-def compareRightKernel (h : Call) (c : Config) : Program := ⟨Kernels.compareRightKernel h c,[]⟩
+def original (h : Call) (c : Config) : Program := ⟨Kernels.chunk_global_reversed_cumsum_vector_kernel h c,[]⟩
+def compareRightKernel (h : Call) (c : Config) : Program := ⟨Kernels.chunk_global_reversed_cumsum_vector_kernel_compare_rightKernel h c,[]⟩
 
 end
 end VeriTile.Bench.Repairs.ReversedCumsum.Equivalence

@@ -16,7 +16,7 @@ def sourceSignature : CallSignature where
   readPorts := ["b_ptr","b_scale_ptr"]
   writePorts := ["fpb_ptr"]
 
-def dequantizeKernel (b_ptr b_scale_ptr fpb_ptr : RegionName)
+def dequantize_kernel (b_ptr b_scale_ptr fpb_ptr : RegionName)
     (K N stride_bk stride_bn stride_scale stride_fpbk stride_fpbn BLOCK_SIZE_N BLOCK_SIZE_K : Nat) : ComputeKernel :=
   let K_value : Nat := K
   let N_value : Nat := N
@@ -29,8 +29,8 @@ def dequantizeKernel (b_ptr b_scale_ptr fpb_ptr : RegionName)
     [K := K_value, N := N_value, stride_bk := stride_bk_value, stride_bn := stride_bn_value, stride_scale := stride_scale_value, stride_fpbk := stride_fpbk_value, stride_fpbn := stride_fpbn_value] in
   triton {
     """Kernel for computing the matmul C = A x B.
-        A has shape (M, K), B has shape (K, N) and C has shape (M, N)
-        """
+    A has shape (M, K), B has shape (K, N) and C has shape (M, N)
+    """
     k_block_idx = tl.program_id(axis=0).to(tl.int64)
     n_block_idx = tl.program_id(axis=1).to(tl.int64)
     offs_k = tl.arange(0, BLOCK_SIZE_K)
@@ -47,7 +47,7 @@ def dequantizeKernel (b_ptr b_scale_ptr fpb_ptr : RegionName)
     tl.store(fpb_ptr + fpb_offs, int_b * scale_b, mask=mask)
   }
 
-def indexCommutedKernel (b_ptr b_scale_ptr fpb_ptr : RegionName)
+def dequantize_index_commutedKernel (b_ptr b_scale_ptr fpb_ptr : RegionName)
     (K N stride_bk stride_bn stride_scale stride_fpbk stride_fpbn BLOCK_SIZE_N BLOCK_SIZE_K : Nat) : ComputeKernel :=
   let K_value : Nat := K
   let N_value : Nat := N
@@ -60,8 +60,8 @@ def indexCommutedKernel (b_ptr b_scale_ptr fpb_ptr : RegionName)
     [K := K_value, N := N_value, stride_bk := stride_bk_value, stride_bn := stride_bn_value, stride_scale := stride_scale_value, stride_fpbk := stride_fpbk_value, stride_fpbn := stride_fpbn_value] in
   triton {
     """Kernel for computing the matmul C = A x B.
-        A has shape (M, K), B has shape (K, N) and C has shape (M, N)
-        """
+    A has shape (M, K), B has shape (K, N) and C has shape (M, N)
+    """
     k_block_idx = tl.program_id(axis=0).to(tl.int64)
     n_block_idx = tl.program_id(axis=1).to(tl.int64)
     offs_k = tl.arange(0, BLOCK_SIZE_K)
@@ -78,7 +78,7 @@ def indexCommutedKernel (b_ptr b_scale_ptr fpb_ptr : RegionName)
     tl.store(fpb_ptr + fpb_offs, int_b * scale_b, mask=mask)
   }
 
-abbrev kernel := dequantizeKernel
+abbrev kernel := dequantize_kernel
 
 end VeriTile.Bench.Repairs.DequantizeMatmul.TypedSource
 
@@ -91,11 +91,11 @@ structure Parameters where
 
 /-- Canonical contiguous call used by the repaired wrapper. -/
 def original (p : Parameters) : ComputeKernel :=
-  TypedSource.dequantizeKernel p.b p.scale p.output p.K p.N p.N 1 1 p.N 1 p.BN p.BK
+  TypedSource.dequantize_kernel p.b p.scale p.output p.K p.N p.N 1 1 p.N 1 p.BN p.BK
 
 /-- Existing integer-mask candidate, retaining all source floating operations. -/
 def candidate (p : Parameters) : ComputeKernel :=
-  TypedSource.indexCommutedKernel p.b p.scale p.output p.K p.N p.N 1 1 p.N 1 p.BN p.BK
+  TypedSource.dequantize_index_commutedKernel p.b p.scale p.output p.K p.N p.N 1 1 p.N 1 p.BN p.BK
 
 def kernel (version : Bool) (p : Parameters) : ComputeKernel :=
   if version then candidate p else original p

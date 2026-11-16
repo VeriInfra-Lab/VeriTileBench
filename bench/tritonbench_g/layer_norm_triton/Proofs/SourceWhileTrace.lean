@@ -14,7 +14,7 @@ def Control (M : Nat) (current : Int) (s : State α) : Prop :=
 theorem prelude_control (m : Model α) (stride M N G B : Nat) (s t : State α)
     (ran : run (engine m) (SourceGrouped.prelude stride M N G B) s=some t) :
     Control M (s.pids 0 : Int) t := by
-  simp [SourceGrouped.prelude,SourceGrouped.code,TypedSource.groupedBackwardKernel,groupedBackwardKernel,
+  simp [SourceGrouped.prelude,SourceGrouped.code,TypedSource.groupedBackwardKernel,_layer_norm_bwd_dx_fusedKernel,
     ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,evalOp_unfold,
     engine,numeric,natLt,numericLt,numericLe,numericEq,bop,State.setReg,
     ComputeDType.eraseDType,TileShape.axisDim,TileShape.eraseAxis,TileShape.insertAxisIndex,
@@ -36,7 +36,7 @@ theorem body_control (m : Model α) (stride M N G B : Nat) (current : Int) (s t 
   obtain ⟨⟨group,hgroup⟩,⟨cols,hcols⟩,⟨mask,hmask⟩,⟨dwp,hdwp⟩,⟨dbp,hdbp⟩,
     ⟨dw,hdw⟩,⟨db,hdb⟩,⟨row,hrow⟩⟩ := ready
   by_cases same : current=group PUnit.unit <;>
-    simp [SourceGrouped.body,SourceGrouped.code,TypedSource.groupedBackwardKernel,groupedBackwardKernel,
+    simp [SourceGrouped.body,SourceGrouped.code,TypedSource.groupedBackwardKernel,_layer_norm_bwd_dx_fusedKernel,
       ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,evalOp_unfold,
       engine,numeric,natLt,numericLt,numericLe,numericEq,bop,State.setReg,FP.Structural.store,
       ComputeDType.eraseDType,TileShape.axisDim,TileShape.eraseAxis,TileShape.insertAxisIndex,

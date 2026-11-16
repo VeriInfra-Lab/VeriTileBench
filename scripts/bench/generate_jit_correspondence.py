@@ -100,7 +100,7 @@ class Quotation:
     key: str
 
 
-def quotations(root: Path, case: Path) -> list[Quotation]:
+def quotations(root: Path, case: Path, *, include_unparsed: bool = False) -> list[Quotation]:
     # Read executable source entries and imported benchmark source entries,
     # never choose quotation-shaped snippets out of proof files.
     pending = sorted(set(case.glob('*Kernels.lean')) | set((case/'Sources').rglob('*.lean')))
@@ -119,9 +119,12 @@ def quotations(root: Path, case: Path) -> list[Quotation]:
         declarations = list(re.finditer(r"(?m)^(?:(?:private|protected|noncomputable)\s+)*def\s+(" + IDENT + r")\b", code))
         counts = Counter(d[1] for d in declarations)
         duplicated = {name for name, count in counts.items() if count > 1}
+        declaration_ends = [d.start() for d in declarations[1:]] + [len(code)]
         repeated_signatures = {
-            d[1] for d in declarations if d[1] in duplicated
-            and re.match(r"\s*:\s*CallSignature\b", code[d.end():])
+            declaration[1]
+            for declaration, end in zip(declarations, declaration_ends)
+            if declaration[1] in duplicated
+            and re.search(r":\s*CallSignature\s*(?:where|:=)", code[declaration.end():end])
         }
         scopes = []
         if duplicated:
@@ -134,7 +137,7 @@ def quotations(root: Path, case: Path) -> list[Quotation]:
             if not re.search(MARKER, code[declaration.end():end]):
                 continue
             name = declaration[1]
-            source_header = code[declaration.end():end].partition('{')[0]
+            source_header = re.split(MARKER, code[declaration.end():end], maxsplit=1)[0]
             if name in duplicated or any(re.search(rf"\b{re.escape(sig)}\b", source_header)
                                          for sig in repeated_signatures):
                 enclosing = [s for s in scopes if s[0] <= declaration.start() < s[1]]
@@ -146,6 +149,8 @@ def quotations(root: Path, case: Path) -> list[Quotation]:
             except (ValueError, SyntaxError):
                 # An auxiliary legacy quotation is not a pasted-body source.
                 # Every discovered Python JIT still must find an exact pair.
+                if include_unparsed:
+                    result.append(Quotation(path.relative_to(root).as_posix(),name,text,'','',''))
                 continue
             result.append(Quotation(path.relative_to(root).as_posix(), name, text, header, body, body_key(statements)))
     return result
@@ -158,6 +163,9 @@ def record(root: Path, py_path: str, function: ast.FunctionDef, quote: Quotation
         row['kind'] = 'source_procedure'
         raw = clause(header, 'fp32_constants') or ''
         row['expected_fp32_constants'] = [n.strip() for n in raw.split(',') if n.strip()]
+        helpers = clause(header, 'jit_functions')
+        if helpers is not None:
+            row['expected_jit_functions'] = bindings(helpers)
         return row
     if re.search(r'\btriton_(?:rebinding_)?procedure\b', header):
         row['kind'] = 'procedure_jit_function'
@@ -259,7 +267,7 @@ def check_pair(root: Path, row: dict, quote: Quotation) -> None:
     kind = row.get('kind')
     common = [py,quote.text,row['python_function'],row['lean_definition']]
     if kind == 'source_procedure':
-        checker.check_source_procedure(*common,row['expected_fp32_constants'])
+        checker.check_source_procedure(*common,row['expected_fp32_constants'],row.get('expected_jit_functions'))
     elif kind == 'procedure_jit_function':
         checker.check_procedure_function(*common,row['signature_definition'],row['expected_signature'],row.get('expected_parameter_rebinding',False))
     elif kind == 'statement_jit_function':

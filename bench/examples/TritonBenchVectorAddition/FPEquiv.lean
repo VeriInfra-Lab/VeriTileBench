@@ -17,17 +17,17 @@ open scoped VeriTile.Spec
 
 /-- Finite operands after the original common prefix. -/
 def additionSite (nElements blockSize : Nat) : Site where
-  before := Source.prefixBefore (originalKernel nElements blockSize).surfaceBody "output"
+  before := Source.prefixBefore (add_kernel nElements blockSize).surfaceBody "output"
   shape := [blockSize]
   left := .ref .real [blockSize] "x"
   right := .ref .real [blockSize] "y"
 
 def original (nElements blockSize : Nat) : Program where
-  kernel := originalKernel nElements blockSize
+  kernel := add_kernel nElements blockSize
   domain := [additionSite nElements blockSize]
 
 def optimized (nElements blockSize : Nat) : Program :=
-  { original nElements blockSize with kernel := optimizedKernel nElements blockSize }
+  { original nElements blockSize with kernel := add_commuted_kernel nElements blockSize }
 
 /-- Under the finite-operand contract, every successful run is preserved,
 including all registers and memory; failed surrounding executions also agree. -/

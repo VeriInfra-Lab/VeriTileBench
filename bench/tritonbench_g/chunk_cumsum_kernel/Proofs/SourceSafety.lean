@@ -9,7 +9,7 @@ set_option maxRecDepth 12000
 set_option linter.unusedSimpArgs false
 
 abbrev source (v : Bool) (input output : RegionName) (T BT : Nat) :=
-  if v then sumLeftKernel .fp32 .fp32 input output T BT else repairedKernel .fp32 .fp32 input output T BT
+  if v then chunk_global_cumsum_scalar_kernel_sum_leftKernel .fp32 .fp32 input output T BT else chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T BT
 abbrev body (v : Bool) (input output : RegionName) (T BT : Nat) :=
   if v then (Rewrite.candidateParts input output T BT).body else (FPIndexBridge.parts input output T BT).body
 
@@ -24,7 +24,7 @@ private theorem body_safe {α : Type} [Inhabited α] (ops : FPRow.Ops α) (v : B
   obtain ⟨carry,hz⟩ := Option.isSome_iff_exists.mp hz
   cases v <;>
     simp (config := {maxSteps := 300000}) [body,FPIndexBridge.parts,FPRow.parts,Rewrite.candidateParts,
-      repairedKernel,sumLeftKernel,ComputeKernel.surfaceBody,Source.intRange?,
+      chunk_global_cumsum_scalar_kernel_repairedKernel,chunk_global_cumsum_scalar_kernel_sum_leftKernel,ComputeKernel.surfaceBody,Source.intRange?,
       Safety.traceSafeList_unfold,Safety.stepSafe_unfold,Safety.safeExpr_unfold,
       Safety.safeCompute_unfold,Safety.safeOp_unfold,Safety.safeAddress_unfold,
       Safety.safeMask_unfold,Safety.addressSafe_unfold,Safety.maskActive_unfold,
@@ -49,7 +49,7 @@ private theorem body_ready {α : Type} [Inhabited α] (ops : FPRow.Ops α) (v : 
   | «true» =>
     obtain ⟨hp,hz⟩ := ready
     obtain ⟨carry,hz⟩ := Option.isSome_iff_exists.mp hz
-    simp (config := {maxSteps := 300000}) [body,Rewrite.candidateParts,sumLeftKernel,
+    simp (config := {maxSteps := 300000}) [body,Rewrite.candidateParts,chunk_global_cumsum_scalar_kernel_sum_leftKernel,
       ComputeKernel.surfaceBody,Source.intRange?,run,step,evalExpr,
       evalComputeOp,evalOp_unfold,evalOffsets,store,Option.bind,
       engine,Algebra.withDefaultPrecision,resolvePrecision,FPRow.Ops.algebra,
@@ -90,7 +90,7 @@ theorem trace_safe {α : Type} [Inhabited α] (ops : FPRow.Ops α) (v : Bool)
   unfold TraceSafe
   rw [hsplit,Safety.traceSafeList_append]
   constructor
-  · simp [FPIndexBridge.parts,FPRow.parts,repairedKernel,ComputeKernel.surfaceBody,Source.intRange?,
+  · simp [FPIndexBridge.parts,FPRow.parts,chunk_global_cumsum_scalar_kernel_repairedKernel,ComputeKernel.surfaceBody,Source.intRange?,
       Safety.traceSafeList_unfold,Safety.stepSafe_unfold,Safety.safeExpr_unfold,
       Safety.safeCompute_unfold,Safety.safeOp_unfold,step,evalExpr,evalComputeOp,evalOp_unfold,Option.bind]
   · intro t ht

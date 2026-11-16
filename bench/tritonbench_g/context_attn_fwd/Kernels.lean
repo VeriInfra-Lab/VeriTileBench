@@ -15,7 +15,7 @@ def signature (dtype : Storage) : CallSignature where
   readPorts := ["Q","K","V","B_Start_Loc","B_Seqlen","b_prompt_cache_len"]
   writePorts := ["Out"]
 
-def originalKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ) (Out : RegionName)
+def _fwd_kernel_int8kvKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ) (Out : RegionName)
     (B_Start_Loc B_Seqlen b_prompt_cache_len : RegionName)
     (stride_qbs stride_qh stride_qd stride_kb stride_kh stride_ks stride_kd stride_vb stride_vh stride_vs stride_vd stride_obs stride_oh stride_od kv_group_num H BLOCK_DMODEL BLOCK_M BLOCK_N : Nat) : ComputeKernel :=
   with_triton_call (signature dtype) call_args [sm_scale := sm_scale, stride_qbs := stride_qbs, stride_qh := stride_qh, stride_qd := stride_qd, stride_kb := stride_kb, stride_kh := stride_kh, stride_ks := stride_ks, stride_kd := stride_kd, stride_vb := stride_vb, stride_vh := stride_vh, stride_vs := stride_vs, stride_vd := stride_vd, stride_obs := stride_obs, stride_oh := stride_oh, stride_od := stride_od, kv_group_num := kv_group_num] in triton {
@@ -23,47 +23,92 @@ def originalKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ) (Out 
     cur_bh = tl.program_id(1).to(tl.int64)
     cur_batch = cur_bh // H
     cur_head = cur_bh % H
+
     cur_kv_head = cur_head // kv_group_num
     prompt_cache_len = tl.load(b_prompt_cache_len + cur_batch).to(tl.int64)
     cur_batch_in_all_start_index = tl.load(B_Start_Loc + cur_batch).to(tl.int64)
     cur_batch_seq_len = tl.load(B_Seqlen + cur_batch).to(tl.int64) - prompt_cache_len
+
     block_start_loc = BLOCK_M * start_m
+
+    # initialize offsets
     offs_n = tl.arange(0, BLOCK_N).to(tl.int64)
     offs_d = tl.arange(0, BLOCK_DMODEL).to(tl.int64)
     offs_m = block_start_loc + tl.arange(0, BLOCK_M).to(tl.int64)
-    off_q = (cur_batch_in_all_start_index + offs_m[:, None]) * stride_qbs + cur_head * stride_qh + offs_d[None, :] * stride_qd
+    off_q = (
+        (cur_batch_in_all_start_index + offs_m[:, None]) * stride_qbs
+        + cur_head * stride_qh
+        + offs_d[None, :] * stride_qd
+    )
     q = tl.load(Q + off_q, mask=offs_m[:, None] < cur_batch_seq_len, other=0.0)
-    m_i = tl.zeros([BLOCK_M], dtype=tl.float32) - float('inf')
+
+    # initialize pointer to m and l
+    m_i = tl.zeros([BLOCK_M], dtype=tl.float32) - float("inf")
     l_i = tl.zeros([BLOCK_M], dtype=tl.float32)
     acc = tl.zeros([BLOCK_M, BLOCK_DMODEL], dtype=tl.float32)
+
     block_mask = tl.where(block_start_loc < cur_batch_seq_len, 1, 0)
     block_end_loc = tl.minimum(block_start_loc + BLOCK_M + prompt_cache_len, cur_batch_seq_len + prompt_cache_len)
+    # causal mask
     for start_n in range(0, block_mask * block_end_loc, BLOCK_N):
         start_n = tl.multiple_of(start_n, BLOCK_N)
-        off_k = cur_batch * stride_kb + (start_n + offs_n[None, :]) * stride_ks + cur_kv_head * stride_kh + offs_d[:, None] * stride_kd
-        k = tl.load(K + off_k, mask=start_n + offs_n[None, :] < block_end_loc, other=0.0)
+        # -- compute qk ----
+        # k = tl.load(
+        #     k_ptrs + (start_n + offs_n[None, :]) * stride_ks,
+        #     mask=(start_n + offs_n[None, :]) < block_end_loc,
+        #     other=0,
+        # )
+        off_k = (
+            cur_batch * stride_kb
+            + (start_n + offs_n[None, :]) * stride_ks
+            + cur_kv_head * stride_kh
+            + offs_d[:, None] * stride_kd
+        )
+        k = tl.load(K + off_k, mask=(start_n + offs_n[None, :]) < block_end_loc, other=0.0)
+
         qk = tl.dot(q, k)
-        mask = offs_m[:, None] + prompt_cache_len >= start_n + offs_n[None, :]
-        qk = tl.where(mask, qk * sm_scale, -100000000.0)
+        mask = (offs_m[:, None] + prompt_cache_len) >= (start_n + offs_n[None, :])
+        qk = tl.where(mask, qk * sm_scale, -1.0e8)
         m_ij = tl.maximum(m_i, tl.max(qk, 1))
         qk -= m_ij[:, None]
         p = tl.math.exp2(qk)
         l_ij = tl.sum(p, 1)
+
+        # -- update m_i and l_i
         alpha = tl.math.exp2(m_i - m_ij)
         l_i = l_i * alpha + l_ij
+        # -- update output accumulator --
         acc = acc * alpha[:, None]
-        off_v = cur_batch * stride_vb + (start_n + offs_n[:, None]) * stride_vs + cur_kv_head * stride_vh + offs_d[None, :] * stride_vd
-        v = tl.load(V + off_v, mask=start_n + offs_n[:, None] < block_end_loc, other=0.0)
+        # update acc
+        # v = tl.load(
+        #     v_ptrs + (start_n + offs_n[:, None]) * stride_vs,
+        #     mask=(start_n + offs_n[:, None]) < block_end_loc,
+        #     other=0.0,
+        # )
+        off_v = (
+            cur_batch * stride_vb
+            + (start_n + offs_n[:, None]) * stride_vs
+            + cur_kv_head * stride_vh
+            + offs_d[None, :] * stride_vd
+        )
+        v = tl.load(V + off_v, mask=(start_n + offs_n[:, None]) < block_end_loc, other=0.0)
+
         p = p.to(v.dtype)
         acc = tl.dot(p, v, acc)
+        # update m_i
         m_i = m_ij
+
     acc = acc / l_i[:, None]
-    off_o = (cur_batch_in_all_start_index + offs_m[:, None]) * stride_obs + cur_head * stride_oh + offs_d[None, :] * stride_od
+    off_o = (
+        (cur_batch_in_all_start_index + offs_m[:, None]) * stride_obs
+        + cur_head * stride_oh
+        + offs_d[None, :] * stride_od
+    )
     out_ptrs = Out + off_o
     tl.store(out_ptrs, acc, mask=offs_m[:, None] < cur_batch_seq_len)
   }
 
-def scaleFirstKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ) (Out : RegionName)
+def _fwd_kernel_scale_firstKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ) (Out : RegionName)
     (B_Start_Loc B_Seqlen b_prompt_cache_len : RegionName)
     (stride_qbs stride_qh stride_qd stride_kb stride_kh stride_ks stride_kd stride_vb stride_vh stride_vs stride_vd stride_obs stride_oh stride_od kv_group_num H BLOCK_DMODEL BLOCK_M BLOCK_N : Nat) : ComputeKernel :=
   with_triton_call (signature dtype) call_args [sm_scale := sm_scale, stride_qbs := stride_qbs, stride_qh := stride_qh, stride_qd := stride_qd, stride_kb := stride_kb, stride_kh := stride_kh, stride_ks := stride_ks, stride_kd := stride_kd, stride_vb := stride_vb, stride_vh := stride_vh, stride_vs := stride_vs, stride_vd := stride_vd, stride_obs := stride_obs, stride_oh := stride_oh, stride_od := stride_od, kv_group_num := kv_group_num] in triton {
@@ -111,7 +156,7 @@ def scaleFirstKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ) (Ou
     tl.store(out_ptrs, acc, mask=offs_m[:, None] < cur_batch_seq_len)
   }
 
-def blockEndFactoredKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ) (Out : RegionName)
+def _fwd_kernel_block_end_factoredKernel (dtype : Storage) (Q K V : RegionName) (sm_scale : ℝ) (Out : RegionName)
     (B_Start_Loc B_Seqlen b_prompt_cache_len : RegionName)
     (stride_qbs stride_qh stride_qd stride_kb stride_kh stride_ks stride_kd stride_vb stride_vh stride_vs stride_vd stride_obs stride_oh stride_od kv_group_num H BLOCK_DMODEL BLOCK_M BLOCK_N : Nat) : ComputeKernel :=
   with_triton_call (signature dtype) call_args [sm_scale := sm_scale, stride_qbs := stride_qbs, stride_qh := stride_qh, stride_qd := stride_qd, stride_kb := stride_kb, stride_kh := stride_kh, stride_ks := stride_ks, stride_kd := stride_kd, stride_vb := stride_vb, stride_vh := stride_vh, stride_vs := stride_vs, stride_vd := stride_vd, stride_obs := stride_obs, stride_oh := stride_oh, stride_od := stride_od, kv_group_num := kv_group_num] in triton {

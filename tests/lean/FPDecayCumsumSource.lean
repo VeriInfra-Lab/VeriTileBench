@@ -81,7 +81,7 @@ theorem forward_types (storage : Storage) (swapped : Bool) :
     stores (loopBody code) = [dtype storage] := by
   cases storage <;> cases swapped
   all_goals refine ⟨?_,rfl,rfl,?_⟩
-  all_goals simp [stores,loopBody,fwd,forward,VeriTile.Bench.Repairs.DecayCumsum.forwardKernel,VeriTile.Bench.Repairs.DecayCumsum.forwardCandidateKernel,VeriTile.Bench.Repairs.DecayCumsum.prepareKernel,VeriTile.Bench.Repairs.DecayCumsum.prepareCandidateKernel,VeriTile.Bench.Repairs.DecayCumsum.backwardKernel,VeriTile.Bench.Repairs.DecayCumsum.backwardCandidateKernel,ComputeKernel.surfaceBody,assignedLoadType?,assignedLoadType?.go,loadType?,dtype,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption,Option.bind]
+  all_goals simp [stores,loopBody,fwd,forward,VeriTile.Bench.Repairs.DecayCumsum.fwd_decay_cumsumKernel,VeriTile.Bench.Repairs.DecayCumsum.fwd_decay_cumsum_index_commutedKernel,VeriTile.Bench.Repairs.DecayCumsum.prepare_qg_kgKernel,VeriTile.Bench.Repairs.DecayCumsum.prepare_qg_kg_index_commutedKernel,VeriTile.Bench.Repairs.DecayCumsum.bwd_decay_global_cumsumKernel,VeriTile.Bench.Repairs.DecayCumsum.bwd_decay_global_cumsum_index_commutedKernel,ComputeKernel.surfaceBody,assignedLoadType?,assignedLoadType?.go,loadType?,dtype,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption,Option.bind]
 
 /-- Query/key and gate storage are independent, including the unmasked final
 gate load. Neither the explicit fp32 conversion nor output casts are erased. -/
@@ -95,7 +95,7 @@ theorem prepare_types (source gate : Storage) (swapped : Bool) :
     stores (loopBody code) = [dtype source,dtype source] := by
   cases source <;> cases gate <;> cases swapped
   all_goals refine ⟨?_,?_,?_,?_,rfl,?_⟩
-  all_goals simp [stores,loopBody,prep,prepare,VeriTile.Bench.Repairs.DecayCumsum.forwardKernel,VeriTile.Bench.Repairs.DecayCumsum.forwardCandidateKernel,VeriTile.Bench.Repairs.DecayCumsum.prepareKernel,VeriTile.Bench.Repairs.DecayCumsum.prepareCandidateKernel,VeriTile.Bench.Repairs.DecayCumsum.backwardKernel,VeriTile.Bench.Repairs.DecayCumsum.backwardCandidateKernel,ComputeKernel.surfaceBody,assignedLoadType?,assignedLoadType?.go,loadType?,dtype,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption,Option.bind]
+  all_goals simp [stores,loopBody,prep,prepare,VeriTile.Bench.Repairs.DecayCumsum.fwd_decay_cumsumKernel,VeriTile.Bench.Repairs.DecayCumsum.fwd_decay_cumsum_index_commutedKernel,VeriTile.Bench.Repairs.DecayCumsum.prepare_qg_kgKernel,VeriTile.Bench.Repairs.DecayCumsum.prepare_qg_kg_index_commutedKernel,VeriTile.Bench.Repairs.DecayCumsum.bwd_decay_global_cumsumKernel,VeriTile.Bench.Repairs.DecayCumsum.bwd_decay_global_cumsum_index_commutedKernel,ComputeKernel.surfaceBody,assignedLoadType?,assignedLoadType?.go,loadType?,dtype,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption,Option.bind]
 
 theorem backward_types (source gate : Storage) (swapped : Bool) :
     let code := (bwd source gate swapped).surfaceBody
@@ -110,7 +110,7 @@ theorem backward_types (source gate : Storage) (swapped : Bool) :
     stores (loopBody code) = [dtype source,dtype source,dtype gate] := by
   cases source <;> cases gate <;> cases swapped
   all_goals refine ⟨?_,?_,?_,?_,?_,?_,?_,rfl,?_⟩
-  all_goals simp [stores,loopBody,bwd,backward,VeriTile.Bench.Repairs.DecayCumsum.forwardKernel,VeriTile.Bench.Repairs.DecayCumsum.forwardCandidateKernel,VeriTile.Bench.Repairs.DecayCumsum.prepareKernel,VeriTile.Bench.Repairs.DecayCumsum.prepareCandidateKernel,VeriTile.Bench.Repairs.DecayCumsum.backwardKernel,VeriTile.Bench.Repairs.DecayCumsum.backwardCandidateKernel,ComputeKernel.surfaceBody,assignedLoadType?,assignedLoadType?.go,loadType?,dtype,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption,Option.bind]
+  all_goals simp [stores,loopBody,bwd,backward,VeriTile.Bench.Repairs.DecayCumsum.fwd_decay_cumsumKernel,VeriTile.Bench.Repairs.DecayCumsum.fwd_decay_cumsum_index_commutedKernel,VeriTile.Bench.Repairs.DecayCumsum.prepare_qg_kgKernel,VeriTile.Bench.Repairs.DecayCumsum.prepare_qg_kg_index_commutedKernel,VeriTile.Bench.Repairs.DecayCumsum.bwd_decay_global_cumsumKernel,VeriTile.Bench.Repairs.DecayCumsum.bwd_decay_global_cumsum_index_commutedKernel,ComputeKernel.surfaceBody,assignedLoadType?,assignedLoadType?.go,loadType?,dtype,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,Except.toOption,Option.bind]
 
 #guard_msgs (drop info) in
 #auditModuleAxioms

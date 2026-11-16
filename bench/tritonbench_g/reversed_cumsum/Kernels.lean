@@ -53,7 +53,7 @@ def callSignature (dtype out_dtype : FloatDType) : CallSignature where
   readPorts := ["s"]
   writePorts := ["z"]
 
-def sourceKernel (h : Call) (c : Config) : ComputeKernel :=
+def chunk_global_reversed_cumsum_vector_kernel (h : Call) (c : Config) : ComputeKernel :=
   let dtype := h.inputDType
   let out_dtype := h.outputDType
   let s := h.input
@@ -92,7 +92,7 @@ def sourceKernel (h : Call) (c : Config) : ComputeKernel :=
             b_z += tl.sum(b_s, 0)
   }
 
-def compareRightKernel (h : Call) (c : Config) : ComputeKernel :=
+def chunk_global_reversed_cumsum_vector_kernel_compare_rightKernel (h : Call) (c : Config) : ComputeKernel :=
   let dtype := h.inputDType
   let out_dtype := h.outputDType
   let s := h.input

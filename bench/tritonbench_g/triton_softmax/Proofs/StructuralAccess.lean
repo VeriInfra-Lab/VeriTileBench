@@ -31,9 +31,9 @@ theorem candidate_safe {α : Type} [Inhabited α] (M : Algebra α)
     (hB : 0<B) (bounds : RegionName → Nat) (s : State α)
     (hin : ∀ i : Fin B,i.val<n → ib+s.pids 0*ir+i.val*ic<bounds inp)
     (hout : ∀ i : Fin B,i.val<n → ob+s.pids 0*orow+i.val*oc<bounds out) :
-    FP.Structural.TraceSafe M bounds (indexCommutedKernel out inp ib ob ir ic orow oc n B) s := by
+    FP.Structural.TraceSafe M bounds (softmax_kernel_candidateKernel out inp ib ob ir ic orow oc n B) s := by
   obtain ⟨k,rfl⟩ := Nat.exists_eq_succ_of_ne_zero hB.ne'
-  simp [FP.Structural.TraceSafe,indexCommutedKernel,ComputeKernel.surfaceBody,
+  simp [FP.Structural.TraceSafe,softmax_kernel_candidateKernel,ComputeKernel.surfaceBody,
     Safety.traceSafeList_unfold,Safety.stepSafe_unfold,Safety.safeExpr_unfold,
     Safety.safeCompute_unfold,Safety.safeOp_unfold,Safety.safeAddress_unfold,
     Safety.safeMask_unfold,Safety.addressSafe_unfold,Safety.maskActive_unfold,

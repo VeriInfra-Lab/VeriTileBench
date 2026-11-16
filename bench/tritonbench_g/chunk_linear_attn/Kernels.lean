@@ -42,7 +42,7 @@ def backwardQKVSignature : CallSignature where
   readPorts := ["q","k","v","h","do","dh"]
   writePorts := ["dq","dk","dv"]
 
-def forwardHKernel (p : Parameters) (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : ComputeKernel :=
+def chunk_linear_attn_fwd_kernel_hKernel (p : Parameters) (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : ComputeKernel :=
   let T := p.T
   let K := p.K
   let V := p.V
@@ -87,7 +87,7 @@ def forwardHKernel (p : Parameters) (USE_INITIAL_STATE STORE_FINAL_STATE : Bool)
         tl.store(p_ht, b_h.to(p_ht.dtype.element_ty), boundary_check=(0, 1))
   }
 
-def forwardOKernel (p : Parameters) (scale : ℝ) : ComputeKernel :=
+def chunk_linear_attn_fwd_kernel_oKernel (p : Parameters) (scale : ℝ) : ComputeKernel :=
   let T := p.T
   let K := p.K
   let V := p.V
@@ -136,7 +136,7 @@ def forwardOKernel (p : Parameters) (scale : ℝ) : ComputeKernel :=
     tl.store(p_o, b_o.to(p_o.dtype.element_ty), boundary_check=(0, 1))
   }
 
-def backwardHKernel (p : Parameters) (scale : ℝ) (USE_FINAL_GRADIENT STORE_INITIAL_GRADIENT : Bool) : ComputeKernel :=
+def chunk_linear_attn_bwd_kernel_dhKernel (p : Parameters) (scale : ℝ) (USE_FINAL_GRADIENT STORE_INITIAL_GRADIENT : Bool) : ComputeKernel :=
   let T := p.T
   let K := p.K
   let V := p.V
@@ -180,7 +180,7 @@ def backwardHKernel (p : Parameters) (scale : ℝ) (USE_FINAL_GRADIENT STORE_INI
         tl.store(p_dh0, b_dh.to(p_dh0.dtype.element_ty), boundary_check=(0, 1))
   }
 
-def backwardQKVKernel (p : Parameters) (scale : ℝ) : ComputeKernel :=
+def chunk_linear_attn_bwd_kernel_dqkvKernel (p : Parameters) (scale : ℝ) : ComputeKernel :=
   let T := p.T
   let K := p.K
   let V := p.V
@@ -248,7 +248,7 @@ def backwardQKVKernel (p : Parameters) (scale : ℝ) : ComputeKernel :=
     tl.store(p_dk, b_dk.to(p_dk.dtype.element_ty), boundary_check=(0, 1))
   }
 
-def forwardOHoistedKernel (p : Parameters) (scale : ℝ) : ComputeKernel :=
+def chunk_linear_attn_fwd_kernel_o_candidateKernel (p : Parameters) (scale : ℝ) : ComputeKernel :=
   let T := p.T
   let K := p.K
   let V := p.V
@@ -300,16 +300,16 @@ def forwardOHoistedKernel (p : Parameters) (scale : ℝ) : ComputeKernel :=
 
 end
 def forwardH (p : Parameters) (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : ComputeKernel :=
-  forwardHKernel p USE_INITIAL_STATE STORE_FINAL_STATE
+  chunk_linear_attn_fwd_kernel_hKernel p USE_INITIAL_STATE STORE_FINAL_STATE
 
 def forwardO (p : Parameters) (scale : ℝ) : ComputeKernel :=
-  forwardOKernel p scale
+  chunk_linear_attn_fwd_kernel_oKernel p scale
 
 def backwardH (p : Parameters) (scale : ℝ) (USE_FINAL_GRADIENT STORE_INITIAL_GRADIENT : Bool) : ComputeKernel :=
-  backwardHKernel p scale USE_FINAL_GRADIENT STORE_INITIAL_GRADIENT
+  chunk_linear_attn_bwd_kernel_dhKernel p scale USE_FINAL_GRADIENT STORE_INITIAL_GRADIENT
 
 def backwardQKV (p : Parameters) (scale : ℝ) : ComputeKernel :=
-  backwardQKVKernel p scale
+  chunk_linear_attn_bwd_kernel_dqkvKernel p scale
 
 end
 end VeriTile.Bench.Repairs.ChunkLinearAttn

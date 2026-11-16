@@ -4,9 +4,9 @@ import VeriTile.Meta.StatementAudit
 namespace VeriTile.Bench.Repairs.SpinningLock
 /-- The entire repaired source lowers successfully to the program used by
 execution, including every address, CAS, barrier and control-flow statement. -/
-theorem kernel_source_preserved : SourceAdapter.decode reductionSource = .ok kernel :=
+theorem kernel_source_preserved : SourceAdapter.decode spinning_lock_kernelSource = .ok kernel :=
   kernelDecoded.property
-theorem area_kernel_source_preserved : SourceAdapter.decode areaSource = .ok areaKernel :=
+theorem area_kernel_source_preserved : SourceAdapter.decode spinning_lock_kernel_areaSource = .ok areaKernel :=
   areaKernelDecoded.property
 #axiomsClean kernel_source_preserved
 #axiomsClean area_kernel_source_preserved

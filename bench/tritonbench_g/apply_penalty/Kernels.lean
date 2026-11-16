@@ -16,7 +16,7 @@ def callSignature : CallSignature where
     "p_cumsum_seq_len","p_token_ids","p_token_counts","Logits"]
   writePorts := ["Logits"]
 
-def sourceKernel
+def _fwd_kernel_apply_penalty_repairedKernel
     (Logits presence_penalty freqency_penalty repetition_penalty : RegionName)
     (p_token_ids p_token_counts p_cumsum_seq_len : RegionName)
     (stride_logit_b stride_logit_s BLOCK_P : Nat) : ComputeKernel :=
@@ -43,7 +43,7 @@ def sourceKernel
     tl.store(output_ptr, pre_logits, mask=cur_batch_id_offset < cur_batch_end_index)
   }
 
-def reciprocalKernel
+def _fwd_kernel_apply_penalty_reciprocalKernel
     (Logits presence_penalty freqency_penalty repetition_penalty : RegionName)
     (p_token_ids p_token_counts p_cumsum_seq_len : RegionName)
     (stride_logit_b stride_logit_s BLOCK_P : Nat) : ComputeKernel :=

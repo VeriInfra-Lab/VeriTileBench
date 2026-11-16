@@ -9,10 +9,10 @@ noncomputable section
 
 def assumptions : Spec.Assumptions FP.GuardedFragment := []
 def original (X O : RegionName) (n : Nat) : Program where
-  kernel := sourceKernel X O n blockSize
+  kernel := sin_kernel X O n blockSize
   domain := []
 def indexCommuted (X O : RegionName) (n : Nat) : Program where
-  kernel := indexCommutedKernel X O n blockSize
+  kernel := sin_kernel_index_commutedKernel X O n blockSize
   domain := []
 
 /-- Both actual kernels succeed and have equal complete typed memories. Only

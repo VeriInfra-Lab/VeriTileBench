@@ -8,22 +8,22 @@ noncomputable section
 def half (A W1 W3 OUT RMS : RegionName)
     (M N K sam sak sw1k sw1n sw3k sw3n soutm soutn srms BM BN BK : Nat)
     (EPS : ℝ) : ComputeKernel :=
-  halfKernel A W1 W3 OUT RMS M N K sam sak sw1k sw1n sw3k sw3n soutm soutn srms BM BN BK EPS
+  FP16.ff_llamaKernel A W1 W3 OUT RMS M N K sam sak sw1k sw1n sw3k sw3n soutm soutn srms BM BN BK EPS
 
 def byte (A W1 W3 OUT RMS : RegionName)
     (M N K sam sak sw1k sw1n sw3k sw3n soutm soutn srms BM BN BK : Nat)
     (EPS : ℝ) : ComputeKernel :=
-  byteKernel A W1 W3 OUT RMS M N K sam sak sw1k sw1n sw3k sw3n soutm soutn srms BM BN BK EPS
+  UInt8.ff_llamaKernel A W1 W3 OUT RMS M N K sam sak sw1k sw1n sw3k sw3n soutm soutn srms BM BN BK EPS
 
 def halfCandidate (A W1 W3 OUT RMS : RegionName)
     (M N K sam sak sw1k sw1n sw3k sw3n soutm soutn srms BM BN BK : Nat)
     (EPS : ℝ) : ComputeKernel :=
-  halfCandidateKernel A W1 W3 OUT RMS M N K sam sak sw1k sw1n sw3k sw3n soutm soutn srms BM BN BK EPS
+  FP16.ff_llama_index_commutedKernel A W1 W3 OUT RMS M N K sam sak sw1k sw1n sw3k sw3n soutm soutn srms BM BN BK EPS
 
 def byteCandidate (A W1 W3 OUT RMS : RegionName)
     (M N K sam sak sw1k sw1n sw3k sw3n soutm soutn srms BM BN BK : Nat)
     (EPS : ℝ) : ComputeKernel :=
-  byteCandidateKernel A W1 W3 OUT RMS M N K sam sak sw1k sw1n sw3k sw3n soutm soutn srms BM BN BK EPS
+  UInt8.ff_llama_index_commutedKernel A W1 W3 OUT RMS M N K sam sak sw1k sw1n sw3k sw3n soutm soutn srms BM BN BK EPS
 
 def kernel (fp8 : Bool) (M N K : Nat) (EPS : ℝ) : ComputeKernel :=
   (if fp8 then byte else half) "A" "W1" "W3" "OUT" "RMS"

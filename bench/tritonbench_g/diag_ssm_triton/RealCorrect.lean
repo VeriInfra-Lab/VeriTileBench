@@ -98,8 +98,8 @@ specification complex_backward_region_correctness (p : BackwardLayout) (length :
    RegionCorrectness.BackwardSeparation,ComplexBackwardRun.Separation,
    forwardIO,backwardIO,UKernelIO.Ctx,UKernelIO.nOut,UKernelIO.oarity,UKernelIO.oty,ChanTy.carrier,UKernelIO.RegionalImplements]
 
-#specNonCircular forwardMath avoiding [forwardKernel,backwardKernel,forwardIO,backwardIO]
-#specNonCircular backwardMath avoiding [forwardKernel,backwardKernel,forwardIO,backwardIO]
+#specNonCircular forwardMath avoiding [diag_ssm_forward_kernel,diag_ssm_backward_kernel,forwardIO,backwardIO]
+#specNonCircular backwardMath avoiding [diag_ssm_forward_kernel,diag_ssm_backward_kernel,forwardIO,backwardIO]
 #guard_msgs (drop info) in
 #auditModuleAxioms
 end

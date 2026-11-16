@@ -62,7 +62,7 @@ theorem sources (p : Layout) (r : Regions) (swapped : Bool) (scale : ℝ) :
     scales p r swapped scale = scalesCode p ∧
     commit p r swapped scale = commitCode p := by
   cases swapped <;> refine ⟨?_,?_,?_,?_⟩
-  all_goals simp only [stats,normalizer,scales,commit,suffixFrom,lower,parts,mathematical,VeriTile.Bench.Repairs.ContextAttnBloomSource.kernel,VeriTile.Bench.Repairs.ContextAttnBloomSource.originalKernel,VeriTile.Bench.Repairs.ContextAttnBloomSource.scaleFirst32,VeriTile.Bench.Repairs.ContextAttnBloomSource.scaleFirstKernel,ComputeKernel.surfaceBody,
+  all_goals simp only [stats,normalizer,scales,commit,suffixFrom,lower,parts,mathematical,VeriTile.Bench.Repairs.ContextAttnBloomSource.kernel,VeriTile.Bench.Repairs.ContextAttnBloomSource._fwd_kernel,VeriTile.Bench.Repairs.ContextAttnBloomSource.scaleFirst32,VeriTile.Bench.Repairs.ContextAttnBloomSource._fwd_kernel_scale_firstKernel,ComputeKernel.surfaceBody,
     Bool.false_eq_true,↓reduceIte,String.reduceEq,Option.map,Option.getD,Except.toOption,
     Source.intRange?,Source.prefixBefore,List.length_cons,List.length_nil,
     List.drop_succ_cons,List.drop_zero,

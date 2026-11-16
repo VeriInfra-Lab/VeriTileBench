@@ -12,7 +12,7 @@ def callSignature : CallSignature where
   constexpr := ["BLOCK_SIZE","P2"]
 
 /-- The unmodified selected Python function body. -/
-def bodyKernel (x_ptr state_x output_ptr : RegionName) (BLOCK_SIZE P2 : Nat) : ComputeKernel :=
+def _dequantize_rowwise_repairedKernel (x_ptr state_x output_ptr : RegionName) (BLOCK_SIZE P2 : Nat) : ComputeKernel :=
   with_triton_signature callSignature in
   triton {
   pid = tl.program_id(axis=0).to(tl.int64)
@@ -27,19 +27,19 @@ def bodyKernel (x_ptr state_x output_ptr : RegionName) (BLOCK_SIZE P2 : Nat) : C
 }
 
 /-- Candidate: commute only the signed integer row-start multiplication. -/
-def indexCommutedBody (x_ptr state_x output_ptr : RegionName) (BLOCK_SIZE P2 : Nat) : ComputeKernel :=
+def _dequantize_rowwise_index_commutedKernel (x_ptr state_x output_ptr : RegionName) (BLOCK_SIZE P2 : Nat) : ComputeKernel :=
   with_triton_signature callSignature in
   triton {
-  pid = tl.program_id(axis=0).to(tl.int64)
-  block_start = BLOCK_SIZE * pid
-  arange = tl.arange(0, P2).to(tl.int64)
-  offsets = block_start + arange
-  row_mask = arange < BLOCK_SIZE
-  x = tl.load(x_ptr + offsets, mask=row_mask)
-  max_val = tl.load(state_x + pid)
-  output = max_val * x * inv_127
-  tl.store(output_ptr + offsets, output, mask=row_mask)
-}
+    pid = tl.program_id(axis=0).to(tl.int64)
+    block_start = BLOCK_SIZE * pid
+    arange = tl.arange(0, P2).to(tl.int64)
+    offsets = block_start + arange
+    row_mask = arange < BLOCK_SIZE
+    x = tl.load(x_ptr + offsets, mask=row_mask)
+    max_val = tl.load(state_x + pid)
+    output = max_val * x * inv_127
+    tl.store(output_ptr + offsets, output, mask=row_mask)
+  }
 
 /-- Explicit call bindings, separate from the source quotation. The unused
 n_elements parameter is retained; scalar FP32 rounding occurs at the call. -/
@@ -48,11 +48,11 @@ noncomputable def arguments (inv_127 : ℝ) (n_elements : Nat) : List ScalarArgu
 
 noncomputable def source (x_ptr state_x output_ptr : RegionName) (inv_127 : ℝ)
     (n_elements BLOCK_SIZE P2 : Nat) : ComputeKernel :=
-  (bodyKernel x_ptr state_x output_ptr BLOCK_SIZE P2).withScalarArguments (arguments inv_127 n_elements)
+  (_dequantize_rowwise_repairedKernel x_ptr state_x output_ptr BLOCK_SIZE P2).withScalarArguments (arguments inv_127 n_elements)
 
 noncomputable def indexCommutedSource (x_ptr state_x output_ptr : RegionName) (inv_127 : ℝ)
     (n_elements BLOCK_SIZE P2 : Nat) : ComputeKernel :=
-  (indexCommutedBody x_ptr state_x output_ptr BLOCK_SIZE P2).withScalarArguments (arguments inv_127 n_elements)
+  (_dequantize_rowwise_index_commutedKernel x_ptr state_x output_ptr BLOCK_SIZE P2).withScalarArguments (arguments inv_127 n_elements)
 
 def xRegion : RegionName := "x"
 def scaleRegion : RegionName := "scale"

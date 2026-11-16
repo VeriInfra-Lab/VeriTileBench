@@ -5,10 +5,10 @@ namespace VeriTile.Bench.TritonBenchG.ChunkGateRecurrence.TypedSource
 open VeriTile.Triton
 def specializeBackward (gate incoming : Storage) (swapped : Bool) (source : FloatDType) :=
   if swapped then
-    VeriTile.Bench.Repairs.ChunkGateRecurrence.Kernels.backwardBodySumLeftKernel
+    VeriTile.Bench.Repairs.ChunkGateRecurrence.Kernels._bwd_recurrence_candidateKernel
       source gate incoming
   else
-    VeriTile.Bench.Repairs.ChunkGateRecurrence.Kernels.backwardKernel
+    VeriTile.Bench.Repairs.ChunkGateRecurrence.Kernels._bwd_recurrenceKernel
       source gate incoming
 
 def backward (source gate incoming : Storage) :=

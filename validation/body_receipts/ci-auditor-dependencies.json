@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "kind": "cold_auditor_fixture_dependency_validation",
+  "accepted": true,
+  "completed_at_utc": "2026-11-16T05:59:09.047410+00:00",
+  "parent_validation": {
+    "path": "validation/body_receipts/ci-shard-locality.json",
+    "sha256": "8422255835369e6b3ac351ab1feb909833080dddd89a1ba3e83589c9e922376a"
+  },
+  "issue": "The auditor fixtures import VectorAdd and softmax_triton1 kernels. A library-only bootstrap leaves their local oleans absent in a fresh runner.",
+  "fix": "The auditor entry point explicitly builds both benchmark kernel dependencies and the audit metadata before executing tests.",
+  "checks": {
+    "tool_tests": 158,
+    "real_auditor_regression_tests": 33,
+    "benchmark_build_trees_removed_from_isolated_checkout": 2,
+    "both_missing_imports_freshly_rebuilt": true,
+    "all_audit_acceptance_and_rejection_assertions_retained": true,
+    "case_sources_or_proofs_changed": false
+  },
+  "ci_failure": {
+    "run": 43811349595,
+    "job": 133114788796,
+    "log_sha256": "f3bfca3abc2c5bcd7de57e2ec180d6b3b680bf552eed1071c169a14200ae0a19"
+  },
+  "local_logs": {
+    "auditor-dependency-tool-tests.log": {
+      "path": "/tmp/veritile-corpus-naming/ci-responsibility/auditor-dependency-tool-tests.log",
+      "sha256": "838841591ed6ea852eb5574b5df5fafd85e6cf59d0be18a393cb7a471a625a7c"
+    },
+    "cold-auditor-regressions.log": {
+      "path": "/tmp/veritile-corpus-naming/ci-responsibility/cold-auditor-regressions.log",
+      "sha256": "353b29cc5d1d9c622c956eb0cd3cb22a59d995af5452eff8ce1cdbd311e4de9b"
+    }
+  },
+  "current_inputs_sha256": {
+    "scripts/bench/ci.py": "ecd0c1a0e8635adcbd0a8adbedb91ee4819b14bcabb936e774adcac049e10c77",
+    "scripts/test_bench_ci.py": "fcc47d656f1f7679b7fc49223b9452c3d0349e950909c65332cc3266f6451aee"
+  },
+  "boundary": "Build prerequisites only; all selected proof targets and source-bound proof receipts retain their scope. No test skip, verdict change or weaker audit acceptance."
+}

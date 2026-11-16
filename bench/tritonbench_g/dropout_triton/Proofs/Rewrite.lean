@@ -17,7 +17,7 @@ def originalExecution {α : Type} [Inhabited α] (M : Algebra α)
   refine ⟨?_, ?_⟩
   swap
   simp [kernel, sourceKernel,VeriTile.Bench.Repairs.DropoutTriton.sourceFamily,
-    VeriTile.Bench.Repairs.DropoutTriton.quotedOriginalKernel,VeriTile.Bench.Repairs.DropoutTriton.quotedCommutedKernel, FP.Structural.exec, ComputeKernel.surfaceBody,
+    VeriTile.Bench.Repairs.DropoutTriton._dropoutKernel,VeriTile.Bench.Repairs.DropoutTriton._dropout_index_commutedKernel, FP.Structural.exec, ComputeKernel.surfaceBody,
     run, step, evalExpr, evalComputeOp, evalOp_unfold, Option.bind,
     numericLt, numericEq, natLt, bop, store, Region.cast,
     numeric, ofFloat, toFloat, ComputeDType.eraseDType]

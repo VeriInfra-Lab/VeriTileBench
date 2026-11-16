@@ -12,7 +12,7 @@ def signature : CallSignature where
   readPorts := ["X","W","B","RESIDUAL","X1","W1","B1","ROWSCALE","SEEDS"]
   writePorts := ["Y","Y1","RESIDUAL_OUT","DROPOUT_MASK","Mean","Rstd"]
 
-def originalKernel (X Y W B RESIDUAL X1 W1 B1 Y1 RESIDUAL_OUT ROWSCALE : RegionName)
+def _layer_norm_fwd_1pass_kernel (X Y W B RESIDUAL X1 W1 B1 Y1 RESIDUAL_OUT ROWSCALE : RegionName)
           (SEEDS : Region .int) (DROPOUT_MASK : Region .bool) (Mean Rstd : RegionName)
           (stride_x_row stride_y_row stride_res_row stride_res_out_row
             stride_x1_row stride_y1_row M N : Nat)
@@ -48,7 +48,9 @@ def originalKernel (X Y W B RESIDUAL X1 W1 B1 Y1 RESIDUAL_OUT ROWSCALE : RegionN
             rowscale = tl.load(ROWSCALE + M + row).to(tl.float32)
             x1 *= rowscale
         if HAS_DROPOUT:
-            keep_mask = tl.rand(tl.load(SEEDS + M + row).to(tl.uint32), cols, n_rounds=7) > dropout_p
+            keep_mask = (
+                tl.rand(tl.load(SEEDS + M + row).to(tl.uint32), cols, n_rounds=7) > dropout_p
+            )
             x1 = tl.where(keep_mask, x1 / (1.0 - dropout_p), 0.0)
             if STORE_DROPOUT_MASK:
                 tl.store(DROPOUT_MASK + (M + row) * N + cols, keep_mask, mask=cols < N)
@@ -83,7 +85,7 @@ def originalKernel (X Y W B RESIDUAL X1 W1 B1 Y1 RESIDUAL_OUT ROWSCALE : RegionN
         tl.store(Y1 + cols, y1, mask=mask)
   }
 
-def indexCommutedKernel (X Y W B RESIDUAL X1 W1 B1 Y1 RESIDUAL_OUT ROWSCALE : RegionName)
+def _layer_norm_fwd_1pass_kernel_index_commutedKernel (X Y W B RESIDUAL X1 W1 B1 Y1 RESIDUAL_OUT ROWSCALE : RegionName)
           (SEEDS : Region .int) (DROPOUT_MASK : Region .bool) (Mean Rstd : RegionName)
           (stride_x_row stride_y_row stride_res_row stride_res_out_row
             stride_x1_row stride_y1_row M N : Nat)

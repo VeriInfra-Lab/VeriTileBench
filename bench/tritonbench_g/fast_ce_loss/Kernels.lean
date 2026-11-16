@@ -17,7 +17,7 @@ def forwardSignature : CallSignature where
   writePorts := ["loss_ptr", "logsumexp_ptr"]
   unaryImports := [("triton_tanh", "triton.language.extra.libdevice.tanh")]
 
-def forwardKernel (cap scale : Bool)
+def _cross_entropy_forwardKernel (cap scale : Bool)
     (logits_ptr loss_ptr logsumexp_ptr : RegionName) (labels_ptr : Region .int)
     (VOCAB_SIZE logits_row_stride BLOCK_SIZE : Nat) (SOFTCAP LOGIT_SCALE : ℝ) : ComputeKernel :=
   let DO_SOFTCAPPING := cap
@@ -53,7 +53,7 @@ def forwardKernel (cap scale : Bool)
     tl.store(loss_ptr, loss)
   }
 
-def forwardIndexCommutedKernel (cap scale : Bool)
+def _cross_entropy_forward_index_commutedKernel (cap scale : Bool)
     (logits_ptr loss_ptr logsumexp_ptr : RegionName) (labels_ptr : Region .int)
     (VOCAB_SIZE logits_row_stride BLOCK_SIZE : Nat) (SOFTCAP LOGIT_SCALE : ℝ) : ComputeKernel :=
   let DO_SOFTCAPPING := cap
@@ -97,7 +97,7 @@ def chunkedSignature : CallSignature where
   writePorts := ["loss_ptr", "logsumexp_ptr"]
   unaryImports := [("triton_tanh", "triton.language.extra.libdevice.tanh")]
 
-def chunkedKernel (cap scale : Bool)
+def _chunked_cross_entropy_forwardKernel (cap scale : Bool)
     (logits_ptr loss_ptr logsumexp_ptr : RegionName) (labels_ptr : Region .int)
     (VOCAB_SIZE N_CHUNKS logits_row_stride BLOCK_SIZE : Nat) (SOFTCAP LOGIT_SCALE : ℝ) : ComputeKernel :=
   let DO_SOFTCAPPING := cap
@@ -135,7 +135,7 @@ def chunkedKernel (cap scale : Bool)
     tl.store(logsumexp_ptr, logsumexp)
   }
 
-def chunkedIndexCommutedKernel (cap scale : Bool)
+def _chunked_cross_entropy_forward_index_commutedKernel (cap scale : Bool)
     (logits_ptr loss_ptr logsumexp_ptr : RegionName) (labels_ptr : Region .int)
     (VOCAB_SIZE N_CHUNKS logits_row_stride BLOCK_SIZE : Nat) (SOFTCAP LOGIT_SCALE : ℝ) : ComputeKernel :=
   let DO_SOFTCAPPING := cap
@@ -181,7 +181,7 @@ def backwardSignature : CallSignature where
   writePorts := ["logits_ptr"]
   unaryImports := [("triton_tanh", "triton.language.extra.libdevice.tanh")]
 
-def backwardKernel (cap scale : Bool)
+def _cross_entropy_backwardKernel (cap scale : Bool)
     (logits_ptr dloss_ptr logsumexp_ptr : RegionName) (labels_ptr : Region .int)
     (VOCAB_SIZE logits_row_stride dloss_row_stride BLOCK_SIZE : Nat) (SOFTCAP LOGIT_SCALE : ℝ) : ComputeKernel :=
   let DO_SOFTCAPPING := cap
@@ -227,7 +227,7 @@ def backwardKernel (cap scale : Bool)
     tl.store(logits_ptr + col_offsets, tl.where(label_idx == -100, 0.0, dloss * y), mask=mask)
   }
 
-def backwardIndexCommutedKernel (cap scale : Bool)
+def _cross_entropy_backward_index_commutedKernel (cap scale : Bool)
     (logits_ptr dloss_ptr logsumexp_ptr : RegionName) (labels_ptr : Region .int)
     (VOCAB_SIZE logits_row_stride dloss_row_stride BLOCK_SIZE : Nat) (SOFTCAP LOGIT_SCALE : ℝ) : ComputeKernel :=
   let DO_SOFTCAPPING := cap

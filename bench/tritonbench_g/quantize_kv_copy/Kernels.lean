@@ -241,7 +241,7 @@ def callSignature : CallSignature where
   scalars := [("stride_k_bs",.integer),("stride_k_h",.integer),("stride_k_g",.integer),("stride_k_d",.integer),("stride_o_bs",.integer),("stride_o_h",.integer),("stride_o_g",.integer),("stride_o_d",.integer),("stride_os_bs",.integer),("stride_os_h",.integer),("stride_os_g",.integer),("stride_dest",.integer),("group_size",.integer)]
   constexpr := ["BLOCK_GROUP_NUM","BLOCK_GROUP_DIM"]
 
-def sourceKernel (groups block heads : Nat) : ComputeKernel :=
+def _fwd_kernel_destindex_copy_quantize_kvKernel (groups block heads : Nat) : ComputeKernel :=
   let K := ("K" : RegionName)
   let Dest_loc := ("D" : RegionName)
   let Out := ("O" : RegionName)
@@ -258,19 +258,25 @@ def sourceKernel (groups block heads : Nat) : ComputeKernel :=
     offs_g = tl.arange(0, BLOCK_GROUP_NUM).to(tl.int64)
     offs_d = tl.arange(0, BLOCK_GROUP_DIM).to(tl.int64)
     dest_index = tl.load(Dest_loc + cur_index * stride_dest).to(tl.int64)
-    src_data = tl.load(K + cur_index * stride_k_bs + cur_head * stride_k_h + offs_g[:, None] * stride_k_g + offs_d[None, :] * stride_k_d, mask=offs_g[:, None] < group_size, other=0.0)
+    src_data = tl.load(
+        K + cur_index * stride_k_bs + cur_head * stride_k_h
+        + offs_g[:, None] * stride_k_g + offs_d[None, :] * stride_k_d,
+        mask=offs_g[:, None] < group_size, other=0.0,
+    )
     abs_data = tl.abs(src_data)
     maximum = tl.max(abs_data, axis=1)
     data_scale = (maximum / 127.0).to(Out_scale.dtype.element_ty)
     denominator = tl.where(maximum == 0.0, 1.0, data_scale)
     q_src_data = (src_data / denominator[:, None]).to(tl.int8)
-    o_ptrs = Out + dest_index * stride_o_bs + cur_head * stride_o_h + offs_g[:, None] * stride_o_g + offs_d[None, :] * stride_o_d
-    os_ptrs = Out_scale + dest_index * stride_os_bs + cur_head * stride_os_h + offs_g * stride_os_g
+    o_ptrs = (Out + dest_index * stride_o_bs + cur_head * stride_o_h
+              + offs_g[:, None] * stride_o_g + offs_d[None, :] * stride_o_d)
+    os_ptrs = (Out_scale + dest_index * stride_os_bs + cur_head * stride_os_h
+               + offs_g * stride_os_g)
     tl.store(o_ptrs, q_src_data, mask=offs_g[:, None] < group_size)
     tl.store(os_ptrs, data_scale, mask=offs_g < group_size)
   }
 
-def addressEarlyKernel (groups block heads : Nat) : ComputeKernel :=
+def _fwd_kernel_destindex_copy_quantize_kv_candidateKernel (groups block heads : Nat) : ComputeKernel :=
   let K := ("K" : RegionName)
   let Dest_loc := ("D" : RegionName)
   let Out := ("O" : RegionName)
@@ -287,9 +293,15 @@ def addressEarlyKernel (groups block heads : Nat) : ComputeKernel :=
     offs_g = tl.arange(0, BLOCK_GROUP_NUM).to(tl.int64)
     offs_d = tl.arange(0, BLOCK_GROUP_DIM).to(tl.int64)
     dest_index = tl.load(Dest_loc + cur_index * stride_dest).to(tl.int64)
-    src_data = tl.load(K + cur_index * stride_k_bs + cur_head * stride_k_h + offs_g[:, None] * stride_k_g + offs_d[None, :] * stride_k_d, mask=offs_g[:, None] < group_size, other=0.0)
-    o_ptrs = Out + dest_index * stride_o_bs + cur_head * stride_o_h + offs_g[:, None] * stride_o_g + offs_d[None, :] * stride_o_d
-    os_ptrs = Out_scale + dest_index * stride_os_bs + cur_head * stride_os_h + offs_g * stride_os_g
+    src_data = tl.load(
+        K + cur_index * stride_k_bs + cur_head * stride_k_h
+        + offs_g[:, None] * stride_k_g + offs_d[None, :] * stride_k_d,
+        mask=offs_g[:, None] < group_size, other=0.0,
+    )
+    o_ptrs = (Out + dest_index * stride_o_bs + cur_head * stride_o_h
+              + offs_g[:, None] * stride_o_g + offs_d[None, :] * stride_o_d)
+    os_ptrs = (Out_scale + dest_index * stride_os_bs + cur_head * stride_os_h
+               + offs_g * stride_os_g)
     abs_data = tl.abs(src_data)
     maximum = tl.max(abs_data, axis=1)
     data_scale = (maximum / 127.0).to(Out_scale.dtype.element_ty)

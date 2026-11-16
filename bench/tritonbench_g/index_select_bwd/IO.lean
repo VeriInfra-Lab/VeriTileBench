@@ -42,7 +42,7 @@ def memory (A : Type) (p : Launch) : MemoryIO A where
   scratchMask := fun k => Fin.elim0 k
 
 def invocation {A : Type} (rest : Algebra A) (add : A → A → A) (p : Launch) : Invocation A where
-  kernel := sourceKernel p
+  kernel := index_select_cat_bwd_repaired_kernel p
   backend := Source.backend (KernelProof.arithmetic rest add)
   pids := fun _ => 0
 

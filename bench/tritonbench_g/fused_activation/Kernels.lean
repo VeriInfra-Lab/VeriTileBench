@@ -12,7 +12,7 @@ def callSignature : CallSignature where
 
 /-- Unchanged selected Python body `fused_add_mul_activation_kernel`. The existing Boolean API supplies
 one of the two valid source String constexpr values before the first statement. -/
-def sourceKernel (X B I : RegionName) (num_weights xnumel BLOCK_SIZE : Nat)
+def fused_add_mul_activation_kernel (X B I : RegionName) (num_weights xnumel BLOCK_SIZE : Nat)
     (multiplier : ℝ) (useSigmoid : Bool) : ComputeKernel :=
   let x_ptr : Region .fp32 := X.cast
   let bias_ptr : Region .fp32 := B.cast
@@ -42,7 +42,7 @@ def sourceKernel (X B I : RegionName) (num_weights xnumel BLOCK_SIZE : Nat)
 
 /-- Unchanged selected Python body `fused_add_mul_activation_commuted_kernel`. The existing Boolean API supplies
 one of the two valid source String constexpr values before the first statement. -/
-def commutedKernel (X B I : RegionName) (num_weights xnumel BLOCK_SIZE : Nat)
+def fused_add_mul_activation_commuted_kernel (X B I : RegionName) (num_weights xnumel BLOCK_SIZE : Nat)
     (multiplier : ℝ) (useSigmoid : Bool) : ComputeKernel :=
   let x_ptr : Region .fp32 := X.cast
   let bias_ptr : Region .fp32 := B.cast

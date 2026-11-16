@@ -30,7 +30,7 @@ def prologueExecution (rest : Algebra Word) (plans : PlanSelector)
     {t : State Word // run (engine rest plans) (prologue p) s = some t} := by
   refine ⟨?_, ?_⟩
   swap
-  simp [prologue, source, VeriTile.Bench.Repairs.BatchedVecmatMult.blockFirst, TypedSource.blockFirst, VeriTile.Bench.Repairs.BatchedVecmatMult.blockFirstKernel, ComputeKernel.surfaceBody,
+  simp [prologue, source, VeriTile.Bench.Repairs.BatchedVecmatMult.blockFirst, TypedSource.blockFirst, VeriTile.Bench.Repairs.BatchedVecmatMult.batched_vecmat_block_firstKernel, ComputeKernel.surfaceBody,
     run, step, evalExpr, evalComputeOp, evalOp_unfold, Option.bind,
     engine, numeric, integralFloorDiv, ComputeDType.eraseDType,
     State.setReg, bop]
@@ -52,7 +52,7 @@ def bodyExecution (rest : Algebra Word) (plans : PlanSelector)
       (current.setReg "k_index" .int [] (fun _ => (c:Int))) = some t} := by
   refine ⟨?_, ?_⟩
   swap
-  simp [body, source, VeriTile.Bench.Repairs.BatchedVecmatMult.blockFirst, TypedSource.blockFirst, VeriTile.Bench.Repairs.BatchedVecmatMult.blockFirstKernel, ComputeKernel.surfaceBody,
+  simp [body, source, VeriTile.Bench.Repairs.BatchedVecmatMult.blockFirst, TypedSource.blockFirst, VeriTile.Bench.Repairs.BatchedVecmatMult.batched_vecmat_block_firstKernel, ComputeKernel.surfaceBody,
     run, step, evalExpr, evalComputeOp, evalOp_unfold, Option.bind,
     engine, numeric, integralFloorDiv, ComputeDType.eraseDType,
     State.setReg, bop, h.mi, h.ni, h.offsets, h.carry, h.blocks, h.memory, Region.cast]

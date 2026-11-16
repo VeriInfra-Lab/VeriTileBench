@@ -11,7 +11,7 @@ theorem scale_source_node (c : Config) :
     (activeBody c)[16]? = some (ComputeStmt.assign .real [] "qk_scale"
       (.compute (.alg .fp32 (.mul .real .nil (.const c.scale) (.const 1.44269504))))) := by
   cases hs : c.storage <;>
-    simp [activeBody,parsedActiveBody,parsedKernel,TypedSource.FP16.sourceKernel,TypedSource.BF16.sourceKernel,
+    simp [activeBody,parsedActiveBody,parsedKernel,TypedSource.FP16._triton_mixed_sparse_attn_fwd_kernel,TypedSource.BF16._triton_mixed_sparse_attn_fwd_kernel,
       ComputeKernel.surfaceBody,hs]
 
 /-- Native tensor inputs are actual FP32 words, not arbitrary staged syntax. -/

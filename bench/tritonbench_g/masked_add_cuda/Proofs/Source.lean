@@ -10,17 +10,17 @@ def parameters (grad data mask : RegionName) (n : Nat) : Parameters :=
   ⟨data, mask, grad, n, blockSize⟩
 
 abbrev candidateKernel (storage : MaskStorage) (p : Parameters) (alpha : ℝ) :=
-  sourceKernel storage p.output p.x p.y p.n alpha p.block
+  masked_add_kernel storage p.output p.x p.y p.n alpha p.block
 
 theorem kernel_eq_original (storage : MaskStorage) (g p m : RegionName)
     (n : Nat) (a : ℝ) (B : Nat) :
-    sourceKernel storage g p m n a B =
+    masked_add_kernel storage g p m n a B =
       VeriTile.Bench.TritonBenchG.MaskedAddCuda.integer_kernel storage Bool.false g p m n a B := by
   cases storage <;> rfl
 
 theorem commutedKernel_eq_original (storage : MaskStorage) (g p m : RegionName)
     (n : Nat) (a : ℝ) (B : Nat) :
-    commutedKernel storage g p m n a B =
+    commuted_masked_addKernel storage g p m n a B =
       VeriTile.Bench.TritonBenchG.MaskedAddCuda.integer_kernel storage Bool.true g p m n a B := by
   cases storage <;> rfl
 

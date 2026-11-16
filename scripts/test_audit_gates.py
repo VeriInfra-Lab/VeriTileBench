@@ -24,6 +24,52 @@ sheets = load('spec_sheets', 'scripts/spec_sheet.py')
 
 
 class AuditGateTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Freeze all negative sources before sharing one independent judge.
+        cls.runner_sources = tempfile.TemporaryDirectory(prefix='_audit-regression-', dir=ROOT/'bench/tritonbench_g')
+        cls.runner_judge = tempfile.TemporaryDirectory(prefix='audit-regression-judge-')
+        cls.runner_cases = []
+        headline = ['specification\n  missedHeadline : False := injected',
+                        'specification αβ : False := injected',
+                        'private specification hidden : False := injected',
+                        '@[simp] specification «quoted headline» : False := injected',
+                        'macro "headlineFixture" : command => `(specification generated : False := injected)\nheadlineFixture',
+                        'macro "headlineFixture" : command => `(theorem generated_correct : False := injected)\nheadlineFixture',
+                        'theorem\n  legacy_correct : False := injected']
+        circular = [
+            'macro "specFixture" : command => `(def generatedSpec : ComputeKernel := kernel)\nspecFixture',
+            'macro "specFixture" : command => `(@[kernel_spec] def generated : Nat := kernel.toAlgKernel.inputs.length)\nspecFixture',
+        ]
+        for kind, declarations in [('headline', headline), ('circular', circular)]:
+            for i, declaration in enumerate(declarations):
+                path = Path(cls.runner_sources.name)/f'{kind}{i}.lean'
+                if kind == 'headline':
+                    source = ('import VeriTile.Meta.StatementAudit\nnamespace Nested\n'
+                              'private axiom injected : False\n'+declaration+'\nend Nested\n')
+                else:
+                    source = ('import VeriTile.Triton.Core\nimport VeriTile.Meta.StatementAudit\n'
+                              'open VeriTile.Triton\ndef kernel : ComputeKernel := .mk [] [] []\n'
+                              +declaration+'\n')
+                path.write_text(source)
+                cls.runner_cases.append((kind, declaration, path))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.runner_judge.cleanup()
+        cls.runner_sources.cleanup()
+
+    def run_rejection_cases(self, kind, marker):
+        for category, declaration, path in self.runner_cases:
+            if category != kind: continue
+            with self.subTest(declaration=declaration):
+                result = subprocess.run(['python3','scripts/check_comparator.py','--file',str(path),'--trust',
+                                         '--workspace',self.runner_judge.name], cwd=ROOT,
+                    text=True,capture_output=True,timeout=300,env=os.environ.copy())
+                self.assertNotEqual(result.returncode,0,result.stdout+result.stderr)
+                self.assertIn(marker,result.stderr)
+                if kind == 'headline':self.assertIn('injected',result.stderr)
+
     def test_default_port_entry_forwards_scope_concurrency_and_exit_status(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -32,7 +78,7 @@ class AuditGateTests(unittest.TestCase):
             entry = root / 'scripts/bench/audit_trust.sh'
             entry.write_text('printf "%s|%s\\n" "$*" "$AUDIT_TRUST_JOBS"\nexit 17\n')
             result = subprocess.run([str(root / 'scripts/bench/check_ports.sh')], cwd=root,
-                                    env={**os.environ, 'CHECK_PORTS_JOBS': '2'},
+                                    env={**os.environ, 'AUDIT_TRUST_REPLAY': 'individual', 'CHECK_PORTS_JOBS': '2'},
                                     text=True, capture_output=True)
             self.assertEqual(result.stdout.strip(), '--final-inventory|2')
             self.assertEqual(result.returncode, 17)
@@ -57,7 +103,7 @@ class AuditGateTests(unittest.TestCase):
 
     def run_gate(self, script, env):
         return subprocess.run([str(self.fixture_root / script), 'vector_addition', 'mean_reduction'],
-                              cwd=self.fixture_root, env={**os.environ, **env}, text=True,
+                              cwd=self.fixture_root, env={**os.environ, 'AUDIT_TRUST_REPLAY': 'individual', **env}, text=True,
                               capture_output=True, timeout=20)
 
     def test_invalid_concurrency(self):
@@ -175,48 +221,13 @@ class AuditGateTests(unittest.TestCase):
             self.assertEqual(result.stdout.strip(), '')
 
     def test_real_runner_rejects_hidden_headline_axioms(self):
-        declarations = ['specification\n  missedHeadline : False := injected',
-                        'specification αβ : False := injected',
-                        'private specification hidden : False := injected',
-                        '@[simp] specification «quoted headline» : False := injected',
-                        'macro "headlineFixture" : command => `(specification generated : False := injected)\nheadlineFixture',
-                        'macro "headlineFixture" : command => `(theorem generated_correct : False := injected)\nheadlineFixture',
-                        'theorem\n  legacy_correct : False := injected']
-        for declaration in declarations:
-            with self.subTest(declaration=declaration), tempfile.TemporaryDirectory(
-                    prefix='_audit-regression-', dir=ROOT / 'bench/tritonbench_g') as temp:
-                directory = Path(temp)
-                (directory / 'Fixture.lean').write_text(
-                    'import VeriTile.Meta.StatementAudit\nnamespace Nested\n'
-                    'private axiom injected : False\n' + declaration + '\nend Nested\n')
-                result = subprocess.run(['bash', 'scripts/bench/audit_trust.sh', directory.name],
-                                        cwd=ROOT, text=True, capture_output=True, timeout=90,
-                                        env={**os.environ, 'AUDIT_TRUST_JOBS': '1'})
-                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-                self.assertIn('DISALLOWED axioms', result.stderr)
-                self.assertIn('injected', result.stderr)
+        self.run_rejection_cases('headline','DISALLOWED axioms')
 
     def test_unannotated_proof_is_not_promoted(self):
         self.assertEqual(coverage.classify('kernel_correctness', 'a checked theorem')[0], 'unreviewed')
 
     def test_real_runner_rejects_macro_generated_circular_specs(self):
-        declarations = [
-            'macro "specFixture" : command => `(def generatedSpec : ComputeKernel := kernel)\nspecFixture',
-            'macro "specFixture" : command => `(@[kernel_spec] def generated : Nat := kernel.toAlgKernel.inputs.length)\nspecFixture',
-        ]
-        for declaration in declarations:
-            with self.subTest(declaration=declaration), tempfile.TemporaryDirectory(
-                    prefix='_audit-regression-', dir=ROOT / 'bench/tritonbench_g') as temp:
-                directory = Path(temp)
-                (directory / 'Fixture.lean').write_text(
-                    'import VeriTile.Triton.Core\nimport VeriTile.Meta.StatementAudit\n'
-                    'open VeriTile.Triton\ndef kernel : ComputeKernel := .mk [] [] []\n'
-                    + declaration + '\n')
-                result = subprocess.run(['bash', 'scripts/bench/audit_trust.sh', directory.name],
-                                        cwd=ROOT, text=True, capture_output=True, timeout=90,
-                                        env={**os.environ, 'AUDIT_TRUST_JOBS': '1'})
-                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-                self.assertIn('SELF-REFERENTIAL', result.stderr)
+        self.run_rejection_cases('circular','SELF-REFERENTIAL')
 
     def test_lean_rejects_specs_without_discovered_kernels(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -237,13 +248,13 @@ class AuditGateTests(unittest.TestCase):
                   'def localKernel : ComputeKernel := .mk [] [] []\n')
         cases = [
             ('Correct.lean', 'def expectedSpec : Nat := 42\n', True, 'localKernel'),
-            ('Correct.lean', 'def sourceAliasForAudit := addKernel "x" "y" "out" 1\n'
+            ('Correct.lean', 'def sourceAliasForAudit := add_kernel "x" "y" "out" 1\n'
              'def expectedSpec := sourceAliasForAudit.toAlgKernel.inputs.length\n', False,
              'SELF-REFERENTIAL'),
             ('Correct.lean', 'def expectedSpec := localKernel.toAlgKernel.inputs.length\n', False,
              'SELF-REFERENTIAL'),
             ('Proofs/Real.lean', 'def expectedSpec : Nat := 42\n', True, 'localKernel'),
-            ('Proofs/Real.lean', 'def sourceAliasForAudit := addKernel "x" "y" "out" 1\n'
+            ('Proofs/Real.lean', 'def sourceAliasForAudit := add_kernel "x" "y" "out" 1\n'
              'def expectedSpec := sourceAliasForAudit.toAlgKernel.inputs.length\n', False,
              'SELF-REFERENTIAL'),
         ]
@@ -258,7 +269,7 @@ class AuditGateTests(unittest.TestCase):
                 self.assertEqual(result.returncode == 0, accepted, result.stdout + result.stderr)
                 self.assertIn(marker, result.stdout)
                 if accepted or 'sourceAliasForAudit' in declaration:
-                    self.assertIn('VectorAdd.Kernels.addKernel', result.stdout)
+                    self.assertIn('VectorAdd.Kernels.add_kernel', result.stdout)
 
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / 'UnknownSource.lean'
@@ -273,7 +284,7 @@ class AuditGateTests(unittest.TestCase):
         cases = [
             ('@[standalone_spec] def expectedSpec (n : Nat) : Prop := n = n\n', True, 'independentSpecs=1'),
             ('@[standalone_spec] def expectedSpec := '
-             '(VeriTile.Bench.Examples.VectorAdd.Kernels.addKernel "x" "y" "out" 1).toAlgKernel.inputs.length\n',
+             '(VeriTile.Bench.Examples.VectorAdd.Kernels.add_kernel "x" "y" "out" 1).toAlgKernel.inputs.length\n',
              False, 'SELF-REFERENTIAL'),
             ('@[standalone_spec, kernel_spec] def expectedSpec (n : Nat) : Prop := n = n\n',
              False, 'cannot also be a kernel specification'),

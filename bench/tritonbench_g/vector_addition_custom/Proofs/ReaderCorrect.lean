@@ -29,7 +29,7 @@ theorem add_kernel_correctness (n : Nat) :
 
 #stmtSurfaceSubset add_kernel_correctness ⊆
   [Spec.Real, addIO, MaskedKernelIO₂.RegionalImplements, MaskedKernelIO₂.B]
-#specNonCircular formula avoiding [add_kernel, originalKernel, commutedKernel]
+#specNonCircular formula avoiding [_add_kernel, originalKernel, commutedKernel]
 #axiomsClean add_kernel_correctness
 #guard_msgs (drop info) in
 #auditModuleAxioms

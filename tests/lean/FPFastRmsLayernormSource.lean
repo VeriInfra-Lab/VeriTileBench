@@ -21,11 +21,11 @@ set_option maxRecDepth 15000
     | _ => none
 
  def regular (candidate : Bool) :=
-  if candidate then regularRuntimeSourceIndexCommutedKernel else regularRuntimeKernel
+  if candidate then _rms_layernorm_forward_index_commutedKernel else _rms_layernorm_forwardKernel
  def gemma (candidate : Bool) :=
-  if candidate then gemmaRuntimeSourceIndexCommutedKernel else gemmaRuntimeKernel
+  if candidate then _gemma_rms_layernorm_forward_index_commutedKernel else _gemma_rms_layernorm_forwardKernel
  def backward (candidate : Bool) :=
-  if candidate then inputGradientSourceIndexCommutedKernel else inputGradientKernel
+  if candidate then _rms_layernorm_backward_index_commutedKernel else _rms_layernorm_backwardKernel
 
 variable (candidate isGemma : Bool) (Y X W r dW : RegionName)
     (YR XR WR RR DWR N B : Nat) (eps : ℝ)
@@ -54,15 +54,15 @@ theorem stores :
 /-- Widening before address products must retain the signed source carrier,
 including when the widened program id is nested in a larger expression. -/
 theorem signed_program_indices :
-    types (regularRuntimeKernel Y X W r YR XR WR RR N B).surfaceBody "row_idx"=[.int] ∧
-    types (runtimeWeightKernel dW Y X r YR N B isGemma).surfaceBody "col"=[.int] := by
+    types (_rms_layernorm_forwardKernel Y X W r YR XR WR RR N B).surfaceBody "row_idx"=[.int] ∧
+    types (_rms_layernorm_weight_backwardKernel dW Y X r YR N B isGemma).surfaceBody "col"=[.int] := by
   cases isGemma <;> exact ⟨rfl,rfl⟩
 
 /-- Binding epsilon adds precisely the call prelude, preserving every JIT statement. -/
 theorem runtime_call :
     (regularSource Y X W r YR XR WR RR N B eps).surfaceBody =
       ScalarArgument.statement (ScalarArgument.fp32 "eps" eps) ::
-        (regularRuntimeKernel Y X W r YR XR WR RR N B).surfaceBody := rfl
+        (_rms_layernorm_forwardKernel Y X W r YR XR WR RR N B).surfaceBody := rfl
 
 #guard_msgs (drop info) in
 #auditModuleAxioms

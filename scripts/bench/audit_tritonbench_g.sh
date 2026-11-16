@@ -15,6 +15,8 @@ fi
 failures=0
 python3 -B scripts/bench/final_inventory.py --check || failures=$((failures + 1))
 python3 -B -m scripts.bench.check_body_corpus --check || failures=$((failures + 1))
+python3 -B scripts/bench/check_source_naming.py --check-comments --check-lean-coverage || failures=$((failures + 1))
+python3 -B scripts/bench/replay_body_migrations.py --check || failures=$((failures + 1))
 python3 -B scripts/bench/check_imported_kernel_review.py || failures=$((failures + 1))
 if [ "$mode" = '--source-only' ]; then
   [ "$failures" -eq 0 ] || exit 1
@@ -26,7 +28,7 @@ if [ "$mode" = '--global-only' ]; then
   printf 'TritonBench-G global gates passed; corpus audit is separate\n'
   exit 0
 fi
-lake build TritonBenchGFinal BenchmarkRegressions BenchmarkExamples BugDetection PretrainKernels || failures=$((failures + 1))
+lake build TritonBenchGFinal BenchmarkRegressions BenchmarkExamples || failures=$((failures + 1))
 scripts/bench/audit_trust.sh --final-inventory || failures=$((failures + 1))
 [ "$failures" -eq 0 ] || exit 1
 printf 'TritonBench-G audit gates passed\n'

@@ -31,7 +31,7 @@ theorem loop_body_run {α : Type} [Inhabited α] (M : Algebra α) (D : Dot α)
   all_goals
     have hq := h.query
     simp only [TypedSource.Storage.tile,TypedSource.Storage.float,FloatDType.toTileDType,ofFloat] at hq
-    simp [loopBody,indexName,columnBody,blockBody,activeBody,parsedActiveBody,parsedKernel,TypedSource.FP16.sourceKernel,TypedSource.BF16.sourceKernel,TypedSource.Storage.tile,TypedSource.Storage.float,
+    simp [loopBody,indexName,columnBody,blockBody,activeBody,parsedActiveBody,parsedKernel,TypedSource.FP16._triton_mixed_sparse_attn_fwd_kernel,TypedSource.BF16._triton_mixed_sparse_attn_fwd_kernel,TypedSource.Storage.tile,TypedSource.Storage.float,
       maximumAssignment,ComputeKernel.surfaceBody,run,step,evalExpr,evalComputeOp,
       evalOp_unfold,Option.bind,ComputeDType.eraseDType,numeric,bop,natLt,natLe,numericLt,numericLe,numericEq,
       integralFloorDiv,integralMod,backend,Region.cast,ofFloat,toFloat,State.setReg,

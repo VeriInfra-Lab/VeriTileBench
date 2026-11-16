@@ -19,7 +19,7 @@ def sourceSignature (dtype out_dtype : FloatDType) : CallSignature where
   readPorts := ["a_ptr","b_ptr"]
   writePorts := ["c_ptr"]
 
-def typedKernel (dtype out_dtype : FloatDType) (p : Parameters) : ComputeKernel :=
+def matmul_tma_load_storeKernel (dtype out_dtype : FloatDType) (p : Parameters) : ComputeKernel :=
   let a_ptr := p.a
   let b_ptr := p.b
   let c_ptr := p.c
@@ -40,6 +40,7 @@ def typedKernel (dtype out_dtype : FloatDType) (p : Parameters) : ComputeKernel 
     [M := M, N := N, K := K, stride_am := stride_am, stride_ak := stride_ak,
      stride_bk := stride_bk, stride_bn := stride_bn, stride_cm := stride_cm,
      stride_cn := stride_cn] in triton {
+    # Create block pointers for A, B, and C matrices
     a_block_ptr = tl.make_block_ptr(base=a_ptr, shape=(M, K), strides=(stride_am, stride_ak), offsets=(0, 0),
                                     block_shape=(BLOCK_M, BLOCK_K), order=(1, 0))
     b_block_ptr = tl.make_block_ptr(base=b_ptr, shape=(K, N), strides=(stride_bk, stride_bn), offsets=(0, 0),
@@ -60,7 +61,7 @@ def typedKernel (dtype out_dtype : FloatDType) (p : Parameters) : ComputeKernel 
     tl.store(c_block_ptr, c)
   }
 
-def directOutputTypedKernel (dtype out_dtype : FloatDType) (p : Parameters) : ComputeKernel :=
+def matmul_tma_direct_outputKernel (dtype out_dtype : FloatDType) (p : Parameters) : ComputeKernel :=
   let a_ptr := p.a
   let b_ptr := p.b
   let c_ptr := p.c
@@ -105,7 +106,7 @@ def directOutputTypedKernel (dtype out_dtype : FloatDType) (p : Parameters) : Co
 def outputDType (half : Bool) : FloatDType := if half then .fp16 else .fp32
 
 def source (p : Parameters) (half : Bool) : ComputeKernel :=
-  typedKernel .fp16 (outputDType half) p
+  matmul_tma_load_storeKernel .fp16 (outputDType half) p
 
 end
 end VeriTile.Bench.TritonBenchG.MatmulTma.FPValue
@@ -115,7 +116,7 @@ open VeriTile.Triton FPValue
 noncomputable section
 
 def sourceDirectOutput (p : Parameters) (half : Bool) : ComputeKernel :=
-  directOutputTypedKernel .fp16 (outputDType half) p
+  matmul_tma_direct_outputKernel .fp16 (outputDType half) p
 
 end
 end VeriTile.Bench.TritonBenchG.MatmulTma.StaticCheckedV2

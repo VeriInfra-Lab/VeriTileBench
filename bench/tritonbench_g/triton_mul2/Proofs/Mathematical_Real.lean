@@ -10,7 +10,7 @@ open VeriTile.Triton VeriTile.Examples
 open scoped VeriTile.Triton.MaskedKernelIO₁
 
 attribute [local simp] Except.bind bind ComputeDType.eraseDType
-  VeriTile.Bench.Repairs.TritonMul2.sourceKernel VeriTile.Bench.Repairs.TritonMul2.inplaceSourceKernel ComputeKernel.toAlgKernel ComputeKernel.toAlgorithm? ComputeKernel.surfaceBody ComputeKernel.fromKernelBody ComputeStmt.listToAlgorithm? ComputeStmt.toAlgorithm? ComputeExpr.toAlgorithm? ComputeOp.toAlgorithm? Region.cast
+  VeriTile.Bench.Repairs.TritonMul2.mul2_kernel VeriTile.Bench.Repairs.TritonMul2.mul2_inplace_kernel ComputeKernel.toAlgKernel ComputeKernel.toAlgorithm? ComputeKernel.surfaceBody ComputeKernel.fromKernelBody ComputeStmt.listToAlgorithm? ComputeStmt.toAlgorithm? ComputeExpr.toAlgorithm? ComputeOp.toAlgorithm? Region.cast
 
 /-- Algorithm-layer correctness for `mul2_kernel`. -/
 theorem mul2_kernel_correct
@@ -119,7 +119,7 @@ theorem mul2_kernel_traceSafe
       ((mul2_kernel in_ptr0 out_ptr n_elements BLOCK_SIZE
         ).toAlgKernel) s := by
   unfold Kernel.TraceSafe
-  try simp only [mul2_kernel, mul2_inplace_kernel, VeriTile.Bench.Repairs.TritonMul2.sourceKernel, VeriTile.Bench.Repairs.TritonMul2.inplaceSourceKernel, ComputeKernel.toAlgKernel, ComputeKernel.toAlgorithm?, ComputeKernel.surfaceBody, ComputeKernel.fromKernelBody, ComputeStmt.listToAlgorithm?, ComputeStmt.toAlgorithm?, ComputeExpr.toAlgorithm?, ComputeOp.toAlgorithm?, Region.cast, Except.bind, bind]
+  try simp only [mul2_kernel, mul2_inplace_kernel, VeriTile.Bench.Repairs.TritonMul2.mul2_kernel, VeriTile.Bench.Repairs.TritonMul2.mul2_inplace_kernel, ComputeKernel.toAlgKernel, ComputeKernel.toAlgorithm?, ComputeKernel.surfaceBody, ComputeKernel.fromKernelBody, ComputeStmt.listToAlgorithm?, ComputeStmt.toAlgorithm?, ComputeExpr.toAlgorithm?, ComputeOp.toAlgorithm?, Region.cast, Except.bind, bind]
   -- Computational unroll: walks all seven statements, discharging every
   -- load-free `SafeAt` and reducing the two memory accesses' lane-wise
   -- address obligations to the bounds hypotheses below.
@@ -250,7 +250,7 @@ theorem mul2_inplace_kernel_traceSafe
       ((mul2_inplace_kernel ptr n_elements BLOCK_SIZE
         ).toAlgKernel) s := by
   unfold Kernel.TraceSafe
-  try simp only [mul2_kernel, mul2_inplace_kernel, VeriTile.Bench.Repairs.TritonMul2.sourceKernel, VeriTile.Bench.Repairs.TritonMul2.inplaceSourceKernel, ComputeKernel.toAlgKernel, ComputeKernel.toAlgorithm?, ComputeKernel.surfaceBody, ComputeKernel.fromKernelBody, ComputeStmt.listToAlgorithm?, ComputeStmt.toAlgorithm?, ComputeExpr.toAlgorithm?, ComputeOp.toAlgorithm?, Region.cast, Except.bind, bind]
+  try simp only [mul2_kernel, mul2_inplace_kernel, VeriTile.Bench.Repairs.TritonMul2.mul2_kernel, VeriTile.Bench.Repairs.TritonMul2.mul2_inplace_kernel, ComputeKernel.toAlgKernel, ComputeKernel.toAlgorithm?, ComputeKernel.surfaceBody, ComputeKernel.fromKernelBody, ComputeStmt.listToAlgorithm?, ComputeStmt.toAlgorithm?, ComputeExpr.toAlgorithm?, ComputeOp.toAlgorithm?, Region.cast, Except.bind, bind]
   -- Computational unroll: walks all seven statements, discharging every
   -- load-free `SafeAt` and reducing the two memory accesses' lane-wise
   -- address obligations to the bounds hypothesis below.

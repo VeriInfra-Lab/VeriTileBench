@@ -31,7 +31,7 @@ specification fused_rotary_real (rest : Algebra ℝ) (c : Config) (valid : c.Val
   PublicIO.logical_real rest c valid
 
 #axiomsClean fused_rotary_real
-#specNonCircular rotaryFormula avoiding [Source.sourceKernel,Source.grid,actualSource]
+#specNonCircular rotaryFormula avoiding [Source.decoding_fused_rotary_embedding_kernel,Source.grid,actualSource]
 #guard_msgs (drop info) in
 #auditModuleAxioms
 end

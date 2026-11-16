@@ -21,7 +21,7 @@ abbrev blockDecay := @ForwardHSource.blockDecay
 abbrev actualLength := ForwardHSource.actualLength
 
 def kernel (c : Shape) (scale : ℝ) (terminal : Bool) :=
-  Kernels.backwardHKernel "q" "incoming" "dh" "terminal"
+  Kernels.chunk_retention_bwd_kernel_dhKernel "q" "incoming" "dh" "terminal"
     (c.T*c.K) c.K 1 (c.T*c.V) c.V 1 (c.chunks*c.K*c.V) c.V
     scale c.H c.T c.K c.V 64 c.BK c.BV c.chunks terminal
 def intParts (c : Shape) (scale : ℝ) (terminal : Bool) : Source.IntRange :=
@@ -61,7 +61,7 @@ def entryExecution (M : Algebra α) (D : DotPrimitive α) (c : Shape)
   all_goals
     refine ⟨?_,?_⟩
     swap
-    simp [parts,intParts,indexState,kernel,Kernels.backwardHKernel,ComputeKernel.surfaceBody,Source.dynamicRange?,Source.intRange?,
+    simp [parts,intParts,indexState,kernel,Kernels.chunk_retention_bwd_kernel_dhKernel,ComputeKernel.surfaceBody,Source.dynamicRange?,Source.intRange?,
       Source.prefixBefore,Option.map,Option.getD,run,step,evalExpr,evalComputeOp,evalOp_unfold,
       evalOffsets,boundaryZero,Option.bind,engine,withDot,Algebra.withDefaultPrecision,
       resolvePrecision,ComputeDType.eraseDType,numeric,integralFloorDiv,integralMod,KernelModel.signed_head_mod,Int.toNat_mul,Int.toNat_add,Int.toNat_natCast,
@@ -124,7 +124,7 @@ def bodyExecution (M : Algebra α) (D : DotPrimitive α) (c : Shape) (scale : �
   all_goals
     refine ⟨?_,?_⟩
     swap
-    simp [parts,intParts,indexState,kernel,Kernels.backwardHKernel,ComputeKernel.surfaceBody,Source.dynamicRange?,Source.intRange?,
+    simp [parts,intParts,indexState,kernel,Kernels.chunk_retention_bwd_kernel_dhKernel,ComputeKernel.surfaceBody,Source.dynamicRange?,Source.intRange?,
       Source.prefixBefore,Option.map,Option.getD,run,step,evalExpr,evalComputeOp,evalOp_unfold,
       evalOffsets,boundaryZero,Option.bind,engine,withDot,Algebra.withDefaultPrecision,
       resolvePrecision,ComputeDType.eraseDType,numeric,integralFloorDiv,integralMod,KernelModel.signed_head_mod,Int.toNat_mul,Int.toNat_add,Int.toNat_natCast,numericEq,

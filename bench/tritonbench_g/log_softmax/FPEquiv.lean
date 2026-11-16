@@ -10,13 +10,13 @@ noncomputable section
 def assumptions : Spec.Assumptions FP.GuardedFragment := []
 
 def forwardOriginal (O X : RegionName) (M N K BM C : Nat) : Program :=
-  ⟨Source.forwardKernel O X M N K BM C,[]⟩
+  ⟨Source.log_softmax_kernel_repairedKernel O X M N K BM C,[]⟩
 def forwardCommutedKernel (O X : RegionName) (M N K BM C : Nat) : Program :=
-  ⟨Source.forwardCommutedKernel O X M N K BM C,[]⟩
+  ⟨Source.log_softmax_kernel_repaired_index_commutedKernel O X M N K BM C,[]⟩
 def backwardOriginal (Y G O : RegionName) (M N K BM C : Nat) : Program :=
-  ⟨Source.backwardKernel Y G O M N K BM C,[]⟩
+  ⟨Source.log_softmax_backward_kernel_repairedKernel Y G O M N K BM C,[]⟩
 def backwardCommutedKernel (Y G O : RegionName) (M N K BM C : Nat) : Program :=
-  ⟨Source.backwardCommutedKernel Y G O M N K BM C,[]⟩
+  ⟨Source.log_softmax_backward_kernel_repaired_index_commutedKernel Y G O M N K BM C,[]⟩
 
 /-- Retains the general one-program equivalence with arbitrary named regions. -/
 specification forward_index_equiv (O X : RegionName) (M N K BM C : Nat) (hc : 0<C) :

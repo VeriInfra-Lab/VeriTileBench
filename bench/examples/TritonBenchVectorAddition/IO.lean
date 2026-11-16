@@ -15,7 +15,7 @@ open scoped VeriTile.Triton.MaskedKernelIO₂
 
 /-- Independent IO wiring, program window and active-lane predicate. -/
 def addIO (nElements blockSize : Nat) : MaskedKernelIO₂ where
-  kernel := originalKernel nElements blockSize
+  kernel := add_kernel nElements blockSize
   in1 := "x"
   in2 := "y"
   out := "output"
@@ -33,7 +33,7 @@ attribute [local simp] ComputeExpr.toAlgorithm? ComputeOp.toAlgorithm? ComputeDT
 
 /-- The optimized source retains the original IO windows and memory contract. -/
 def optimizedIO (n B : Nat) : MaskedKernelIO₂ :=
-  { addIO n B with kernel := optimizedKernel n B, projection := by rfl }
+  { addIO n B with kernel := add_commuted_kernel n B, projection := by rfl }
 
 end Optimized
 

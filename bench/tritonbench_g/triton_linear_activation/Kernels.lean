@@ -35,7 +35,7 @@ def signature (dtype : FloatDType) : CallSignature where
   readPorts := ["A","B","bias"]
   writePorts := ["C","ACT_INPUTS"]
 
-def originalKernel (dtype : FloatDType) (C ACT_INPUTS A B bias : RegionName) (M N K CACHE_KEY_M CACHE_KEY_N CACHE_KEY_K output_m_stride output_n_stride act_inputs_m_stride act_inputs_n_stride a_m_stride a_k_stride b_n_stride b_k_stride BLOCK_M GROUP_M BLOCK_N BLOCK_K SPLIT_K : Nat) (HAS_BIAS SHOULD_SAVE_ACT_INPUTS K_LOAD_MASK_NEEDED : Bool) (ACTIVATION : Option String) : ComputeKernel :=
+def kernel_fmaKernel (dtype : FloatDType) (C ACT_INPUTS A B bias : RegionName) (M N K CACHE_KEY_M CACHE_KEY_N CACHE_KEY_K output_m_stride output_n_stride act_inputs_m_stride act_inputs_n_stride a_m_stride a_k_stride b_n_stride b_k_stride BLOCK_M GROUP_M BLOCK_N BLOCK_K SPLIT_K : Nat) (HAS_BIAS SHOULD_SAVE_ACT_INPUTS K_LOAD_MASK_NEEDED : Bool) (ACTIVATION : Option String) : ComputeKernel :=
   with_triton_call (signature dtype) call_args [M := M, N := N, K := K, CACHE_KEY_M := CACHE_KEY_M, CACHE_KEY_N := CACHE_KEY_N, CACHE_KEY_K := CACHE_KEY_K, output_m_stride := output_m_stride, output_n_stride := output_n_stride, act_inputs_m_stride := act_inputs_m_stride, act_inputs_n_stride := act_inputs_n_stride, a_m_stride := a_m_stride, a_k_stride := a_k_stride, b_n_stride := b_n_stride, b_k_stride := b_k_stride]
     jit_functions [tanh := tanhSource, relu := reluSource, fast_gelu := fast_geluSource, gelu := geluSource] in triton {
     """
@@ -122,7 +122,7 @@ def originalKernel (dtype : FloatDType) (C ACT_INPUTS A B bias : RegionName) (M 
     tl.store(C, acc, mask=c_ptr_mask)
 }
 
-def candidateKernel (dtype : FloatDType) (C ACT_INPUTS A B bias : RegionName) (M N K CACHE_KEY_M CACHE_KEY_N CACHE_KEY_K output_m_stride output_n_stride act_inputs_m_stride act_inputs_n_stride a_m_stride a_k_stride b_n_stride b_k_stride BLOCK_M GROUP_M BLOCK_N BLOCK_K SPLIT_K : Nat) (HAS_BIAS SHOULD_SAVE_ACT_INPUTS K_LOAD_MASK_NEEDED : Bool) (ACTIVATION : Option String) : ComputeKernel :=
+def kernel_fma_shiftedKernel (dtype : FloatDType) (C ACT_INPUTS A B bias : RegionName) (M N K CACHE_KEY_M CACHE_KEY_N CACHE_KEY_K output_m_stride output_n_stride act_inputs_m_stride act_inputs_n_stride a_m_stride a_k_stride b_n_stride b_k_stride BLOCK_M GROUP_M BLOCK_N BLOCK_K SPLIT_K : Nat) (HAS_BIAS SHOULD_SAVE_ACT_INPUTS K_LOAD_MASK_NEEDED : Bool) (ACTIVATION : Option String) : ComputeKernel :=
   with_triton_call (signature dtype) call_args [M := M, N := N, K := K, CACHE_KEY_M := CACHE_KEY_M, CACHE_KEY_N := CACHE_KEY_N, CACHE_KEY_K := CACHE_KEY_K, output_m_stride := output_m_stride, output_n_stride := output_n_stride, act_inputs_m_stride := act_inputs_m_stride, act_inputs_n_stride := act_inputs_n_stride, a_m_stride := a_m_stride, a_k_stride := a_k_stride, b_n_stride := b_n_stride, b_k_stride := b_k_stride]
     jit_functions [tanh := tanhSource, relu := reluSource, fast_gelu := fast_geluSource, gelu := geluSource] in triton {
     """

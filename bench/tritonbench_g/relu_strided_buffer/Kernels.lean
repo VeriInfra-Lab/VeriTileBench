@@ -8,7 +8,7 @@ set_option maxHeartbeats 4000000
 set_option maxRecDepth 24000
 
 /-- Copied original unary JIT body, shared by both callers. -/
-def reluForwardSource : PureJitFunction := with_triton_params (x) constexpr_args [] in triton {
+def relu_forwardSource : PureJitFunction := with_triton_params (x) constexpr_args [] in triton {
     return tl.where(x > 0, x, 0)
 }
 
@@ -31,14 +31,14 @@ def candidateSignature : CallSignature where
   readPorts := ["in0_ptr"]
   writePorts := ["out0_ptr"]
 
-def originalKernel (in0_ptr out0_ptr : RegionName) (input_base output_base in0_stride0 out0_stride0 : Int)
+def relu_forward_kernel_rank_1Kernel (in0_ptr out0_ptr : RegionName) (input_base output_base in0_stride0 out0_stride0 : Int)
     (s0 num_tasks tiles_per_cta tile_size0 : Nat) (one_tile_per_cta : Bool) : ComputeKernel :=
   let in0_stride_order0 : Nat := 0
   let out0_stride_order0 : Nat := 0
   with_triton_call signature call_args [in0_stride0 := in0_stride0,out0_stride0 := out0_stride0,
     s0 := s0,num_tasks := num_tasks,tiles_per_cta := tiles_per_cta]
     signed_pointer_offsets [in0_ptr := input_base,out0_ptr := output_base]
-    pure_functions [relu_forward := reluForwardSource] in triton {
+    pure_functions [relu_forward := relu_forwardSource] in triton {
     pid = tl.program_id(0)
     num_tiles0 = tl.cdiv(s0, tile_size0)
     if one_tile_per_cta: # monolitic kernel style
@@ -79,14 +79,14 @@ def originalKernel (in0_ptr out0_ptr : RegionName) (input_base output_base in0_s
             tl.store(out0_bptr, out0.to(out0_bptr.type.element_ty), boundary_check=(out0_stride_order0,))
   }
 
-def candidateKernel (in0_ptr out0_ptr : RegionName) (input_base output_base in0_stride0 out0_stride0 : Int)
+def relu_forward_kernel_rank_1_foldedKernel (in0_ptr out0_ptr : RegionName) (input_base output_base in0_stride0 out0_stride0 : Int)
     (s0 num_tasks tiles_per_cta tile_size0 : Nat) (one_tile_per_cta : Bool) (folded_num_tiles0 : Nat) : ComputeKernel :=
   let in0_stride_order0 : Nat := 0
   let out0_stride_order0 : Nat := 0
   with_triton_call candidateSignature call_args [in0_stride0 := in0_stride0,out0_stride0 := out0_stride0,
     s0 := s0,num_tasks := num_tasks,tiles_per_cta := tiles_per_cta]
     signed_pointer_offsets [in0_ptr := input_base,out0_ptr := output_base]
-    pure_functions [relu_forward := reluForwardSource] in triton {
+    pure_functions [relu_forward := relu_forwardSource] in triton {
     pid = tl.program_id(0)
     num_tiles0 = folded_num_tiles0
     if one_tile_per_cta: # monolitic kernel style
@@ -128,19 +128,19 @@ def candidateKernel (in0_ptr out0_ptr : RegionName) (input_base output_base in0_
   }
 
 def oneTileKernel (c : Parameters) : ComputeKernel :=
-  originalKernel c.input.region c.output.region c.input.base c.output.base c.input.stride c.output.stride
+  relu_forward_kernel_rank_1Kernel c.input.region c.output.region c.input.base c.output.base c.input.stride c.output.stride
     c.n c.n c.tiles c.B Bool.true
 
 def gridStrideKernel (c : Parameters) : ComputeKernel :=
-  originalKernel c.input.region c.output.region c.input.base c.output.base c.input.stride c.output.stride
+  relu_forward_kernel_rank_1Kernel c.input.region c.output.region c.input.base c.output.base c.input.stride c.output.stride
     c.n c.n c.tiles c.B Bool.false
 
 def oneTileFolded (c : Parameters) : ComputeKernel :=
-  candidateKernel c.input.region c.output.region c.input.base c.output.base c.input.stride c.output.stride
+  relu_forward_kernel_rank_1_foldedKernel c.input.region c.output.region c.input.base c.output.base c.input.stride c.output.stride
     c.n c.n c.tiles c.B Bool.true ((c.n+c.B-1)/c.B)
 
 def gridStrideFolded (c : Parameters) : ComputeKernel :=
-  candidateKernel c.input.region c.output.region c.input.base c.output.base c.input.stride c.output.stride
+  relu_forward_kernel_rank_1_foldedKernel c.input.region c.output.region c.input.base c.output.base c.input.stride c.output.stride
     c.n c.n c.tiles c.B Bool.false ((c.n+c.B-1)/c.B)
 
 def kernel (c : Parameters) : ComputeKernel :=

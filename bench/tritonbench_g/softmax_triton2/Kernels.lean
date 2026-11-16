@@ -32,6 +32,7 @@ def softmax_kernel (output_ptr input_ptr : RegionName)
      n_cols := n_cols_value]
     pointer_offsets [input_ptr := input_offset, output_ptr := output_offset] in
   triton {
+    # The rows of the softmax are independent, so we parallelize across those
     row_idx = tl.program_id(0).to(tl.int64)
     # The stride represents how much we need to increase the pointer to advance 1 row
     row_start_ptr = input_ptr + row_idx * input_row_stride
@@ -67,6 +68,7 @@ def guarded_reciprocal_kernel (output_ptr input_ptr : RegionName)
      n_cols := n_cols_value]
     pointer_offsets [input_ptr := input_offset, output_ptr := output_offset] in
   triton {
+    # The rows of the softmax are independent, so we parallelize across those
     row_idx = tl.program_id(0).to(tl.int64)
     # The stride represents how much we need to increase the pointer to advance 1 row
     row_start_ptr = input_ptr + row_idx * input_row_stride

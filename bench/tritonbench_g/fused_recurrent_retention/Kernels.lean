@@ -25,10 +25,11 @@ def backwardSignature : CallSignature where
   readPorts := ["q","k","v","do","initial_state","d_final_state"]
   writePorts := ["dq","dk","dv"]
 
-def forwardKernel (q k v o initial_state final_state : RegionName)
+def fused_recurrent_retention_fwd_kernel (q k v o initial_state final_state : RegionName)
     (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d B H T : Nat) (BK BV DK DV : Nat)
     (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : ComputeKernel :=
   with_triton_call forwardSignature call_args [s_qk_h := s_qk_h,s_qk_t := s_qk_t,s_qk_d := s_qk_d,s_vo_h := s_vo_h,s_vo_t := s_vo_t,s_vo_d := s_vo_d,B := B,H := H,T := T] in triton {
+    # Kernel logic
     i_v, i_k, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     i_h = i_bh % H
     b_b = (1 - tl.math.exp2(-5 - i_h * 1.0))
@@ -76,13 +77,14 @@ def forward (dtype out_dtype : FloatDType)
         (q k v o initial_state final_state : RegionName)
         (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d B H T : Nat) (scale : ℝ)
         (BK BV DK DV : Nat) (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : ComputeKernel :=
-  forwardKernel q k v o initial_state final_state
+  fused_recurrent_retention_fwd_kernel q k v o initial_state final_state
     s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d B H T BK BV DK DV USE_INITIAL_STATE STORE_FINAL_STATE
 
-def backwardKernel (q k v «do» dq dk dv initial_state d_final_state : RegionName)
+def fused_recurrent_retention_bwd_kernel (q k v «do» dq dk dv initial_state d_final_state : RegionName)
     (s_do_b s_do_h s_do_t s_do_d s_df_b s_df_h s_df_k s_df_v s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d B H T : Nat) (BK BV DK DV : Nat)
     (USE_INITIAL_STATE USE_FINAL_GRAD : Bool) : ComputeKernel :=
   with_triton_call backwardSignature call_args [s_do_b := s_do_b,s_do_h := s_do_h,s_do_t := s_do_t,s_do_d := s_do_d,s_df_b := s_df_b,s_df_h := s_df_h,s_df_k := s_df_k,s_df_v := s_df_v,s_qk_h := s_qk_h,s_qk_t := s_qk_t,s_qk_d := s_qk_d,s_vo_h := s_vo_h,s_vo_t := s_vo_t,s_vo_d := s_vo_d,B := B,H := H,T := T] in triton {
+    # Kernel logic
     i_v, i_k, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     i_h = i_bh % H
     b_b = 1 - tl.math.exp2(-5 - i_h * 1.0)
@@ -163,13 +165,14 @@ def backward (dtype out_dtype : FloatDType)
         (s_do_b s_do_h s_do_t s_do_d s_df_b s_df_h s_df_k s_df_v : Nat)
         (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d B H T : Nat) (scale : ℝ)
         (BK BV DK DV : Nat) (USE_INITIAL_STATE USE_FINAL_GRAD : Bool) : ComputeKernel :=
-  backwardKernel q k v do_ dq dk dv initial_state d_final_state
+  fused_recurrent_retention_bwd_kernel q k v do_ dq dk dv initial_state d_final_state
     s_do_b s_do_h s_do_t s_do_d s_df_b s_df_h s_df_k s_df_v s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d B H T BK BV DK DV USE_INITIAL_STATE USE_FINAL_GRAD
 
-def forwardCompareRightKernel (q k v o initial_state final_state : RegionName)
+def fused_recurrent_retention_fwd_kernel_candidateKernel (q k v o initial_state final_state : RegionName)
     (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d B H T : Nat) (BK BV DK DV : Nat)
     (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : ComputeKernel :=
   with_triton_call forwardSignature call_args [s_qk_h := s_qk_h,s_qk_t := s_qk_t,s_qk_d := s_qk_d,s_vo_h := s_vo_h,s_vo_t := s_vo_t,s_vo_d := s_vo_d,B := B,H := H,T := T] in triton {
+    # Kernel logic
     i_v, i_k, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     i_h = i_bh % H
     b_b = (1 - tl.math.exp2(-5 - i_h * 1.0))
@@ -217,13 +220,14 @@ def forwardCompareRight (dtype out_dtype : FloatDType)
         (q k v o initial_state final_state : RegionName)
         (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d B H T : Nat) (scale : ℝ)
         (BK BV DK DV : Nat) (USE_INITIAL_STATE STORE_FINAL_STATE : Bool) : ComputeKernel :=
-  forwardCompareRightKernel q k v o initial_state final_state
+  fused_recurrent_retention_fwd_kernel_candidateKernel q k v o initial_state final_state
     s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d B H T BK BV DK DV USE_INITIAL_STATE STORE_FINAL_STATE
 
-def backwardCompareRightKernel (q k v «do» dq dk dv initial_state d_final_state : RegionName)
+def fused_recurrent_retention_bwd_kernel_candidateKernel (q k v «do» dq dk dv initial_state d_final_state : RegionName)
     (s_do_b s_do_h s_do_t s_do_d s_df_b s_df_h s_df_k s_df_v s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d B H T : Nat) (BK BV DK DV : Nat)
     (USE_INITIAL_STATE USE_FINAL_GRAD : Bool) : ComputeKernel :=
   with_triton_call backwardSignature call_args [s_do_b := s_do_b,s_do_h := s_do_h,s_do_t := s_do_t,s_do_d := s_do_d,s_df_b := s_df_b,s_df_h := s_df_h,s_df_k := s_df_k,s_df_v := s_df_v,s_qk_h := s_qk_h,s_qk_t := s_qk_t,s_qk_d := s_qk_d,s_vo_h := s_vo_h,s_vo_t := s_vo_t,s_vo_d := s_vo_d,B := B,H := H,T := T] in triton {
+    # Kernel logic
     i_v, i_k, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     i_h = i_bh % H
     b_b = 1 - tl.math.exp2(-5 - i_h * 1.0)
@@ -304,7 +308,7 @@ def backwardCompareRight (dtype out_dtype : FloatDType)
         (s_do_b s_do_h s_do_t s_do_d s_df_b s_df_h s_df_k s_df_v : Nat)
         (s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d B H T : Nat) (scale : ℝ)
         (BK BV DK DV : Nat) (USE_INITIAL_STATE USE_FINAL_GRAD : Bool) : ComputeKernel :=
-  backwardCompareRightKernel q k v do_ dq dk dv initial_state d_final_state
+  fused_recurrent_retention_bwd_kernel_candidateKernel q k v do_ dq dk dv initial_state d_final_state
     s_do_b s_do_h s_do_t s_do_d s_df_b s_df_h s_df_k s_df_v s_qk_h s_qk_t s_qk_d s_vo_h s_vo_t s_vo_d B H T BK BV DK DV USE_INITIAL_STATE USE_FINAL_GRAD
 
 end

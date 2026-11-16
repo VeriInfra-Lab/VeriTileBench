@@ -18,7 +18,7 @@ def callSignature (input_dtype output_dtype : FloatDType) (index_dtype : IndexSt
   readPorts := ["input_ptr","lora_ptr","out_ptr","lora_indices"]
   writePorts := ["out_ptr"]
 
-def originalKernel (input_dtype output_dtype : FloatDType) (index_dtype : IndexStorage)
+def _bgmv_shrink_kernel (input_dtype output_dtype : FloatDType) (index_dtype : IndexStorage)
     (input_ptr lora_ptr out_ptr lora_indices : RegionName)
     (N K xm_stride xk_stride l0_stride lora_k_stride lora_n_stride cm_stride cn_stride : Nat) (BLOCK_N BLOCK_K SPLIT_K : Nat) : ComputeKernel :=
   with_triton_call (callSignature input_dtype output_dtype index_dtype)
@@ -62,7 +62,7 @@ def originalKernel (input_dtype output_dtype : FloatDType) (index_dtype : IndexS
         tl.atomic_add(c_ptr, accumulator, mask=c_mask)
   }
 
-def candidateKernel (input_dtype output_dtype : FloatDType) (index_dtype : IndexStorage)
+def _bgmv_shrink_kernel_candidateKernel (input_dtype output_dtype : FloatDType) (index_dtype : IndexStorage)
     (input_ptr lora_ptr out_ptr lora_indices : RegionName)
     (N K xm_stride xk_stride l0_stride lora_k_stride lora_n_stride cm_stride cn_stride : Nat) (BLOCK_N BLOCK_K SPLIT_K : Nat) : ComputeKernel :=
   with_triton_call (callSignature input_dtype output_dtype index_dtype)
@@ -113,19 +113,19 @@ namespace VeriTile.Bench.Repairs.BgmvShrinkKernelPhysical.Kernels
 open VeriTile.Triton
 
 def originalFP16 (h : Call) : ComputeKernel :=
-  Pasted.originalKernel .fp16 h.outputType .i64 "X" "W" "Y" "Indices"
+  Pasted._bgmv_shrink_kernel .fp16 h.outputType .i64 "X" "W" "Y" "Indices"
     h.N h.K h.K 1 (h.N*h.K) h.K 1 h.columns 1 h.BN 256 64
 
 def scalarLeftFP16 (h : Call) : ComputeKernel :=
-  Pasted.candidateKernel .fp16 h.outputType .i64 "X" "W" "Y" "Indices"
+  Pasted._bgmv_shrink_kernel_candidateKernel .fp16 h.outputType .i64 "X" "W" "Y" "Indices"
     h.N h.K h.K 1 (h.N*h.K) h.K 1 h.columns 1 h.BN 256 64
 
 def originalBF16 (h : Call) : ComputeKernel :=
-  Pasted.originalKernel .bf16 h.outputType .i64 "X" "W" "Y" "Indices"
+  Pasted._bgmv_shrink_kernel .bf16 h.outputType .i64 "X" "W" "Y" "Indices"
     h.N h.K h.K 1 (h.N*h.K) h.K 1 h.columns 1 h.BN 256 64
 
 def scalarLeftBF16 (h : Call) : ComputeKernel :=
-  Pasted.candidateKernel .bf16 h.outputType .i64 "X" "W" "Y" "Indices"
+  Pasted._bgmv_shrink_kernel_candidateKernel .bf16 h.outputType .i64 "X" "W" "Y" "Indices"
     h.N h.K h.K 1 (h.N*h.K) h.K 1 h.columns 1 h.BN 256 64
 
 def source (h : Call) : ComputeKernel :=

@@ -33,11 +33,11 @@ theorem apply_penalty_reciprocal_equiv (stride B : Nat) (R : Rules) :
 /-- The mathematical and floating entries use the same canonical FP32 source. -/
 theorem original_source (stride B : Nat) :
     (original stride B).source =
-      sourceKernel "logits" "presence" "frequency" "repetition" "ids" "counts" "cumsum" stride 1 B := rfl
+      _fwd_kernel_apply_penalty_repairedKernel "logits" "presence" "frequency" "repetition" "ids" "counts" "cumsum" stride 1 B := rfl
 
 theorem reciprocal_source (stride B : Nat) :
     (reciprocal stride B).source =
-      reciprocalKernel "logits" "presence" "frequency" "repetition" "ids" "counts" "cumsum" stride 1 B := rfl
+      _fwd_kernel_apply_penalty_reciprocalKernel "logits" "presence" "frequency" "repetition" "ids" "counts" "cumsum" stride 1 B := rfl
 
 #print_fp_assumptions apply_penalty_reciprocal_equiv
 #axiomsClean apply_penalty_reciprocal_equiv

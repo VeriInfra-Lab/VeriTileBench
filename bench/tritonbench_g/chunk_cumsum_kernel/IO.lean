@@ -10,9 +10,9 @@ open VeriTile.Triton
 noncomputable section
 
 abbrev realIO (input output : RegionName) (T : Nat) (cfg : Config)
-    (projectionProof : (repairedKernel .fp32 .fp32 input output T cfg.block).eraseDType.toAlgorithm? =
-      .ok (repairedKernel .fp32 .fp32 input output T cfg.block).eraseDType.toAlgKernel) : UKernelIO where
-  kernel := (repairedKernel .fp32 .fp32 input output T cfg.block).eraseDType
+    (projectionProof : (chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T cfg.block).eraseDType.toAlgorithm? =
+      .ok (chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T cfg.block).eraseDType.toAlgKernel) : UKernelIO where
+  kernel := (chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T cfg.block).eraseDType
   projection := projectionProof
   nIn := 1
   nOut := 1
@@ -54,7 +54,7 @@ abbrev io {α : Type} (ops : FPRow.Ops α) (input output : RegionName)
   scratchWrite := fun z => Fin.elim0 z
   scratchMask := fun z => Fin.elim0 z
   schedule := fun _ => [{
-    kernel := repairedKernel .fp32 .fp32 input output T cfg.block
+    kernel := chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T cfg.block
     backend := engine ops.algebra
     pids := fun ax => if ax=0 then pid else 0 }]
   encode := id
@@ -63,7 +63,7 @@ abbrev io {α : Type} (ops : FPRow.Ops α) (input output : RegionName)
 abbrev candidate {α : Type} (ops : FPRow.Ops α) (input output : RegionName)
     (T : Nat) (cfg : Config) (pid : Nat) : ProgramIO.Variant (io ops input output T cfg pid) where
   schedule := fun _ => [{
-    kernel := sumLeftKernel .fp32 .fp32 input output T cfg.block
+    kernel := chunk_global_cumsum_scalar_kernel_sum_leftKernel .fp32 .fp32 input output T cfg.block
     backend := engine ops.algebra
     pids := fun ax => if ax=0 then pid else 0 }]
   observe := fun _ _ => id

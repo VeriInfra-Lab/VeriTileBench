@@ -22,7 +22,7 @@ theorem tile_safe (M : Algebra α) (c : Parameters) (candidate : Bool) (s : Stat
   all_goals
     simp only [perTile,PastedTile.body,branch,Bool.false_eq_true,if_false,if_true,
       PastedTile.oneTile,PastedTile.grid,PastedTile.iterations,oneTileKernel,oneTileCommuted,
-      gridStrideKernel,gridStrideCommuted,originalKernel,commutedBodyPastedKernel,ComputeKernel.surfaceBody]
+      gridStrideKernel,gridStrideCommuted,pow_func_scalar_tensor_kernel_rank_1Kernel,pow_func_scalar_tensor_kernel_rank_1_commutedKernel,ComputeKernel.surfaceBody]
     simp [traceSafeList_unfold,stepSafe_unfold,safeExpr_unfold,safeCompute_unfold,
       safeOp_unfold,safeAddress_unfold,safeMask_unfold,addressSafe_unfold,maskActive_unfold,
       step,stepAlg,evalExpr,evalComputeOp,evalOp_unfold,numeric,numericLt,numericLe,numericEq,natLt,

@@ -43,7 +43,7 @@ theorem quant4 {α : Type} [Inhabited α] (a : Ops α) (p : Parameters)
     simpa only [shapeV] using bv (p.cv+i) (by omega)
   cases version
   all_goals
-    simp (maxSteps := 2500000) [FP.Structural.TraceSafe, QuantSource.kernel4, QuantSource.original4Kernel,original4Kernel, QuantSource.commuted4Kernel,candidate4Kernel, ComputeKernel.surfaceBody,
+    simp (maxSteps := 2500000) [FP.Structural.TraceSafe, QuantSource.kernel4, QuantSource.original4Kernel,Policy4._fill_rowsKernel, QuantSource.commuted4Kernel,Policy4._fill_rows_index_commutedKernel, ComputeKernel.surfaceBody,
       Safety.traceSafeList_unfold, Safety.stepSafe_unfold, Safety.safeExpr_unfold,
       Safety.safeCompute_unfold, Safety.safeOp_unfold, Safety.safeAddress_unfold,
       Safety.safeMask_unfold, Safety.addressSafe_unfold, Safety.maskActive_unfold,

@@ -130,9 +130,9 @@ theorem matches_ready (p : Layout) (M : Algebra α) (a : Inputs α) (acc : Acc p
 theorem prelude (p : Layout) (r : Regions) (scale : ℝ) (M : Algebra α) (s : State α) :
     ∃ t,run (M.withDefaultPrecision .fp32) (parts p r scale).before s=some t ∧
       Matches p M (inputs p r s) (initial p M) t ∧ t.mem=s.mem := by
-  simp (config := {maxSteps := 500000}) [parts,kernel,originalFP32,VeriTile.Bench.TritonBenchG.ContextAttnFwd.Program.kernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd.originalKernel,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd.originalKernel,
+  simp (config := {maxSteps := 500000}) [parts,kernel,originalFP32,VeriTile.Bench.TritonBenchG.ContextAttnFwd.Program.kernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_int8kvKernel,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_int8kvKernel,
     VeriTile.Bench.TritonBenchG.ContextAttnFwd.Program.kernel,
-    VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd.originalKernel,ComputeKernel.surfaceBody,
+    VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_int8kvKernel,ComputeKernel.surfaceBody,
     Source.intRange?,run,step,evalExpr,evalComputeOp,evalOp_unfold,Option.bind,
     ComputeDType.eraseDType,State.setReg,Algebra.withDefaultPrecision,
     resolvePrecision,numeric,numericLt,numericLe,natLt,natLe,integralFloorDiv,integralMod,
@@ -152,9 +152,9 @@ theorem body (p : Layout) (r : Regions) (scale : ℝ) (M : Algebra α)
       Matches p M (inputs p r initialState) (advance p M dots scale (inputs p r initialState) cur old) t ∧
       t.mem=initialState.mem := by
   rcases live with ⟨h0,h1,h2,h3,h4,h5,h6,h7,h8,h9,h10,h11,h12,h13,h14⟩
-  simp (config := {maxSteps := 1000000}) [parts,kernel,originalFP32,VeriTile.Bench.TritonBenchG.ContextAttnFwd.Program.kernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd.originalKernel,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd.originalKernel,
+  simp (config := {maxSteps := 1000000}) [parts,kernel,originalFP32,VeriTile.Bench.TritonBenchG.ContextAttnFwd.Program.kernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_int8kvKernel,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_int8kvKernel,
     VeriTile.Bench.TritonBenchG.ContextAttnFwd.Program.kernel,
-    VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd.originalKernel,ComputeKernel.surfaceBody,
+    VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_int8kvKernel,ComputeKernel.surfaceBody,
     Source.intRange?,run,step,evalExpr,evalComputeOp,evalOp_unfold,Option.bind,
     ComputeDType.eraseDType,State.setReg,Algebra.withDefaultPrecision,
     resolvePrecision,numeric,numericLt,numericLe,natLt,natLe,integralFloorDiv,integralMod,
@@ -162,7 +162,8 @@ theorem body (p : Layout) (r : Regions) (scale : ℝ) (M : Algebra α)
     dots.qk_bound,dots.pv_bound,TileShape.axisDim,hBN,Matches,advance,keyTile,valueTile,
     memory,inputs,bop,Nat.cast_add,Nat.cast_mul,Broadcast.leftIndex,Broadcast.rightIndex]
   simp [funext_iff,bop,Broadcast.leftIndex,Broadcast.rightIndex,keyTile,valueTile,Function.comp_def]
-  refine ⟨?_,?_,?_⟩ <;> intros <;> rfl
+  refine ⟨?_,?_,?_⟩ <;> intros <;>
+    simp only [show (-1.0e8 : ℝ)=(-100000000.0 : ℝ) by norm_num] <;> rfl
 
 end
 end VeriTile.Bench.Repairs.ContextAttnFwd.FPReference

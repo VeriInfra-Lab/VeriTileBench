@@ -1,21 +1,21 @@
 # Triton function-body correspondence
 
-The 183 selected TritonBench-G tasks and all 19 worked-example groups have
+The 184 selected TritonBench-G tasks and all 19 worked-example groups have
 checked pasted Python bodies. The 334 imported bug-detection and pretrain tasks
 have no independent Python reference registered and remain outside that scope.
 
 The current machine-readable inventory is
 [`validation/source-correspondence.json`](../../validation/source-correspondence.json).
-It covers 517 tasks and 19 worked-example groups: 183 TritonBench tasks,
+It covers 518 tasks and 19 worked-example groups: 184 TritonBench tasks,
 65 bug-detection tasks and 269 pretrain tasks. Each entry records every
 retained Python JIT, registered pairs, source provenance and source hashes.
 The 334 imported bug-detection/pretrain tasks remain outside this migration's
-explicit 177-task plus 19-example scope.
+explicit 178-task plus 19-example scope.
 
 The active scope and separate validation stages are recorded in
 [`validation/body-migration-progress.json`](../../validation/body-migration-progress.json).
-The completed migration comprises 177 TritonBench-G tasks and 19 worked-example
-groups. The source inventory also includes six previously aligned TritonBench-G
+The completed migration comprises 178 TritonBench-G tasks, including the scaled
+FP4 conversion, and 19 worked-example groups. The source inventory also includes six previously aligned TritonBench-G
 tasks. Current pairs are discovered directly from the source and call bindings.
 
 Body correspondence, public Real/FP proofs, retained-module builds and official

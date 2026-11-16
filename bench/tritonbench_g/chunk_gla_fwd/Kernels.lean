@@ -30,7 +30,7 @@ def interSignature (qStorage kStorage gStorage : Storage) (out_dtype : FloatDTyp
   readPorts := ["q","k","g"]
   writePorts := ["A"]
 
-def interOriginalKernel (qStorage kStorage gStorage : Storage) (out_dtype : FloatDType) (q k g A : RegionName) (s_k_h s_k_t : Nat) (scale : ℝ) (T K BT BC BK NC : Nat) : ComputeKernel :=
+def chunk_gla_fwd_A_kernel_intra_sub_interKernel (qStorage kStorage gStorage : Storage) (out_dtype : FloatDType) (q k g A : RegionName) (s_k_h s_k_t : Nat) (scale : ℝ) (T K BT BC BK NC : Nat) : ComputeKernel :=
   with_triton_call (interSignature qStorage kStorage gStorage out_dtype) call_args [s_k_h := s_k_h, s_k_t := s_k_t, scale := scale] in triton {
     i_t, i_c, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     i_i, i_j = i_c // NC, i_c % NC
@@ -62,7 +62,7 @@ def interOriginalKernel (qStorage kStorage gStorage : Storage) (out_dtype : Floa
     tl.store(p_A, b_A.to(A.dtype.element_ty), boundary_check=(0, 1))
   }
 
-def interDotFirstKernel (qStorage kStorage gStorage : Storage) (out_dtype : FloatDType) (q k g A : RegionName) (s_k_h s_k_t : Nat) (scale : ℝ) (T K BT BC BK NC : Nat) : ComputeKernel :=
+def chunk_gla_fwd_A_kernel_intra_sub_inter_candidateKernel (qStorage kStorage gStorage : Storage) (out_dtype : FloatDType) (q k g A : RegionName) (s_k_h s_k_t : Nat) (scale : ℝ) (T K BT BC BK NC : Nat) : ComputeKernel :=
   with_triton_call (interSignature qStorage kStorage gStorage out_dtype) call_args [s_k_h := s_k_h, s_k_t := s_k_t, scale := scale] in triton {
     i_t, i_c, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     i_i, i_j = i_c // NC, i_c % NC
@@ -101,7 +101,7 @@ def intraSignature (qStorage kStorage gStorage : Storage) : CallSignature where
   readPorts := ["q","k","g"]
   writePorts := ["A"]
 
-def intraOriginalKernel (qStorage kStorage gStorage : Storage) (q k g A : RegionName) (s_k_h s_k_t : Nat) (scale : ℝ) (T K BT BC BK : Nat) : ComputeKernel :=
+def chunk_gla_fwd_A_kernel_intra_sub_intraKernel (qStorage kStorage gStorage : Storage) (q k g A : RegionName) (s_k_h s_k_t : Nat) (scale : ℝ) (T K BT BC BK : Nat) : ComputeKernel :=
   with_triton_call (intraSignature qStorage kStorage gStorage) call_args [s_k_h := s_k_h, s_k_t := s_k_t, scale := scale] in triton {
     i_t, i_i, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     i_j = i_i
@@ -132,7 +132,7 @@ def intraOriginalKernel (qStorage kStorage gStorage : Storage) (q k g A : Region
         p_gk += K
   }
 
-def intraScaleFirstKernel (qStorage kStorage gStorage : Storage) (q k g A : RegionName) (s_k_h s_k_t : Nat) (scale : ℝ) (T K BT BC BK : Nat) : ComputeKernel :=
+def chunk_gla_fwd_A_kernel_intra_sub_intra_candidateKernel (qStorage kStorage gStorage : Storage) (q k g A : RegionName) (s_k_h s_k_t : Nat) (scale : ℝ) (T K BT BC BK : Nat) : ComputeKernel :=
   with_triton_call (intraSignature qStorage kStorage gStorage) call_args [s_k_h := s_k_h, s_k_t := s_k_t, scale := scale] in triton {
     i_t, i_i, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     i_j = i_i
@@ -170,7 +170,7 @@ def splitSignature (qStorage kStorage gStorage : Storage) : CallSignature where
   readPorts := ["q","k","g"]
   writePorts := ["A"]
 
-def splitOriginalKernel (qStorage kStorage gStorage : Storage) (q k g A : RegionName) (s_k_h s_k_t : Nat) (scale : ℝ) (T K BT BC BK NC : Nat) : ComputeKernel :=
+def chunk_gla_fwd_A_kernel_intra_sub_intra_splitKernel (qStorage kStorage gStorage : Storage) (q k g A : RegionName) (s_k_h s_k_t : Nat) (scale : ℝ) (T K BT BC BK NC : Nat) : ComputeKernel :=
   with_triton_call (splitSignature qStorage kStorage gStorage) call_args [s_k_h := s_k_h, s_k_t := s_k_t, scale := scale] in triton {
     i_k, i_tc, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     i_t, i_i = i_tc // NC, i_tc % NC
@@ -203,7 +203,7 @@ def splitOriginalKernel (qStorage kStorage gStorage : Storage) (q k g A : Region
         p_gk += K
   }
 
-def splitScaleFirstKernel (qStorage kStorage gStorage : Storage) (q k g A : RegionName) (s_k_h s_k_t : Nat) (scale : ℝ) (T K BT BC BK NC : Nat) : ComputeKernel :=
+def chunk_gla_fwd_A_kernel_intra_sub_intra_split_candidateKernel (qStorage kStorage gStorage : Storage) (q k g A : RegionName) (s_k_h s_k_t : Nat) (scale : ℝ) (T K BT BC BK NC : Nat) : ComputeKernel :=
   with_triton_call (splitSignature qStorage kStorage gStorage) call_args [s_k_h := s_k_h, s_k_t := s_k_t, scale := scale] in triton {
     i_k, i_tc, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     i_t, i_i = i_tc // NC, i_tc % NC
@@ -244,7 +244,7 @@ def mergeSignature (out_dtype : FloatDType) : CallSignature where
   readPorts := ["A"]
   writePorts := ["A2"]
 
-def mergeOriginalKernel (out_dtype : FloatDType) (A A2 : RegionName) (T BT BC NK : Nat) : ComputeKernel :=
+def chunk_gla_fwd_A_kernel_intra_sub_intra_mergeKernel (out_dtype : FloatDType) (A A2 : RegionName) (T BT BC NK : Nat) : ComputeKernel :=
   with_triton_call (mergeSignature out_dtype) call_args [] in triton {
     i_t, i_c, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     if i_t * BT + i_c * BC >= T:
@@ -258,7 +258,7 @@ def mergeOriginalKernel (out_dtype : FloatDType) (A A2 : RegionName) (T BT BC NK
     tl.store(p_A2, b_A.to(A2.dtype.element_ty), boundary_check=(0, 1))
   }
 
-def mergeLoadFirstKernel (out_dtype : FloatDType) (A A2 : RegionName) (T BT BC NK : Nat) : ComputeKernel :=
+def chunk_gla_fwd_A_kernel_intra_sub_intra_merge_candidateKernel (out_dtype : FloatDType) (A A2 : RegionName) (T BT BC NK : Nat) : ComputeKernel :=
   with_triton_call (mergeSignature out_dtype) call_args [] in triton {
     i_t, i_c, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     if i_t * BT + i_c * BC >= T:
@@ -280,7 +280,7 @@ def outputSignature (queryStorage valueStorage gateStorage : Storage) (dtype out
   readPorts := ["q","v","g","h","A"]
   writePorts := ["o"]
 
-def outputOriginalKernel (queryStorage valueStorage gateStorage : Storage) (dtype out_dtype : FloatDType) (q v g h o A : RegionName) (s_k_h s_k_t s_v_h s_v_t s_h_h s_h_t : Nat) (scale : ℝ) (T K V BT BK BV : Nat) : ComputeKernel :=
+def chunk_gla_fwd_kernel_oKernel (queryStorage valueStorage gateStorage : Storage) (dtype out_dtype : FloatDType) (q v g h o A : RegionName) (s_k_h s_k_t s_v_h s_v_t s_h_h s_h_t : Nat) (scale : ℝ) (T K V BT BK BV : Nat) : ComputeKernel :=
   with_triton_call (outputSignature queryStorage valueStorage gateStorage dtype out_dtype) call_args [s_k_h := s_k_h, s_k_t := s_k_t, s_v_h := s_v_h, s_v_t := s_v_t, s_h_h := s_h_h, s_h_t := s_h_t, scale := scale] in triton {
     i_v, i_t, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     m_s = tl.arange(0, BT)[:, None] >= tl.arange(0, BT)[None, :]
@@ -309,7 +309,7 @@ def outputOriginalKernel (queryStorage valueStorage gateStorage : Storage) (dtyp
     tl.store(p_o, b_o.to(p_o.dtype.element_ty), boundary_check=(0, 1))
   }
 
-def outputSumLeftKernel (queryStorage valueStorage gateStorage : Storage) (dtype out_dtype : FloatDType) (q v g h o A : RegionName) (s_k_h s_k_t s_v_h s_v_t s_h_h s_h_t : Nat) (scale : ℝ) (T K V BT BK BV : Nat) : ComputeKernel :=
+def chunk_gla_fwd_kernel_o_candidateKernel (queryStorage valueStorage gateStorage : Storage) (dtype out_dtype : FloatDType) (q v g h o A : RegionName) (s_k_h s_k_t s_v_h s_v_t s_h_h s_h_t : Nat) (scale : ℝ) (T K V BT BK BV : Nat) : ComputeKernel :=
   with_triton_call (outputSignature queryStorage valueStorage gateStorage dtype out_dtype) call_args [s_k_h := s_k_h, s_k_t := s_k_t, s_v_h := s_v_h, s_v_t := s_v_t, s_h_h := s_h_h, s_h_t := s_h_t, scale := scale] in triton {
     i_v, i_t, i_bh = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     m_s = tl.arange(0, BT)[:, None] >= tl.arange(0, BT)[None, :]
@@ -343,11 +343,11 @@ end VeriTile.Bench.Repairs.ChunkGlaFwd
 namespace VeriTile.Bench.Repairs.ChunkGlaFwd.TypedInter
 open VeriTile.Triton
 abbrev Storage := TypedOutput.Storage
-def fp32Original := interOriginalKernel .fp32 .fp32 .fp32
-def fp32DotFirst := interDotFirstKernel .fp32 .fp32 .fp32
+def fp32Original := chunk_gla_fwd_A_kernel_intra_sub_interKernel .fp32 .fp32 .fp32
+def fp32DotFirst := chunk_gla_fwd_A_kernel_intra_sub_inter_candidateKernel .fp32 .fp32 .fp32
 def source (qStorage kStorage gStorage : Storage) (swapped : Bool) :=
-  if swapped then interDotFirstKernel qStorage kStorage gStorage
-  else interOriginalKernel qStorage kStorage gStorage
+  if swapped then chunk_gla_fwd_A_kernel_intra_sub_inter_candidateKernel qStorage kStorage gStorage
+  else chunk_gla_fwd_A_kernel_intra_sub_interKernel qStorage kStorage gStorage
 def original (qStorage kStorage gStorage : Storage) := source qStorage kStorage gStorage Bool.false
 def dotFirst (qStorage kStorage gStorage : Storage) := source qStorage kStorage gStorage Bool.true
 end VeriTile.Bench.Repairs.ChunkGlaFwd.TypedInter
@@ -355,11 +355,11 @@ end VeriTile.Bench.Repairs.ChunkGlaFwd.TypedInter
 namespace VeriTile.Bench.Repairs.ChunkGlaFwd.TypedIntra
 open VeriTile.Triton
 abbrev Storage := TypedOutput.Storage
-def fp32Original := intraOriginalKernel .fp32 .fp32 .fp32
-def fp32ScaleFirst := intraScaleFirstKernel .fp32 .fp32 .fp32
+def fp32Original := chunk_gla_fwd_A_kernel_intra_sub_intraKernel .fp32 .fp32 .fp32
+def fp32ScaleFirst := chunk_gla_fwd_A_kernel_intra_sub_intra_candidateKernel .fp32 .fp32 .fp32
 def source (qStorage kStorage gStorage : Storage) (swapped : Bool) :=
-  if swapped then intraScaleFirstKernel qStorage kStorage gStorage
-  else intraOriginalKernel qStorage kStorage gStorage
+  if swapped then chunk_gla_fwd_A_kernel_intra_sub_intra_candidateKernel qStorage kStorage gStorage
+  else chunk_gla_fwd_A_kernel_intra_sub_intraKernel qStorage kStorage gStorage
 def original (qStorage kStorage gStorage : Storage) := source qStorage kStorage gStorage Bool.false
 def scaleFirst (qStorage kStorage gStorage : Storage) := source qStorage kStorage gStorage Bool.true
 end VeriTile.Bench.Repairs.ChunkGlaFwd.TypedIntra
@@ -367,27 +367,27 @@ end VeriTile.Bench.Repairs.ChunkGlaFwd.TypedIntra
 namespace VeriTile.Bench.Repairs.ChunkGlaFwd.TypedSplit
 open VeriTile.Triton
 abbrev Storage := TypedOutput.Storage
-def fp32Original := splitOriginalKernel .fp32 .fp32 .fp32
-def fp32ScaleFirst := splitScaleFirstKernel .fp32 .fp32 .fp32
+def fp32Original := chunk_gla_fwd_A_kernel_intra_sub_intra_splitKernel .fp32 .fp32 .fp32
+def fp32ScaleFirst := chunk_gla_fwd_A_kernel_intra_sub_intra_split_candidateKernel .fp32 .fp32 .fp32
 def source (qStorage kStorage gStorage : Storage) (swapped : Bool) :=
-  if swapped then splitScaleFirstKernel qStorage kStorage gStorage
-  else splitOriginalKernel qStorage kStorage gStorage
+  if swapped then chunk_gla_fwd_A_kernel_intra_sub_intra_split_candidateKernel qStorage kStorage gStorage
+  else chunk_gla_fwd_A_kernel_intra_sub_intra_splitKernel qStorage kStorage gStorage
 def original (qStorage kStorage gStorage : Storage) := source qStorage kStorage gStorage Bool.false
 def scaleFirst (qStorage kStorage gStorage : Storage) := source qStorage kStorage gStorage Bool.true
 end VeriTile.Bench.Repairs.ChunkGlaFwd.TypedSplit
 
 namespace VeriTile.Bench.Repairs.ChunkGlaFwd.TypedOutput
 open VeriTile.Triton
-def fp32Original := outputOriginalKernel .fp32 .fp32 .fp32
-def fp32SumLeft := outputSumLeftKernel .fp32 .fp32 .fp32
+def fp32Original := chunk_gla_fwd_kernel_oKernel .fp32 .fp32 .fp32
+def fp32SumLeft := chunk_gla_fwd_kernel_o_candidateKernel .fp32 .fp32 .fp32
 def source (queryStorage valueStorage gateStorage : Storage) (swapped : Bool) :=
-  if swapped then outputSumLeftKernel queryStorage valueStorage gateStorage
-  else outputOriginalKernel queryStorage valueStorage gateStorage
+  if swapped then chunk_gla_fwd_kernel_o_candidateKernel queryStorage valueStorage gateStorage
+  else chunk_gla_fwd_kernel_oKernel queryStorage valueStorage gateStorage
 def original (queryStorage valueStorage gateStorage : Storage) := source queryStorage valueStorage gateStorage Bool.false
 def sumLeft (queryStorage valueStorage gateStorage : Storage) := source queryStorage valueStorage gateStorage Bool.true
 end VeriTile.Bench.Repairs.ChunkGlaFwd.TypedOutput
 
 namespace VeriTile.Bench.Repairs.ChunkGlaFwd.TypedMerge
-def original := mergeOriginalKernel
-def loadFirst := mergeLoadFirstKernel
+def original := chunk_gla_fwd_A_kernel_intra_sub_intra_mergeKernel
+def loadFirst := chunk_gla_fwd_A_kernel_intra_sub_intra_merge_candidateKernel
 end VeriTile.Bench.Repairs.ChunkGlaFwd.TypedMerge

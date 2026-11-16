@@ -30,7 +30,7 @@ sys.path.insert(0, ROOT)
 from pathlib import Path
 
 DECL_KW = r"(?:noncomputable\s+|private\s+|protected\s+|partial\s+|@\[[^\]]*\]\s*)*" \
-          r"(def|denotation|theorem|specification|lemma|abbrev|instance)"
+          r"(def|denotation|theorem|specification|refutation|lemma|abbrev|instance)"
 # A top-level decl starts at column 0 (these files put decls at col 0 even
 # inside namespace/section).
 DECL_RE = re.compile(r"^(" + DECL_KW + r")\s+([A-Za-z_][A-Za-z0-9_'?!.]*)", re.M)
@@ -301,8 +301,8 @@ def is_headline(n):
 
 def find_summary_theorems(decls, manifest_decls):
     thms = {d["name"]: d for d in decls
-            if d["kind"] in ("theorem", "specification", "lemma")}
-    headline_names = [n for n, d in thms.items() if d["kind"] == "specification"]
+            if d["kind"] in ("theorem", "specification", "refutation", "lemma")}
+    headline_names = [n for n, d in thms.items() if d["kind"] in ("specification", "refutation")]
     # fallback for files whose public theorem matches no tier: manifest seed
     if not headline_names:
         for d in manifest_decls:
@@ -396,6 +396,8 @@ def make_sheet(file_path, manifest):
         sig_scan = strip_comments(sig)
         out.append(f"## Public theorem: `{thm['name']}`")
         out.append("")
+        if thm['kind'] == 'refutation':
+            out.append('**Refutation:** proves the negation of the displayed claim.\n')
         if thm["doc"]:
             out.append("<details><summary>docstring</summary>\n")
             out.append("```")

@@ -20,7 +20,7 @@ def forwardSignature : CallSignature where
   readPorts := ["Q","K","V"]
   writePorts := ["Out"]
 
-def forwardKernel (p : Parameters) : ComputeKernel :=
+def _fwd_kernel (p : Parameters) : ComputeKernel :=
   let b := p.B
   let h := p.H
   let n := p.N
@@ -36,6 +36,7 @@ def forwardKernel (p : Parameters) : ComputeKernel :=
   let V : RegionName := "value"
   let Out : RegionName := "output"
   with_triton_call forwardSignature call_args [] in triton {
+    ##### get offset
     off_bh = tl.program_id(0)
     off_bh % h
     off_e = tl.program_id(1)
@@ -92,7 +93,7 @@ def forwardKernel (p : Parameters) : ComputeKernel :=
         off_block += BLOCK
   }
 
-def forwardCandidateKernel (p : Parameters) : ComputeKernel :=
+def _fwd_kernel_candidateKernel (p : Parameters) : ComputeKernel :=
   let b := p.B
   let h := p.H
   let n := p.N
@@ -108,6 +109,7 @@ def forwardCandidateKernel (p : Parameters) : ComputeKernel :=
   let V : RegionName := "value"
   let Out : RegionName := "output"
   with_triton_call forwardSignature call_args [] in triton {
+    ##### get offset
     off_bh = tl.program_id(0)
     off_bh % h
     off_e = tl.program_id(1)
@@ -171,7 +173,7 @@ def intraSignature : CallSignature where
   readPorts := ["K","V","DO","Q"]
   writePorts := ["DQ","DK","DV"]
 
-def intraKernel (p : Parameters) : ComputeKernel :=
+def _bwd_intra_kernel (p : Parameters) : ComputeKernel :=
   let b := p.B
   let h := p.H
   let n := p.N
@@ -190,6 +192,7 @@ def intraKernel (p : Parameters) : ComputeKernel :=
   let DK : RegionName := "keyGradient"
   let DV : RegionName := "valueGradient"
   with_triton_call intraSignature call_args [] in triton {
+    ##### get offset
     off_bh = tl.program_id(0)
     off_block = tl.program_id(1)
     off_bh % h
@@ -262,7 +265,7 @@ def intraKernel (p : Parameters) : ComputeKernel :=
     )
   }
 
-def intraCandidateKernel (p : Parameters) : ComputeKernel :=
+def _bwd_intra_kernel_candidateKernel (p : Parameters) : ComputeKernel :=
   let b := p.B
   let h := p.H
   let n := p.N
@@ -281,6 +284,7 @@ def intraCandidateKernel (p : Parameters) : ComputeKernel :=
   let DK : RegionName := "keyGradient"
   let DV : RegionName := "valueGradient"
   with_triton_call intraSignature call_args [] in triton {
+    ##### get offset
     off_bh = tl.program_id(0)
     off_block = tl.program_id(1)
     off_bh % h
@@ -360,7 +364,7 @@ def interSignature : CallSignature where
   readPorts := []
   writePorts := []
 
-def interKernel (p : Parameters) : ComputeKernel :=
+def _bwd_inter_kernel (p : Parameters) : ComputeKernel :=
   let b := p.B
   let h := p.H
   let n := p.N
@@ -379,6 +383,7 @@ def interKernel (p : Parameters) : ComputeKernel :=
   let DK : RegionName := "keyGradient"
   let DV : RegionName := "valueGradient"
   with_triton_call interSignature call_args [] in triton {
+    ##### get offset
     off_bh = tl.program_id(0)
     off_bh % h
 
@@ -554,7 +559,7 @@ def interKernel (p : Parameters) : ComputeKernel :=
         dkv += dkv_current
   }
 
-def interCandidateKernel (p : Parameters) : ComputeKernel :=
+def _bwd_inter_kernel_candidateKernel (p : Parameters) : ComputeKernel :=
   let b := p.B
   let h := p.H
   let n := p.N
@@ -573,6 +578,7 @@ def interCandidateKernel (p : Parameters) : ComputeKernel :=
   let DK : RegionName := "keyGradient"
   let DV : RegionName := "valueGradient"
   with_triton_call interSignature call_args [] in triton {
+    ##### get offset
     off_bh = tl.program_id(0)
     off_bh % h
 

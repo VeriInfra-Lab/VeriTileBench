@@ -16,11 +16,11 @@ Inactive lanes may contain arbitrary, including nonfinite, load values. -/
 abbrev multiplicationSite := Rewrite.multiplicationSite
 
 def original (X O : RegionName) (n B : Nat) : Program where
-  kernel := sourceKernel X O n B
+  kernel := mul2_kernel X O n B
   domain := [multiplicationSite X O n B]
 
 def commuted (X O : RegionName) (n B : Nat) : Program :=
-  { original X O n B with kernel := commutedSourceKernel X O n B }
+  { original X O n B with kernel := mul2_commuted_kernel X O n B }
 
 /-- Both complete sources succeed and agree on every typed memory cell.
 The proof supports equal input/output regions, not just fresh output. -/
@@ -37,10 +37,10 @@ specification mul2_commuted_equiv (X O : RegionName) (n B : Nat) :
     Rewrite.commuted_memory M D hM X O n B s (hd _ (by simp [original]))⟩
 
 def inplaceOriginal (X : RegionName) (n B : Nat) : Program :=
-  { original X X n B with kernel := inplaceSourceKernel X n B }
+  { original X X n B with kernel := mul2_inplace_kernel X n B }
 
 def inplaceCommuted (X : RegionName) (n B : Nat) : Program :=
-  { original X X n B with kernel := inplaceCommutedSourceKernel X n B }
+  { original X X n B with kernel := mul2_inplace_commuted_kernel X n B }
 
 specification mul2_inplace_commuted_equiv (X : RegionName) (n B : Nat) :
     inplaceOriginal X n B ≡[([] : Spec.Assumptions FP.GuardedFragment)] inplaceCommuted X n B :=

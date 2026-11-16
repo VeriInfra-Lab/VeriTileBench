@@ -14,12 +14,13 @@ def callSignature : CallSignature where
   readPorts := ["X","Y","DOUT"]
   writePorts := ["DX","DY","OUT"]
 
-def sourceKernel (X Y DOUT OUT DX DY : RegionName)
+def _swiglu_bwd_kernel (X Y DOUT OUT DX DY : RegionName)
     (sx sy sd so sdx sdy cols block : Nat) (recompute : Bool) : ComputeKernel :=
   let BLOCK_N := block
   let RECOMPUTE_OUTPUT := recompute
   with_triton_call callSignature call_args [stride_x_row := sx, stride_y_row := sy, stride_dout_row := sd, stride_out_row := so, stride_dx_row := sdx, stride_dy_row := sdy, ncols := cols] in
   triton {
+    # Map the program id to the row of X and Y it should compute.
     row = tl.program_id(0)
     start_col = tl.program_id(1) * BLOCK_N
     X += row * stride_x_row
@@ -43,7 +44,7 @@ def sourceKernel (X Y DOUT OUT DX DY : RegionName)
         tl.store(OUT + cols, out, mask=cols < ncols)
   }
 
-def commutedKernel (X Y DOUT OUT DX DY : RegionName)
+def swiglu_bwd_commutedKernel (X Y DOUT OUT DX DY : RegionName)
     (sx sy sd so sdx sdy cols block : Nat) (recompute : Bool) : ComputeKernel :=
   let BLOCK_N := block
   let RECOMPUTE_OUTPUT := recompute

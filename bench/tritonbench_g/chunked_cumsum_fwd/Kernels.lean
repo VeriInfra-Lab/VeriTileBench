@@ -17,7 +17,7 @@ def callSignature (storage : FloatDType) : CallSignature where
   readPorts := ["dt_ptr", "A_ptr", "dt_bias_ptr"]
   writePorts := ["dt_out_ptr", "dA_cumsum_ptr"]
 
-def sourceKernel
+def _chunk_cumsum_fwd_kernel
     (dt_ptr A_ptr dt_bias_ptr dt_out_ptr dA_cumsum_ptr : RegionName)
     (batch seqlen nheads chunk_size : Nat)
     (stride_dt_batch stride_dt_seqlen stride_dt_head stride_A_head stride_dt_bias_head
@@ -27,6 +27,7 @@ def sourceKernel
   let storage := FloatDType.fp32
   with_triton_call (callSignature storage) call_args [batch := batch, seqlen := seqlen, nheads := nheads, chunk_size := chunk_size, stride_dt_batch := stride_dt_batch, stride_dt_seqlen := stride_dt_seqlen, stride_dt_head := stride_dt_head, stride_A_head := stride_A_head, stride_dt_bias_head := stride_dt_bias_head, stride_dt_out_batch := stride_dt_out_batch, stride_dt_out_chunk := stride_dt_out_chunk, stride_dt_out_head := stride_dt_out_head, stride_dt_out_csize := stride_dt_out_csize, stride_dA_cs_batch := stride_dA_cs_batch, stride_dA_cs_chunk := stride_dA_cs_chunk, stride_dA_cs_head := stride_dA_cs_head, stride_dA_cs_csize := stride_dA_cs_csize] in
   triton {
+    # Triton kernel implementation for chunked cumulative sum forward pass
     pid_b = tl.program_id(axis=0).to(tl.uint64)
     pid_c = tl.program_id(axis=1).to(tl.uint64)
     pid_h = tl.program_id(axis=2).to(tl.uint64)
@@ -63,7 +64,7 @@ def sourceKernel
     tl.store(dA_cs_ptrs, dA_cs, mask=(offs_h[:, None] < nheads) & (offs_c[None, :] < chunk_size))
   }
 
-def scaleFirstKernel
+def chunk_cumsum_scale_firstKernel
     (dt_ptr A_ptr dt_bias_ptr dt_out_ptr dA_cumsum_ptr : RegionName)
     (batch seqlen nheads chunk_size : Nat)
     (stride_dt_batch stride_dt_seqlen stride_dt_head stride_A_head stride_dt_bias_head

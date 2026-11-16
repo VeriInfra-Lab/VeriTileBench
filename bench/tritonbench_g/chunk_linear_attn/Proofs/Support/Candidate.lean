@@ -4,5 +4,5 @@ namespace VeriTile.Bench.Repairs.ChunkLinearAttn
 open VeriTile.Triton
 /-- The complete Python candidate hoists the common Q/K head address. -/
 def forwardOHoisted (p : Parameters) (scale : ℝ) : ComputeKernel :=
-  forwardOHoistedKernel p scale
+  chunk_linear_attn_fwd_kernel_o_candidateKernel p scale
 end VeriTile.Bench.Repairs.ChunkLinearAttn

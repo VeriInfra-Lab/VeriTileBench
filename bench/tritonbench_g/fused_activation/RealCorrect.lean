@@ -27,7 +27,7 @@ specification fused_activation_kernel_correctness (x b input : RegionName)
    RealIO.ActivationValues, RealIO.ActivationValues.x, RealIO.ActivationValues.bias,
    RealIO.ActivationValues.input, RealIO.activationIO, GroupedMasked2DKernelIO.RegionalImplements,
    GroupedMasked2DKernelIO.nIn, GroupedMasked2DKernelIO.B]
-#specNonCircular formula avoiding [sourceKernel, commutedKernel]
+#specNonCircular formula avoiding [fused_add_mul_activation_kernel, fused_add_mul_activation_commuted_kernel]
 #axiomsClean fused_activation_kernel_correctness
 #guard_msgs (drop info) in
 #auditModuleAxioms

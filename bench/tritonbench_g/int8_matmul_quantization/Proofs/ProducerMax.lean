@@ -64,7 +64,7 @@ def iteration {α : Type} [Inhabited α] (M : Algebra α) (integer8 : α→BitVe
       (current.setReg "k" .int [] (fun _=>(k : Int)))=some t} := by
   refine ⟨?_,?_⟩
   swap
-  simp only [maxBody,code,KernelSource.quantize,quantizeKernel,parameters,
+  simp only [maxBody,code,KernelSource.quantize,quantize_int8_perrow_kernel,parameters,
     ComputeKernel.surfaceBody,List.getElem?_cons_succ,List.getElem?_cons_zero]
   simp [run,step,evalExpr,evalComputeOp,evalOp_unfold,evalOffsets,numeric,numericLt,
     natLt,bop,backend,ComputeDType.eraseDType,Option.bind,TileShape.axisDim,width,

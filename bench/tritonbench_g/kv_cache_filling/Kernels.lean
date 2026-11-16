@@ -7,7 +7,7 @@ set_option maxHeartbeats 8000000
 set_option maxRecDepth 30000
 set_option linter.unusedVariables false
 
-def quantRowSource : StatementJitFunction := with_triton_params (x, lo, hi, LEVELS) constexpr_args [LEVELS] in triton {
+def _quant_rowSource : StatementJitFunction := with_triton_params (x, lo, hi, LEVELS) constexpr_args [LEVELS] in triton {
     raw_scale = (hi - lo) / LEVELS
     scale = tl.where(hi == lo, 1.0, raw_scale)
     zero = -lo / scale
@@ -22,9 +22,9 @@ def signature0 : CallSignature where
   readPorts := ["SRC","DST","K","V"]
   writePorts := ["KC","VC"]
 
-def original0Kernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV : Nat) : ComputeKernel :=
+def Policy0._fill_rowsKernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV : Nat) : ComputeKernel :=
   let POLICY : Nat := 0
-  with_triton_call signature0 call_args [] jit_functions [_quant_row := quantRowSource] in triton {
+  with_triton_call signature0 call_args [] jit_functions [_quant_row := _quant_rowSource] in triton {
     job = tl.program_id(0).to(tl.int64)
     src = tl.load(SRC + job)
     dst = tl.load(DST + job)
@@ -84,9 +84,9 @@ def original0Kernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV 
         tl.store(VSZ + dst * 2 + 1, zv)
 }
 
-def candidate0Kernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV : Nat) : ComputeKernel :=
+def Policy0._fill_rows_index_commutedKernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV : Nat) : ComputeKernel :=
   let POLICY : Nat := 0
-  with_triton_call signature0 call_args [] jit_functions [_quant_row := quantRowSource] in triton {
+  with_triton_call signature0 call_args [] jit_functions [_quant_row := _quant_rowSource] in triton {
     job = tl.program_id(0).to(tl.int64)
     src = tl.load(SRC + job)
     dst = tl.load(DST + job)
@@ -153,9 +153,9 @@ def signature8 : CallSignature where
   readPorts := ["SRC","DST","K","V"]
   writePorts := ["KC","VC","KSZ","VSZ"]
 
-def original8Kernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV : Nat) : ComputeKernel :=
+def Policy8._fill_rowsKernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV : Nat) : ComputeKernel :=
   let POLICY : Nat := 8
-  with_triton_call signature8 call_args [] jit_functions [_quant_row := quantRowSource] in triton {
+  with_triton_call signature8 call_args [] jit_functions [_quant_row := _quant_rowSource] in triton {
     job = tl.program_id(0).to(tl.int64)
     src = tl.load(SRC + job)
     dst = tl.load(DST + job)
@@ -215,9 +215,9 @@ def original8Kernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV 
         tl.store(VSZ + dst * 2 + 1, zv)
 }
 
-def candidate8Kernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV : Nat) : ComputeKernel :=
+def Policy8._fill_rows_index_commutedKernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV : Nat) : ComputeKernel :=
   let POLICY : Nat := 8
-  with_triton_call signature8 call_args [] jit_functions [_quant_row := quantRowSource] in triton {
+  with_triton_call signature8 call_args [] jit_functions [_quant_row := _quant_rowSource] in triton {
     job = tl.program_id(0).to(tl.int64)
     src = tl.load(SRC + job)
     dst = tl.load(DST + job)
@@ -284,9 +284,9 @@ def signature4 : CallSignature where
   readPorts := ["SRC","DST","K","V"]
   writePorts := ["KC","VC","KSZ","VSZ"]
 
-def original4Kernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV : Nat) : ComputeKernel :=
+def Policy4._fill_rowsKernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV : Nat) : ComputeKernel :=
   let POLICY : Nat := 4
-  with_triton_call signature4 call_args [] jit_functions [_quant_row := quantRowSource] in triton {
+  with_triton_call signature4 call_args [] jit_functions [_quant_row := _quant_rowSource] in triton {
     job = tl.program_id(0).to(tl.int64)
     src = tl.load(SRC + job)
     dst = tl.load(DST + job)
@@ -346,9 +346,9 @@ def original4Kernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV 
         tl.store(VSZ + dst * 2 + 1, zv)
 }
 
-def candidate4Kernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV : Nat) : ComputeKernel :=
+def Policy4._fill_rows_index_commutedKernel (K V KC VC KSZ VSZ SRC DST : RegionName) (DK DV CK CV BK BV : Nat) : ComputeKernel :=
   let POLICY : Nat := 4
-  with_triton_call signature4 call_args [] jit_functions [_quant_row := quantRowSource] in triton {
+  with_triton_call signature4 call_args [] jit_functions [_quant_row := _quant_rowSource] in triton {
     job = tl.program_id(0).to(tl.int64)
     src = tl.load(SRC + job)
     dst = tl.load(DST + job)

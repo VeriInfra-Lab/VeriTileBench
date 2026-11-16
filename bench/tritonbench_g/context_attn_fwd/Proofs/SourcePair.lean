@@ -28,7 +28,7 @@ private theorem index_run {α : Type} [Inhabited α] (M : Algebra α)
     cases hn : s.regs .int [] "cur_batch_seq_len" <;>
     cases hp : s.regs .int [] "prompt_cache_len"
   all_goals simp (config := {maxSteps := 1000000}) [indexCode,position,source,
-    originalFP32,VeriTile.Bench.TritonBenchG.ContextAttnFwd.Program.kernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd.originalKernel,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd.originalKernel,blockEndFactoredFP32,VeriTile.Bench.Repairs.ContextAttnFwd.blockEndFactoredKernel,ComputeKernel.surfaceBody,List.drop,List.take,
+    originalFP32,VeriTile.Bench.TritonBenchG.ContextAttnFwd.Program.kernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_int8kvKernel,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_int8kvKernel,blockEndFactoredFP32,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_block_end_factoredKernel,ComputeKernel.surfaceBody,List.drop,List.take,
     run,step,evalExpr,evalOp_unfold,Option.bind,numeric,numericLt,bop,
     Broadcast.leftIndex,Broadcast.rightIndex,hb,hn,hp]
   all_goals try (congr 1; funext i; simp [bop,Broadcast.leftIndex,Broadcast.rightIndex,
@@ -38,7 +38,7 @@ private theorem index_safe {α : Type} [Inhabited α] (M : Algebra α)
     (bounds : RegionName → Nat) (candidate : Bool) (p : Layout) (r : Regions) (scale : ℝ) (s : State α) :
     Safety.traceSafeList M bounds (indexCode candidate p r scale) s := by
   cases candidate
-  all_goals simp [indexCode,position,source,originalFP32,VeriTile.Bench.TritonBenchG.ContextAttnFwd.Program.kernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd.originalKernel,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd.originalKernel,blockEndFactoredFP32,VeriTile.Bench.Repairs.ContextAttnFwd.blockEndFactoredKernel,
+  all_goals simp [indexCode,position,source,originalFP32,VeriTile.Bench.TritonBenchG.ContextAttnFwd.Program.kernel,VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_int8kvKernel,VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_int8kvKernel,blockEndFactoredFP32,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_block_end_factoredKernel,
     ComputeKernel.surfaceBody,List.drop,List.take,Safety.traceSafeList,Safety.stepSafe,
     Safety.safeExpr,Safety.safeAlg,Safety.safeOp,Safety.safeOp_unfold]
   all_goals split <;> trivial
@@ -53,7 +53,14 @@ private theorem prefix_eq (p : Layout) (r : Regions) (scale : ℝ) :
       (source Bool.true p r scale).surfaceBody.take position := rfl
 private theorem suffix_eq (p : Layout) (r : Regions) (scale : ℝ) :
     (source Bool.false p r scale).surfaceBody.drop (position+1) =
-      (source Bool.true p r scale).surfaceBody.drop (position+1) := rfl
+      (source Bool.true p r scale).surfaceBody.drop (position+1) := by
+  norm_num [source,position,originalFP32,
+    VeriTile.Bench.TritonBenchG.ContextAttnFwd.Program.kernel,
+    VeriTile.Bench.TritonBenchG.ContextAttnFwd.original,
+    VeriTile.Bench.Repairs.ContextAttnFwd.SelectedSource.original,
+    VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_int8kvKernel,
+    blockEndFactoredFP32,VeriTile.Bench.Repairs.ContextAttnFwd._fwd_kernel_block_end_factoredKernel,
+    ComputeKernel.surfaceBody]
 
 /-- Strict integer common-addend factoring preserves the entire source state;
 there is no floating numerical rule or input-word restriction. -/

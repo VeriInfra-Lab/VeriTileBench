@@ -20,7 +20,7 @@ def callSignature : CallSignature where
   readPorts := []
   writePorts := []
 
-def FP16.sourceKernel
+def FP16._triton_mixed_sparse_attn_fwd_kernel
     (Q K V : RegionName) (seqlens : Region .nat) (sm_scale : ℝ)
     (block_count block_offset column_count column_index : Region .nat)
     (Out : RegionName)
@@ -119,7 +119,7 @@ def FP16.sourceKernel
     tl.store(o_ptrs, acc.to(dtype), mask=m_mask)
   }
 
-def FP16.fusedMaskKernel
+def FP16._triton_mixed_sparse_attn_fused_mask_kernel
     (Q K V : RegionName) (seqlens : Region .nat) (sm_scale : ℝ)
     (block_count block_offset column_count column_index : Region .nat)
     (Out : RegionName)
@@ -217,7 +217,7 @@ def FP16.fusedMaskKernel
     tl.store(o_ptrs, acc.to(dtype), mask=m_mask)
   }
 
-def BF16.sourceKernel
+def BF16._triton_mixed_sparse_attn_fwd_kernel
     (Q K V : RegionName) (seqlens : Region .nat) (sm_scale : ℝ)
     (block_count block_offset column_count column_index : Region .nat)
     (Out : RegionName)
@@ -316,7 +316,7 @@ def BF16.sourceKernel
     tl.store(o_ptrs, acc.to(dtype), mask=m_mask)
   }
 
-def BF16.fusedMaskKernel
+def BF16._triton_mixed_sparse_attn_fused_mask_kernel
     (Q K V : RegionName) (seqlens : Region .nat) (sm_scale : ℝ)
     (block_count block_offset column_count column_index : Region .nat)
     (Out : RegionName)

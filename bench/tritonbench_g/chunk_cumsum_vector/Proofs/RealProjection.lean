@@ -4,8 +4,8 @@ namespace VeriTile.Bench.Repairs.ChunkCumsumVector.PublicRealIO
 open VeriTile.Triton
 
 theorem sourceProjection (h : Call) (c : Config) :
-    (Kernels.sourceKernel h c).eraseDType.toAlgorithm? =
-      Except.ok (Kernels.sourceKernel h c).eraseDType.toAlgKernel := by
+    (Kernels.chunk_global_cumsum_vector_kernel h c).eraseDType.toAlgorithm? =
+      Except.ok (Kernels.chunk_global_cumsum_vector_kernel h c).eraseDType.toAlgKernel := by
   simp only [ComputeKernel.eraseDType, Kernels.source_projects,
     ComputeKernel.toAlgorithm?_fromKernelBody, ComputeKernel.toAlgKernel_fromKernelBody]
 

@@ -24,10 +24,10 @@ The selected native conversion supplies those results; no input restriction
 or success premise is used. -/
 def execution {α : Type} [Inhabited α] (rest : Algebra α) (convert : α → Int)
     (equal : α → α → Bool) (p : Parameters) (s : State α) (hw : 0<p.width) :
-    {t : State α // exec (backend rest convert equal) (sourceKernel p) s=some t} := by
+    {t : State α // exec (backend rest convert equal) (_fwd_kernel_destindex_copy_quantize_kvKernel p) s=some t} := by
   refine ⟨?_,?_⟩
   swap
-  simp [sourceKernel,FP.Structural.exec,ComputeKernel.surfaceBody,
+  simp [_fwd_kernel_destindex_copy_quantize_kvKernel,FP.Structural.exec,ComputeKernel.surfaceBody,
     FP.Structural.run,FP.Structural.step,FP.Structural.evalExpr,
     FP.Structural.evalComputeOp,FP.Structural.evalOp_unfold,FP.Structural.store,
     FP.Structural.numeric,FP.Structural.numericLt,FP.Structural.numericEq,

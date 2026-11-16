@@ -60,7 +60,7 @@ theorem logical_value (x w y : Tensor) (memory : Nat → ℝ) (eps : EpsilonInfo
   rfl
 
 #guard_msgs (drop info) in
-#specNonCircular result avoiding [sourceKernel,Runtime.value,Runtime.run,FP.Structural.exec]
+#specNonCircular result avoiding [rms_norm_fwd_fusedKernel,Runtime.value,Runtime.run,FP.Structural.exec]
 #guard_msgs (drop info) in
 #auditModuleAxioms
 end

@@ -46,7 +46,7 @@ def weightSignature : CallSignature where
   readPorts := ["dY","X","r"]
   writePorts := ["dW"]
 
-def regularRuntimeKernel (Y X W r : RegionName)
+def _rms_layernorm_forwardKernel (Y X W r : RegionName)
     (Y_row_stride X_row_stride W_row_stride r_row_stride n_cols BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call forwardSignature call_args [Y_row_stride := Y_row_stride,
     X_row_stride := X_row_stride, W_row_stride := W_row_stride,
@@ -76,7 +76,7 @@ def regularRuntimeKernel (Y X W r : RegionName)
     tl.store(Y + col_offsets, output, mask=mask)
   }
 
-def gemmaRuntimeKernel (Y X W r : RegionName)
+def _gemma_rms_layernorm_forwardKernel (Y X W r : RegionName)
     (Y_row_stride X_row_stride W_row_stride r_row_stride n_cols BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call forwardSignature call_args [Y_row_stride := Y_row_stride,
     X_row_stride := X_row_stride, W_row_stride := W_row_stride,
@@ -101,7 +101,7 @@ def gemmaRuntimeKernel (Y X W r : RegionName)
     tl.store(Y + col_offsets, output, mask=mask)
   }
 
-def regularRuntimeSourceIndexCommutedKernel (Y X W r : RegionName)
+def _rms_layernorm_forward_index_commutedKernel (Y X W r : RegionName)
     (Y_row_stride X_row_stride W_row_stride r_row_stride n_cols BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call forwardSignature call_args [Y_row_stride := Y_row_stride,
     X_row_stride := X_row_stride, W_row_stride := W_row_stride,
@@ -131,7 +131,7 @@ def regularRuntimeSourceIndexCommutedKernel (Y X W r : RegionName)
     tl.store(Y + col_offsets, output, mask=mask)
   }
 
-def gemmaRuntimeSourceIndexCommutedKernel (Y X W r : RegionName)
+def _gemma_rms_layernorm_forward_index_commutedKernel (Y X W r : RegionName)
     (Y_row_stride X_row_stride W_row_stride r_row_stride n_cols BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call forwardSignature call_args [Y_row_stride := Y_row_stride,
     X_row_stride := X_row_stride, W_row_stride := W_row_stride,
@@ -156,7 +156,7 @@ def gemmaRuntimeSourceIndexCommutedKernel (Y X W r : RegionName)
     tl.store(Y + col_offsets, output, mask=mask)
   }
 
-def inputGradientKernel (dY X W r dW : RegionName)
+def _rms_layernorm_backwardKernel (dY X W r dW : RegionName)
     (dY_row_stride X_row_stride W_row_stride r_row_stride dW_row_stride n_cols BLOCK_SIZE : Nat)
     (_eps : ℝ) (GEMMA : Bool) : ComputeKernel :=
   with_triton_call backwardSignature call_args [dY_row_stride := dY_row_stride,
@@ -190,7 +190,7 @@ def inputGradientKernel (dY X W r dW : RegionName)
     tl.store(dY + col_offsets, output, mask=mask)
   }
 
-def inputGradientSourceIndexCommutedKernel (dY X W r dW : RegionName)
+def _rms_layernorm_backward_index_commutedKernel (dY X W r dW : RegionName)
     (dY_row_stride X_row_stride W_row_stride r_row_stride dW_row_stride n_cols BLOCK_SIZE : Nat)
     (_eps : ℝ) (GEMMA : Bool) : ComputeKernel :=
   with_triton_call backwardSignature call_args [dY_row_stride := dY_row_stride,
@@ -224,9 +224,10 @@ def inputGradientSourceIndexCommutedKernel (dY X W r dW : RegionName)
     tl.store(dY + col_offsets, output, mask=mask)
   }
 
-def runtimeWeightKernel (dW dY X r : RegionName)
+def _rms_layernorm_weight_backwardKernel (dW dY X r : RegionName)
     (n_rows n_cols BLOCK_SIZE : Nat) (GEMMA : Bool) : ComputeKernel :=
   with_triton_call weightSignature call_args [n_rows := n_rows, n_cols := n_cols] in triton {
+    # One owner per weight lane, with a deterministic increasing-row fold.
     col = tl.program_id(0).to(tl.int64) * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
     mask = col < n_cols
     acc = tl.full((BLOCK_SIZE,), 0, tl.float32)
@@ -245,18 +246,18 @@ def runtimeWeightKernel (dW dY X r : RegionName)
 The assignment supplies the caller's scalar argument before the unchanged JIT body. -/
 def regularSource (Y X W r : RegionName)
     (YR XR WR RR N B : Nat) (eps : ℝ) : ComputeKernel :=
-  (regularRuntimeKernel Y X W r YR XR WR RR N B).withScalarArguments
+  (_rms_layernorm_forwardKernel Y X W r YR XR WR RR N B).withScalarArguments
     [ScalarArgument.fp32 "eps" eps]
 
 /-- The same runtime ABI binding for the Gemma constexpr branch. -/
 def gemmaSource (Y X W r : RegionName)
     (YR XR WR RR N B : Nat) (eps : ℝ) : ComputeKernel :=
-  (gemmaRuntimeKernel Y X W r YR XR WR RR N B).withScalarArguments
+  (_gemma_rms_layernorm_forwardKernel Y X W r YR XR WR RR N B).withScalarArguments
     [ScalarArgument.fp32 "eps" eps]
 
 def forwardRuntime (h : Call) : ComputeKernel :=
-  if h.gemma then gemmaRuntimeKernel "y" "x" "w" "r" h.cols h.cols 1 1 h.cols h.block
-  else regularRuntimeKernel "y" "x" "w" "r" h.cols h.cols 1 1 h.cols h.block
+  if h.gemma then _gemma_rms_layernorm_forwardKernel "y" "x" "w" "r" h.cols h.cols 1 1 h.cols h.block
+  else _rms_layernorm_forwardKernel "y" "x" "w" "r" h.cols h.cols 1 1 h.cols h.block
 
 
 def forward (h : Call) : ComputeKernel :=
@@ -264,18 +265,18 @@ def forward (h : Call) : ComputeKernel :=
   else regularSource "y" "x" "w" "r" h.cols h.cols 1 1 h.cols h.block h.eps
 
 def backward (h : Call) : ComputeKernel :=
-  inputGradientKernel "dx" "x" "w" "r" "dw" h.cols h.cols 1 1 1 h.cols h.block h.eps h.gemma
+  _rms_layernorm_backwardKernel "dx" "x" "w" "r" "dw" h.cols h.cols 1 1 1 h.cols h.block h.eps h.gemma
 
 
 def forwardRuntimeIndexCommuted (h : Call) : ComputeKernel :=
-  if h.gemma then gemmaRuntimeSourceIndexCommutedKernel "y" "x" "w" "r" h.cols h.cols 1 1 h.cols h.block
-  else regularRuntimeSourceIndexCommutedKernel "y" "x" "w" "r" h.cols h.cols 1 1 h.cols h.block
+  if h.gemma then _gemma_rms_layernorm_forward_index_commutedKernel "y" "x" "w" "r" h.cols h.cols 1 1 h.cols h.block
+  else _rms_layernorm_forward_index_commutedKernel "y" "x" "w" "r" h.cols h.cols 1 1 h.cols h.block
 
 def backwardIndexCommuted (h : Call) : ComputeKernel :=
-  inputGradientSourceIndexCommutedKernel "dx" "x" "w" "r" "dw" h.cols h.cols 1 1 1 h.cols h.block h.eps h.gemma
+  _rms_layernorm_backward_index_commutedKernel "dx" "x" "w" "r" "dw" h.cols h.cols 1 1 1 h.cols h.block h.eps h.gemma
 
 def weightBackward (h : Call) (K : Nat) : ComputeKernel :=
-  runtimeWeightKernel "dw" "dx" "x" "r" h.rows h.cols K h.gemma
+  _rms_layernorm_weight_backwardKernel "dw" "dx" "x" "r" h.rows h.cols K h.gemma
 
 end
 end Kernels

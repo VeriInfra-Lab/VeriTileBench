@@ -26,7 +26,7 @@ def original (n : Nat) : Program where
 
 /-- Local `y = 10; output = y + x`, with the same actual rewrite-site domain. -/
 def commuted (n : Nat) : Program :=
-  { original n with kernel := commutedKernel n }
+  { original n with kernel := puzzle1_commuted_kernel n }
 
 /-- Both displayed sources execute successfully and agree on every typed
 memory cell by strict FP32 addition commutation at the existing operand site. The candidate's

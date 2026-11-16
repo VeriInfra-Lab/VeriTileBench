@@ -19,7 +19,7 @@ theorem schedule_safe {α β : Type} [Inhabited β] (M : Algebra β)
   | cons t ts ih =>
     refine ⟨?_,fun next _ => ih (fun u hu => valid u (List.mem_cons_of_mem t hu)) bounded next⟩
     change TraceSafe M bounds
-      (commutedKernel c.X c.Y c.DOUT c.OUT c.DX c.DY
+      (swiglu_bwd_commutedKernel c.X c.Y c.DOUT c.OUT c.DX c.DY
         c.sx c.sy c.sd c.so c.sdx c.sdy c.cols B R) (tileState M c B t.1 t.2 s)
     have row := valid t List.mem_cons_self
     apply SourceEquivalence.candidate_safe

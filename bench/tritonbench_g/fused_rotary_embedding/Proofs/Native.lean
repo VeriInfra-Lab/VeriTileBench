@@ -88,6 +88,6 @@ theorem complete_bytes (rest : Algebra Payload) (c : Checked.Call) (callerDevice
 
 #axiomsClean source_selected
 #axiomsClean complete_bytes
-#specNonCircular Native.graph avoiding [Source.sourceKernel,Source.grid,ops,actualSource,Native.selected]
+#specNonCircular Native.graph avoiding [Source.decoding_fused_rotary_embedding_kernel,Source.grid,ops,actualSource,Native.selected]
 end
 end VeriTile.Bench.Repairs.FusedRotaryEmbeddingTileChecked.NativeSource

@@ -40,7 +40,7 @@ def nativeIO (inst : NativeGraph.Instructions) (candidate : Bool) (x y : View)
   scratchMask := fun i => i.elim0
   schedule := fun _ => [{
     kernel := if candidate then
-      indexCommutedKernel y.region x.region x.offset y.offset x.rowStride x.colStride
+      softmax_kernel_candidateKernel y.region x.region x.offset y.offset x.rowStride x.colStride
         y.rowStride y.colStride x.cols B
       else softmax_kernel y.region x.region x.offset y.offset x.rowStride x.colStride
         y.rowStride y.colStride x.cols B

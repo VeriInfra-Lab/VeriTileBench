@@ -18,7 +18,7 @@ def callSignature : CallSignature where
   readPorts := ["q", "k", "v", "cos", "sin", "BLOCK_TABLES", "context_lengths"]
   writePorts := ["q", "k_cache", "v_cache"]
 
-def sourceKernel (p : Parameters) : ComputeKernel :=
+def decoding_fused_rotary_embedding_kernel (p : Parameters) : ComputeKernel :=
   let q : RegionName := "q"
   let k : RegionName := "k"
   let v : RegionName := "v"
@@ -112,7 +112,7 @@ def sourceKernel (p : Parameters) : ComputeKernel :=
         tl.store(v_cache + v_range, loaded_v, mask=dim_range < HEAD_DIM)
   }
 
-def kernelSharedQOffsetKernel (p : Parameters) : ComputeKernel :=
+def decoding_fused_rotary_embedding_kernel_sharedKernel (p : Parameters) : ComputeKernel :=
   let q : RegionName := "q"
   let k : RegionName := "k"
   let v : RegionName := "v"

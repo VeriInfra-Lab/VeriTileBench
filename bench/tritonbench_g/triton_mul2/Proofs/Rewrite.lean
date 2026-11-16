@@ -12,20 +12,20 @@ set_option maxRecDepth 24000
 
 /-- Execute the displayed original source, retaining all precision tags. -/
 def originalExecution {α : Type} [Inhabited α] (M : Algebra α) (X O : RegionName) (n B : Nat) (s : State α) :
-    {t : State α // FP.Structural.exec (engine M) (sourceKernel X O n B) s = some t} := by
+    {t : State α // FP.Structural.exec (engine M) (mul2_kernel X O n B) s = some t} := by
   refine ⟨?_, ?_⟩
   swap
-  simp [sourceKernel, FP.Structural.exec, run, step, evalExpr,
+  simp [mul2_kernel, FP.Structural.exec, run, step, evalExpr,
     evalComputeOp, evalOp_unfold, Option.bind, numeric, numericLt, natLt, bop,
     store, Region.cast, ComputeDType.eraseDType]
   rfl
 
 /-- Execute the candidate source with the same load and store precision. -/
 def commutedExecution {α : Type} [Inhabited α] (M : Algebra α) (X O : RegionName) (n B : Nat) (s : State α) :
-    {t : State α // FP.Structural.exec (engine M) (commutedSourceKernel X O n B) s = some t} := by
+    {t : State α // FP.Structural.exec (engine M) (mul2_commuted_kernel X O n B) s = some t} := by
   refine ⟨?_, ?_⟩
   swap
-  simp [commutedSourceKernel, FP.Structural.exec, run, step, evalExpr,
+  simp [mul2_commuted_kernel, FP.Structural.exec, run, step, evalExpr,
     evalComputeOp, evalOp_unfold, Option.bind, numeric, numericLt, natLt, bop,
     store, Region.cast, ComputeDType.eraseDType]
   rfl
@@ -33,7 +33,7 @@ def commutedExecution {α : Type} [Inhabited α] (M : Algebra α) (X O : RegionN
 /-- Check only lanes selected by the source's actual store mask, after the
 original load prefix. The memory proof below establishes masked-lane irrelevance. -/
 def multiplicationSite (X O : RegionName) (n B : Nat) : Site :=
-  .maskedScalarFP32 (VeriTile.Triton.Source.prefixBefore (sourceKernel X O n B).surfaceBody
+  .maskedScalarFP32 (VeriTile.Triton.Source.prefixBefore (mul2_kernel X O n B).surfaceBody
     "output") [B] (.ref .bool [B] "mask")
     (.ref .real [B] "x") (.const 2)
 
@@ -53,7 +53,7 @@ theorem site_values_iff {α : Type} [Inhabited α] (M : Algebra α) (D : Domain 
         D .finite (loadedValue M X O n B s i) ∧
         D .finite (M.literal (some .fp32) .real 2) := by
   simp [multiplicationSite, Site.Holds, VeriTile.Triton.Source.prefixBefore,
-    sourceKernel, ComputeKernel.surfaceBody, run, step, evalExpr, evalComputeOp, evalOp_unfold,
+    mul2_kernel, ComputeKernel.surfaceBody, run, step, evalExpr, evalComputeOp, evalOp_unfold,
     Option.bind, numeric, numericLt, natLt, bop, Region.cast, loadedValue,
     engine, Algebra.withDefaultPrecision, resolvePrecision]
 

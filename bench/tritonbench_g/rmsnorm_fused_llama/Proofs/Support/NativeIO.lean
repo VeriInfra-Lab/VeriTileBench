@@ -10,7 +10,7 @@ open VeriTile Triton FP.Structural
 noncomputable section
 
 def source (candidate : Bool) (X Y W : RegionName) (N B : Nat) : ComputeKernel :=
-  if candidate then runtimeCandidateKernel X Y W N B else runtimeKernel X Y W N B
+  if candidate then _rms_norm_fwd_fused_index_commutedKernel X Y W N B else _rms_norm_fwd_fusedKernel X Y W N B
 
 def launch (A : Algebra α) (candidate : Bool) (X Y W : RegionName)
     (rows N B : Nat) (epsilon : α) (row : Nat) : Invocation α where

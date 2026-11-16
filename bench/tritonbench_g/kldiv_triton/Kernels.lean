@@ -24,7 +24,7 @@ def backwardSignature : CallSignature where
   readPorts := ["target_ptr"]
   writePorts := ["input_ptr"]
 
-def forwardTemplateKernel (y_ptr gt_ptr loss_ptr : RegionName) (sy st so N B : Nat)
+def _kldiv_kernel_forward_repairedKernel (y_ptr gt_ptr loss_ptr : RegionName) (sy st so N B : Nat)
     (logTarget : Bool) (reduction : Nat) : ComputeKernel :=
   let BLOCK_SIZE : Nat := B
   let log_target : Bool := logTarget
@@ -59,7 +59,7 @@ def forwardTemplateKernel (y_ptr gt_ptr loss_ptr : RegionName) (sy st so N B : N
             loss_ptr += 1
   }
 
-def backwardTemplateKernel (input_ptr target_ptr : RegionName) (so st N B : Nat)
+def _kldiv_kernel_backward_repairedKernel (input_ptr target_ptr : RegionName) (so st N B : Nat)
     (logTarget : Bool) : ComputeKernel :=
   let BLOCK_SIZE : Nat := B
   let log_target : Bool := logTarget
@@ -85,7 +85,7 @@ def backwardTemplateKernel (input_ptr target_ptr : RegionName) (so st N B : Nat)
         tl.store(input_ptr + offsets, res, mask=mask)
   }
 
-def forwardCandidateTemplateKernel (y_ptr gt_ptr loss_ptr : RegionName) (sy st so N B : Nat)
+def _kldiv_kernel_forward_index_commutedKernel (y_ptr gt_ptr loss_ptr : RegionName) (sy st so N B : Nat)
     (logTarget : Bool) (reduction : Nat) : ComputeKernel :=
   let BLOCK_SIZE : Nat := B
   let log_target : Bool := logTarget
@@ -120,7 +120,7 @@ def forwardCandidateTemplateKernel (y_ptr gt_ptr loss_ptr : RegionName) (sy st s
             loss_ptr += 1
   }
 
-def backwardCandidateTemplateKernel (input_ptr target_ptr : RegionName) (so st N B : Nat)
+def _kldiv_kernel_backward_index_commutedKernel (input_ptr target_ptr : RegionName) (so st N B : Nat)
     (logTarget : Bool) : ComputeKernel :=
   let BLOCK_SIZE : Nat := B
   let log_target : Bool := logTarget
@@ -147,16 +147,16 @@ def backwardCandidateTemplateKernel (input_ptr target_ptr : RegionName) (so st N
   }
 
 def forwardSource (sy st so N B : Nat) (logTarget : Bool) (reduction : Nat) : ComputeKernel :=
-  forwardTemplateKernel "y_ptr" "gt_ptr" "loss_ptr" sy st so N B logTarget reduction
+  _kldiv_kernel_forward_repairedKernel "y_ptr" "gt_ptr" "loss_ptr" sy st so N B logTarget reduction
 
 def backwardSource (so st N B : Nat) (logTarget : Bool) : ComputeKernel :=
-  backwardTemplateKernel "input_ptr" "target_ptr" so st N B logTarget
+  _kldiv_kernel_backward_repairedKernel "input_ptr" "target_ptr" so st N B logTarget
 
 def forwardCandidateSource (sy st so N B : Nat) (logTarget : Bool) (reduction : Nat) : ComputeKernel :=
-  forwardCandidateTemplateKernel "y_ptr" "gt_ptr" "loss_ptr" sy st so N B logTarget reduction
+  _kldiv_kernel_forward_index_commutedKernel "y_ptr" "gt_ptr" "loss_ptr" sy st so N B logTarget reduction
 
 def backwardCandidateSource (so st N B : Nat) (logTarget : Bool) : ComputeKernel :=
-  backwardCandidateTemplateKernel "input_ptr" "target_ptr" so st N B logTarget
+  _kldiv_kernel_backward_index_commutedKernel "input_ptr" "target_ptr" so st N B logTarget
 
 #guard_msgs (drop info) in
 #auditModuleAxioms

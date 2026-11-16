@@ -3,7 +3,7 @@ import copy
 import hashlib
 from pathlib import Path
 import unittest
-from scripts.bench.jit_correspondence import check
+from scripts.bench.jit_correspondence import check, quotation
 
 from tests.python.layout_fixtures import check_pinned_pairs, pinned_pairs, variant_provenance, variant_source
 
@@ -27,19 +27,20 @@ class ContextAttnFwdBodyMigrationTests(unittest.TestCase):
         self.assertEqual([r['statements'] for r in rows], [24, 24, 24])
 
     def test_cast_loop_mask_and_operation_mutations_are_rejected(self):
+        body=quotation(self.lean,self.records[0]['lean_definition'],raw_python=True)[1]
         for before, after in [
             ('tl.program_id(0).to(tl.int64)', 'tl.program_id(0)'),
             ('p = p.to(v.dtype)', 'p = p'),
             ('range(0, block_mask * block_end_loc, BLOCK_N)', 'range(0, block_end_loc, BLOCK_N)'),
             ('start_n = tl.multiple_of(start_n, BLOCK_N)', 'start_n = start_n'),
-            ('mask=start_n + offs_n[None, :] < block_end_loc', 'mask=start_n + offs_n[None, :] <= block_end_loc'),
+            ('mask=(start_n + offs_n[None, :]) < block_end_loc', 'mask=(start_n + offs_n[None, :]) <= block_end_loc'),
             ('qk * sm_scale', 'sm_scale * qk'),
             ('tl.dot(p, v, acc)', 'tl.dot(p, v) + acc'),
         ]:
             with self.subTest(before=before):
-                self.assertIn(before, self.lean)
+                self.assertIn(before, body)
                 with self.assertRaises(ValueError):
-                    self.verify(self.lean.replace(before, after))
+                    self.verify(self.lean.replace(body,body.replace(before,after),1))
 
     def test_payload_and_metadata_storage_mutations_are_rejected(self):
         for before, after in [('("B_Seqlen",.i32)', '("B_Seqlen",.i64)'),

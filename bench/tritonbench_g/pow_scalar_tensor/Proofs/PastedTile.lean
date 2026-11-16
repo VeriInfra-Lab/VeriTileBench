@@ -33,7 +33,7 @@ def execution {α : Type} [Inhabited α] (M : Algebra α) (c : Parameters) (cand
     refine ⟨?_,?_⟩
     swap
     simp [body,branch,oneTile,grid,iterations,oneTileKernel,oneTileCommuted,gridStrideKernel,
-      gridStrideCommuted,originalKernel,commutedBodyPastedKernel,ComputeKernel.surfaceBody,
+      gridStrideCommuted,pow_func_scalar_tensor_kernel_rank_1Kernel,pow_func_scalar_tensor_kernel_rank_1_commutedKernel,ComputeKernel.surfaceBody,
       run,step,stepAlg,evalExpr,evalComputeOp,evalOp_unfold,Option.bind,
       numeric,numericLt,numericLe,numericEq,natLt,FP.Structural.bop,store,ht,
       ComputeDType.eraseDType,FloatDType.comparableDType,Region.cast,ofFloat,toFloat,

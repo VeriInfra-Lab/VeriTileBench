@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       full_audit:
-        description: Replay every retained module, including unused helper theorems
+        description: Replay every retained module, including auxiliary theorems
         type: boolean
         default: true
   schedule:
@@ -23,99 +23,161 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  global:
-    name: Source inventory and benchmark smoke test
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+  checks:
+    name: Source and audit-tool regressions
     runs-on: ubuntu-24.04
-    timeout-minutes: 360
+    timeout-minutes: 30
     outputs:
-      full_audit: ${{ steps.scope.outputs.full }}
-      audit_mode: ${{ steps.scope.outputs.mode }}
-      shard_count: ${{ steps.scope.outputs.count }}
+      full_audit: ${{ steps.scope.outputs.full_audit }}
+      shard_count: ${{ steps.scope.outputs.shard_count }}
       shards: ${{ steps.scope.outputs.shards }}
+      affected_required: ${{ steps.affected.outputs.affected_required }}
+      auditor_required: ${{ steps.affected.outputs.auditor_required }}
+      affected_shards: ${{ steps.affected.outputs.affected_shards }}
     steps:
       - uses: actions/checkout@v4
-      - name: Select daily or manually requested full-corpus audit
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Read the audit plan and pinned library source
         id: scope
         env:
           FULL_AUDIT: ${{ inputs.full_audit }}
-        run: |
-          python3 - <<'PY'
-          import json, os
-          full = os.environ['GITHUB_EVENT_NAME'] == 'schedule' or os.environ['FULL_AUDIT'] == 'true'
-          count = 64 if full else 16
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
-              print('full=' + str(full).lower(), file=output)
-              print('mode=' + ('--final-inventory' if full else '--ci-targets'), file=output)
-              print(f'count={count}', file=output)
-              print('shards=' + json.dumps(list(range(count))), file=output)
-          PY
-      - name: Make room for the complete Lean corpus
-        run: sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
-      - name: Install required source audit tools
+        run: >-
+          python3 scripts/bench/ci.py plan --event "$GITHUB_EVENT_NAME"
+          --full-audit "$FULL_AUDIT" --github-output "$GITHUB_OUTPUT"
+      - name: Fetch the exact library source for Python-only checks
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.scope.outputs.library_repository }}
+          ref: ${{ steps.scope.outputs.library_revision }}
+          path: ${{ steps.scope.outputs.library_path }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install source audit tools
         run: |
           sudo apt-get update
           sudo apt-get install -y ripgrep
-          command -v rg && command -v python3
-      - uses: ./.github/actions/build-lean
-        with:
-          build-args: >-
-            bench.tritonbench_g.matrix_transpose.RealCorrect
-            bench.tritonbench_g.matrix_transpose.FPEquiv
-            bench.examples.VectorAdd.RealCorrect
-            bench.examples.VectorAdd.FPEquiv
-            bench.examples.FlatVectorAdd.RealCorrect
-            bench.examples.FlatVectorAdd.FPEquiv
-            tests.lean.FPBgmvExpandSliceSource
-            tests.lean.FPDecayCumsumSource
-            tests.lean.FPDiagSsmTritonSource
-            tests.lean.FPFastRopeEmbeddingSource
-      - name: Check final source and audit regressions
-        run: |
-          python3 -B -m unittest discover -s tests/python -p 'test_*.py'
-          python3 -B -m unittest discover -s scripts -p 'test_audit_source.py'
-          python3 -B -m unittest discover -s scripts -p 'test_audit_shards.py'
-          python3 -B -m unittest discover -s scripts -p 'test_comparator_preflight.py'
-          bash scripts/bench/audit_tritonbench_g.sh --source-only
+      - name: Check source correspondence, required verdicts and audit-tool regressions
+        run: python3 -B scripts/bench/ci.py checks
 
-  drafts:
-    name: All 334 benchmark interfaces
-    needs: global
-    if: needs.global.outputs.full_audit == 'true'
+      - name: Select changed cases and all affected dependencies
+        id: affected
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+          FULL_AUDIT: ${{ steps.scope.outputs.full_audit }}
+        run: >-
+          python3 -B scripts/bench/ci.py affected --base "$BASE_SHA" --head "$HEAD_SHA"
+          --full-audit "$FULL_AUDIT" --write "$RUNNER_TEMP/affected-plan.json"
+          --github-output "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: affected-proof-plan
+          path: ${{ runner.temp }}/affected-plan.json
+          retention-days: 7
+          if-no-files-found: error
+
+  affected:
+    name: Changed cases and affected proof dependencies ${{ matrix.shard }}
+    needs: checks
+    if: needs.checks.outputs.affected_required == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.checks.outputs.affected_shards) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
-      - name: Make room for the benchmark builds
-        run: sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
-      - uses: leanprover/lean-action@v1
         with:
-          build: true
-          build-args: "BugDetection PretrainKernels"
-          test: false
-          lint: false
-          use-mathlib-cache: auto
-      - name: Check final interfaces and recorded source bindings
-        run: |
-          python3 bench/bug_detection/check.py --verify-record
-          python3 bench/pretrain_kernels/check.py --verify-record
-          python3 scripts/bench/check_imported_kernel_review.py
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: affected-proof-plan
+          path: ${{ runner.temp }}/affected-plan
+      - name: Make room for proof replay
+        run: sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
+      - name: Read this shard's exact build selection
+        id: targets
+        run: >-
+          python3 -B scripts/bench/ci.py build-targets
+          --plan "$RUNNER_TEMP/affected-plan/affected-plan.json"
+          --shard-index ${{ matrix.shard }} --github-output "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/build-lean
+        with:
+          build-args: ${{ steps.targets.outputs.build_args }}
+      - uses: ./.github/actions/setup-comparator
+      - name: Build and independently replay the complete affected selection
+        run: >-
+          python3 -B scripts/bench/ci.py verify-affected
+          --plan "$RUNNER_TEMP/affected-plan/affected-plan.json"
+          --workspace "$RUNNER_TEMP/affected-replay"
+          --results "$RUNNER_TEMP/affected-result.json"
+          --shard-index ${{ matrix.shard }}
+      - name: Preserve the affected selection and replay evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: affected-proof-result-${{ matrix.shard }}
+          path: |
+            ${{ runner.temp }}/affected-result.json
+            ${{ runner.temp }}/affected-replay/build-logs/
+            Logs/comparator-check-*/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  auditor:
+    name: Proof-auditor rejection regressions
+    needs: checks
+    if: needs.checks.outputs.auditor_required == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Make room for the isolated audit fixtures
+        run: sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
+      - uses: ./.github/actions/build-lean
+        with:
+          build-args: VeriTile VeriTile.Meta.StatementAudit VeriTile.Meta.Disprove
+      - uses: ./.github/actions/setup-comparator
+      - name: Reject injected axioms, missed headlines and circular specifications
+        run: python3 -B scripts/bench/ci.py auditor
+      - name: Preserve failed audit diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proof-auditor-regressions
+          path: Logs/comparator-check-*/
+          retention-days: 7
+          if-no-files-found: ignore
 
   audit:
     name: Final entry build and replay ${{ matrix.shard }}
-    needs: global
-    if: needs.global.outputs.full_audit == 'true'
+    needs: checks
+    if: needs.checks.outputs.full_audit == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:
-        shard: ${{ fromJSON(needs.global.outputs.shards) }}
+        shard: ${{ fromJSON(needs.checks.outputs.shards) }}
     env:
+      AUDIT_TRUST_REPLAY: batch
+      AUDIT_TRUST_AUDIT_JOBS: 2
+      AUDIT_TRUST_BATCH_SIZE: 32
+      AUDIT_TRUST_FILE_TIMEOUT: 1800
+      AUDIT_TRUST_BATCH_TIMEOUT: 1800
+      AUDIT_TRUST_HEARTBEAT_SECONDS: 30
       AUDIT_TRUST_JOBS: 1
-      AUDIT_TRUST_SHARD_COUNT: ${{ needs.global.outputs.shard_count }}
+      AUDIT_TRUST_SHARD_COUNT: ${{ needs.checks.outputs.shard_count }}
       AUDIT_TRUST_SHARD_INDEX: ${{ matrix.shard }}
-      AUDIT_MODE: ${{ needs.global.outputs.audit_mode }}
+
     steps:
       - uses: actions/checkout@v4
       - name: Make room for proof replay
@@ -126,6 +188,7 @@ jobs:
           test: false
           lint: false
           use-mathlib-cache: false
+          use-github-cache: false
       - name: Fetch Mathlib cache with bounded network retries
         env:
           MATHLIB_CACHE_GET_URL: https://cache.mathlib.org/mathlib4
@@ -141,11 +204,7 @@ jobs:
         run: |
           snapshot="$RUNNER_TEMP/final-inventory.json"
           python3 scripts/bench/final_inventory.py --write "$snapshot"
-          inventory_targets=--ci-targets
-          if [ "$AUDIT_MODE" = --final-inventory ]; then
-            inventory_targets=--targets
-          fi
-          python3 scripts/bench/final_inventory.py "$inventory_targets" --snapshot "$snapshot" > "$RUNNER_TEMP/all-targets.txt"
+          python3 scripts/bench/final_inventory.py --targets --snapshot "$snapshot" > "$RUNNER_TEMP/all-targets.txt"
           snapshot_sha256=$(sha256sum -- "$snapshot")
           printf 'AUDIT_TRUST_SNAPSHOT=%s\nAUDIT_TRUST_SNAPSHOT_SHA256=%s\n' \
             "$snapshot" "${snapshot_sha256%% *}" >> "$GITHUB_ENV"
@@ -155,27 +214,33 @@ jobs:
           sed 's|/|.|g; s|\.lean$||' "$RUNNER_TEMP/shard-targets.txt" | xargs lake build
       - uses: ./.github/actions/setup-comparator
       - name: Replay selected entries and their proof dependencies
-        run: scripts/bench/audit_trust.sh "$AUDIT_MODE"
+        run: scripts/bench/audit_trust.sh --final-inventory
+      - name: Preserve failed audit diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proof-audit-${{ matrix.shard }}
+          path: Logs/comparator-check-*/
+          retention-days: 7
+          if-no-files-found: ignore
 
   complete:
     name: TritonBench-G audit complete
-    needs: [global, drafts, audit]
-    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    needs: [checks, affected, auditor, audit]
+    if: always()
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     env:
-      GLOBAL_RESULT: ${{ needs.global.result }}
+      CHECKS_RESULT: ${{ needs.checks.result }}
+      AFFECTED_RESULT: ${{ needs.affected.result }}
+      AFFECTED_REQUIRED: ${{ needs.checks.outputs.affected_required }}
+      AUDITOR_REQUIRED: ${{ needs.checks.outputs.auditor_required }}
       CORPUS_RESULT: ${{ needs.audit.result }}
-      DRAFTS_RESULT: ${{ needs.drafts.result }}
-      FULL_AUDIT: ${{ needs.global.outputs.full_audit }}
+      AUDITOR_RESULT: ${{ needs.auditor.result }}
+      FULL_AUDIT: ${{ needs.checks.outputs.full_audit }}
     steps:
-      - name: Require every build and proof gate
-        run: |
-          test "$GLOBAL_RESULT" = success
-          if [ "$FULL_AUDIT" = true ]; then
-            test "$CORPUS_RESULT" = success
-            test "$DRAFTS_RESULT" = success
-          else
-            test "$FULL_AUDIT" = false
-            test "$CORPUS_RESULT" = skipped
-            test "$DRAFTS_RESULT" = skipped
-          fi
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Require every planned check, build and proof gate
+        run: python3 -B scripts/bench/ci.py complete

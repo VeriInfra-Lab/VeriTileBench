@@ -25,14 +25,18 @@ private def after (p : Layout) (r : Program.Regions) (scale : ℝ) :=
 private theorem split_source (reused : Bool) (p : Layout) (r : Program.Regions) (scale : ℝ) :
     (source reused p r scale).surfaceBody =
       before p r scale ++ (indexCode reused p r scale ++ after p r scale) := by
-  cases reused <;> rfl
+  cases reused
+  · rfl
+  · norm_num [source,before,indexCode,after,KernelSource.original,KernelSource.candidate,
+      kernel,blockStartReused,_fwd_kernel_repairedKernel,_fwd_kernel_block_start_reusedKernel,
+      ComputeKernel.surfaceBody]
 
 private theorem prefix_registers {α : Type} [Inhabited α] (M : Algebra α)
     (p : Layout) (r : Program.Regions) (scale : ℝ) (s t : State α)
     (executed : run M (before p r scale) s=some t) :
     t.regs .int [] "start_m"=some (fun _ => (s.pids 2 : Int)) ∧
       t.regs .int [] "block_start_loc"=some (fun _ => ((p.BM*s.pids 2 : Nat) : Int)) := by
-  simp (config := {maxSteps := 1000000}) [before,KernelSource.original,kernel,originalKernel,
+  simp (config := {maxSteps := 1000000}) [before,KernelSource.original,kernel,_fwd_kernel_repairedKernel,
     ComputeKernel.surfaceBody,List.take,run,step,evalExpr,evalOp_unfold,Option.bind,
     numeric,integralFloorDiv,bop,Broadcast.leftIndex,Broadcast.rightIndex,
     ofFloat,toFloat,Region.cast,State.setReg] at executed
@@ -47,7 +51,7 @@ private theorem index_run {α : Type} [Inhabited α] (M : Algebra α)
       run M (indexCode Bool.true p r scale) t := by
   obtain ⟨start,block⟩ := prefix_registers M p r scale s t executed
   simp (config := {maxSteps := 1000000}) [indexCode,source,KernelSource.original,candidate,
-    kernel,blockStartReused,originalKernel,blockStartReusedKernel,ComputeKernel.surfaceBody,List.drop,List.take,
+    kernel,blockStartReused,_fwd_kernel_repairedKernel,_fwd_kernel_block_start_reusedKernel,ComputeKernel.surfaceBody,List.drop,List.take,
     run,step,evalExpr,evalOp_unfold,Option.bind,numeric,bop,
     Broadcast.leftIndex,Broadcast.rightIndex,start,block,Nat.cast_mul,Int.mul_comm,Nat.mul_comm]
   congr 1
@@ -59,7 +63,7 @@ private theorem index_safe {α : Type} [Inhabited α] (M : Algebra α)
     (p : Layout) (r : Program.Regions) (scale : ℝ) (s : State α) :
     Safety.traceSafeList M bounds (indexCode reused p r scale) s := by
   cases reused
-  all_goals simp [indexCode,source,KernelSource.original,candidate,kernel,blockStartReused,originalKernel,blockStartReusedKernel,
+  all_goals simp [indexCode,source,KernelSource.original,candidate,kernel,blockStartReused,_fwd_kernel_repairedKernel,_fwd_kernel_block_start_reusedKernel,
     ComputeKernel.surfaceBody,List.drop,List.take,Safety.traceSafeList,
     Safety.stepSafe,Safety.safeExpr,Safety.safeAlg,Safety.safeOp,Safety.safeOp_unfold]
   all_goals split <;> trivial

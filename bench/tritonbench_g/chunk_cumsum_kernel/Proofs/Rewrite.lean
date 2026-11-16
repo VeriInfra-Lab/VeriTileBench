@@ -13,7 +13,7 @@ set_option linter.unusedSimpArgs false
 abbrev parts := FPIndexBridge.parts
 
 def candidateParts (input output : RegionName) (T BT : Nat) : Source.IntRange :=
-  (Source.intRange? (sumLeftKernel .fp32 .fp32 input output T BT).surfaceBody "i_t").getD
+  (Source.intRange? (chunk_global_cumsum_scalar_kernel_sum_leftKernel .fp32 .fp32 input output T BT).surfaceBody "i_t").getD
     ⟨[],.constInt 0,.constInt 0,.constNat 1,[],[]⟩
 
 def additionSite (input output : RegionName) (T BT : Nat) : Site :=
@@ -56,7 +56,7 @@ theorem final_body {α : Type} [Inhabited α] (ops : FPRow.Ops α)
         (s.setReg "i_t" .int [] (fun _ => (index:Int)))=some b ∧ a.mem=b.mem := by
   obtain ⟨hp,hz⟩ := ready
   obtain ⟨carry,hz⟩ := Option.isSome_iff_exists.mp hz
-  simp (config := {maxSteps := 400000}) [parts,FPIndexBridge.parts,FPRow.parts,candidateParts,repairedKernel,sumLeftKernel,
+  simp (config := {maxSteps := 400000}) [parts,FPIndexBridge.parts,FPRow.parts,candidateParts,chunk_global_cumsum_scalar_kernel_repairedKernel,chunk_global_cumsum_scalar_kernel_sum_leftKernel,
     ComputeKernel.surfaceBody,Source.intRange?,run,step,FP.Structural.evalExpr,
     evalComputeOp,evalOp_unfold,evalOffsets,FP.Structural.store,Option.bind,engine,Algebra.withDefaultPrecision,
     resolvePrecision,FPRow.Ops.algebra,ComputeDType.eraseDType,numeric,numericLt,bop,ofFloat,toFloat,
@@ -123,7 +123,7 @@ termination_by (T+BT-1)/BT-q
  decreasing_by omega
 
 theorem candidate_split (input output : RegionName) (T BT : Nat) :
-    (sumLeftKernel .fp32 .fp32 input output T BT).surfaceBody =
+    (chunk_global_cumsum_scalar_kernel_sum_leftKernel .fp32 .fp32 input output T BT).surfaceBody =
       (parts input output T BT).before ++
         [.forRangeInt "i_t" (parts input output T BT).start
           (parts input output T BT).stop (parts input output T BT).stride
@@ -134,16 +134,16 @@ theorem candidate_split (input output : RegionName) (T BT : Nat) :
     (model : FP.Guarded.Models [] ops.algebra D)
     (input output : RegionName) (T BT : Nat) (u : State α)
     (finite : FiniteCarry ops.algebra D input output T BT u) :
-    ∃ a b, FP.Structural.exec (engine ops.algebra) (repairedKernel .fp32 .fp32 input output T BT) u=some a ∧
-      FP.Structural.exec (engine ops.algebra) (sumLeftKernel .fp32 .fp32 input output T BT) u=some b ∧
+    ∃ a b, FP.Structural.exec (engine ops.algebra) (chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T BT) u=some a ∧
+      FP.Structural.exec (engine ops.algebra) (chunk_global_cumsum_scalar_kernel_sum_leftKernel .fp32 .fp32 input output T BT) u=some b ∧
       a.mem=b.mem ∧ FPRow.Frame output (u.pids 0) T u a ∧ FPRow.Frame output (u.pids 0) T u b := by
   obtain ⟨first,hpre,ready,_⟩ := FPRow.prelude ops input output T BT u
   have prelude : run (engine ops.algebra) (parts input output T BT).before u=some first := by
     rw [FPIndexBridge.before]; exact hpre
   obtain ⟨a,b,ha,hb,mem⟩ := loop ops D model input output T BT (u.pids 0) u first prelude finite
     0 first ready .initial
-  have aexec : FP.Structural.exec (engine ops.algebra) (repairedKernel .fp32 .fp32 input output T BT) u=some a := by
-    change run (engine ops.algebra) (repairedKernel .fp32 .fp32 input output T BT).surfaceBody u=some a
+  have aexec : FP.Structural.exec (engine ops.algebra) (chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T BT) u=some a := by
+    change run (engine ops.algebra) (chunk_global_cumsum_scalar_kernel_repairedKernel .fp32 .fp32 input output T BT).surfaceBody u=some a
     rw [FPIndexBridge.split_source,run_append,prelude]
     simp only [Option.bind_some,run]
     have hs : step (engine ops.algebra)
@@ -156,8 +156,8 @@ theorem candidate_split (input output : RegionName) (T BT : Nat) :
       exact ha
     rw [hs]
     rfl
-  have bexec : FP.Structural.exec (engine ops.algebra) (sumLeftKernel .fp32 .fp32 input output T BT) u=some b := by
-    change run (engine ops.algebra) (sumLeftKernel .fp32 .fp32 input output T BT).surfaceBody u=some b
+  have bexec : FP.Structural.exec (engine ops.algebra) (chunk_global_cumsum_scalar_kernel_sum_leftKernel .fp32 .fp32 input output T BT) u=some b := by
+    change run (engine ops.algebra) (chunk_global_cumsum_scalar_kernel_sum_leftKernel .fp32 .fp32 input output T BT).surfaceBody u=some b
     rw [candidate_split,run_append,prelude]
     simp only [Option.bind_some,run]
     have hs : step (engine ops.algebra)

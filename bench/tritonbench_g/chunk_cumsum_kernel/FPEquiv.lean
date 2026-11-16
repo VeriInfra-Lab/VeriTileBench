@@ -17,7 +17,7 @@ specification memory_equiv {α : Type} [Inhabited α]
   ProgramPair.memory_equiv ops D model input output T cfg pid
 
 #print_fp_assumptions memory_equiv
-#specNonCircular CarryDomain.Finite avoiding [repairedKernel,sumLeftKernel,Rewrite.FiniteCarry,FP.Structural.run]
+#specNonCircular CarryDomain.Finite avoiding [chunk_global_cumsum_scalar_kernel_repairedKernel,chunk_global_cumsum_scalar_kernel_sum_leftKernel,Rewrite.FiniteCarry,FP.Structural.run]
 #axiomsClean memory_equiv
 #stmtSurfaceSubset memory_equiv ⊆
   [FPRow.Ops,FP.Guarded.Domain,FP.Guarded.Models,Spec.RuleEntry,FP.GuardedFragment,

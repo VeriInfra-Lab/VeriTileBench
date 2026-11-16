@@ -9,10 +9,10 @@ noncomputable section
 
 def assumptions : Spec.Assumptions FP.GuardedFragment := []
 def original (Y X : RegionName) (M N : Nat) : Program where
-  kernel := sourceKernel Y X M N (Config.tile N)
+  kernel := softmax_kernel_online_v2_repairedKernel Y X M N (Config.tile N)
   domain := []
 def indexCommuted (Y X : RegionName) (M N : Nat) : Program where
-  kernel := indexCommutedKernel Y X M N (Config.tile N)
+  kernel := softmax_kernel_online_v2_index_commutedKernel Y X M N (Config.tile N)
   domain := []
 
 /-- The complete typed FP32 source is equivalent after commuting the integer

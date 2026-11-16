@@ -32,7 +32,7 @@ def backwardSignature (storage partner gradient : Storage) : CallSignature where
   readPorts := ["dc_ptr","a_ptr","b_ptr"]
   writePorts := ["a_ptr","b_ptr"]
 
-def forwardTypedKernel (storage partner : Storage)
+def _swiglu_forward_kernel (storage partner : Storage)
     (a_ptr b_ptr c_ptr : RegionName) (stride n_cols BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call (forwardSignature storage partner) call_args [stride := stride] pure_functions [silu := siluSource] in triton {
     program_id = tl.program_id(0).to(tl.int64)
@@ -52,7 +52,7 @@ def forwardTypedKernel (storage partner : Storage)
     tl.store(c_ptr + col_offsets, c_row, mask=mask)
   }
 
-def forwardCommutedTypedKernel (storage partner : Storage)
+def _swiglu_forward_kernel_index_commutedKernel (storage partner : Storage)
     (a_ptr b_ptr c_ptr : RegionName) (stride n_cols BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call (forwardSignature storage partner) call_args [stride := stride] pure_functions [silu := siluSource] in triton {
     program_id = tl.program_id(0).to(tl.int64)
@@ -72,7 +72,7 @@ def forwardCommutedTypedKernel (storage partner : Storage)
     tl.store(c_ptr + col_offsets, c_row, mask=mask)
   }
 
-def backwardTypedKernel (storage partner gradient : Storage)
+def _swiglu_backward_kernel (storage partner gradient : Storage)
     (dc_ptr a_ptr b_ptr : RegionName) (stride n_cols BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call (backwardSignature storage partner gradient) call_args [stride := stride] in triton {
     program_id = tl.program_id(0).to(tl.int64)
@@ -100,7 +100,7 @@ def backwardTypedKernel (storage partner gradient : Storage)
     tl.store(b_ptr + col_offsets, db_row, mask=mask)
   }
 
-def backwardCommutedTypedKernel (storage partner gradient : Storage)
+def _swiglu_backward_kernel_index_commutedKernel (storage partner gradient : Storage)
     (dc_ptr a_ptr b_ptr : RegionName) (stride n_cols BLOCK_SIZE : Nat) : ComputeKernel :=
   with_triton_call (backwardSignature storage partner gradient) call_args [stride := stride] in triton {
     program_id = tl.program_id(0).to(tl.int64)
@@ -129,16 +129,16 @@ def backwardCommutedTypedKernel (storage partner gradient : Storage)
   }
 
 def forwardKernel (a b c : RegionName) (stride cols block : Nat) : ComputeKernel :=
-  forwardTypedKernel .fp32 .fp32 a b c stride cols block
+  _swiglu_forward_kernel .fp32 .fp32 a b c stride cols block
 
 def forwardIndexCommuted (a b c : RegionName) (stride cols block : Nat) : ComputeKernel :=
-  forwardCommutedTypedKernel .fp32 .fp32 a b c stride cols block
+  _swiglu_forward_kernel_index_commutedKernel .fp32 .fp32 a b c stride cols block
 
 def backwardKernel (dc a b : RegionName) (stride cols block : Nat) : ComputeKernel :=
-  backwardTypedKernel .fp32 .fp32 .fp32 dc a b stride cols block
+  _swiglu_backward_kernel .fp32 .fp32 .fp32 dc a b stride cols block
 
 def backwardIndexCommuted (dc a b : RegionName) (stride cols block : Nat) : ComputeKernel :=
-  backwardCommutedTypedKernel .fp32 .fp32 .fp32 dc a b stride cols block
+  _swiglu_backward_kernel_index_commutedKernel .fp32 .fp32 .fp32 dc a b stride cols block
 
 /-- Exactly the source configuration branches; HIP has 16 warps at the largest
 blocks while CUDA has 32. Columns beyond 65536 are rejected before launch. -/

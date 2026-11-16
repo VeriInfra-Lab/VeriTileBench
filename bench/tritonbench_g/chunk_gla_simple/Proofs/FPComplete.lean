@@ -33,7 +33,7 @@ def finishExecution {α : Type} [Inhabited α] (M : Algebra α) (c : Shape) (sca
   have hs := ha.2
   refine ⟨?_,?_⟩
   swap
-  simp [Typed.parts,kernel,fp32Original,originalKernel,ComputeKernel.surfaceBody,Source.intRange?,
+  simp [Typed.parts,kernel,fp32Original,chunk_simple_gla_fwd_kernel_o_repairedKernel,ComputeKernel.surfaceBody,Source.intRange?,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,Option.bind,engine,
     Algebra.withDefaultPrecision,resolvePrecision,ComputeDType.eraseDType,
     numeric,natLe,numericLe,numericLt,natLt,bop,ofFloat,toFloat,TileShape.axisDim,Region.cast,State.setReg,

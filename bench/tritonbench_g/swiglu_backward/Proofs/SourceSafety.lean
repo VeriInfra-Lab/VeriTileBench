@@ -22,7 +22,7 @@ theorem source_safe {α : Type} [Inhabited α] (M : Algebra α) (c : Layout)
     TraceSafe M bounds (c.source B R) (tileState M c B row tile s) := by
   cases R
   all_goals
-    simp (maxSteps := 1400000) [TraceSafe, Layout.source, VeriTile.Bench.Repairs.SwigluBackward.sourceKernel,
+    simp (maxSteps := 1400000) [TraceSafe, Layout.source, VeriTile.Bench.Repairs.SwigluBackward._swiglu_bwd_kernel,
 
       ComputeKernel.surfaceBody, Safety.traceSafeList_unfold, Safety.stepSafe_unfold,
       Safety.safeExpr_unfold, Safety.safeCompute_unfold, Safety.safeOp_unfold,

@@ -51,8 +51,8 @@ def statement (h : Call) (c : Config) : Stmt :=
 def body (h : Call) (c : Config) := initCode h c ++ [statement h c]
 
 theorem source_body (h : Call) (c : Config) :
-    (Kernels.sourceKernel h c).eraseDType.toAlgKernel.body=body h c := by
-  simp only [Kernels.sourceKernel,ComputeKernel.surfaceBody,ComputeKernel.eraseDType,
+    (Kernels.chunk_global_reversed_cumsum_vector_kernel h c).eraseDType.toAlgKernel.body=body h c := by
+  simp only [Kernels.chunk_global_reversed_cumsum_vector_kernel,ComputeKernel.surfaceBody,ComputeKernel.eraseDType,
     ComputeKernel.toAlgorithm?,ComputeKernel.toAlgKernel,ComputeKernel.fromKernelBody,
     ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,ComputeOp.toAlgorithm?,
     ComputeDType.eraseDType,List.map_cons,List.map_nil,Kernel.eraseDType,Stmt.eraseDTypeList,

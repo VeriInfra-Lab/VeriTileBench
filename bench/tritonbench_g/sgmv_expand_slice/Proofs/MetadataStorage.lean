@@ -12,15 +12,15 @@ for every remaining runtime argument and constexpr choice. -/
 theorem original_metadata_widths (input_dtype : FloatDType)
     (weight_format : LowFormat) (output_format : ScalarFormat)
     (starts lengths adapters : MetadataWidth) :
-    originalKernel input_dtype weight_format output_format starts lengths adapters =
-      originalKernel input_dtype weight_format output_format .w32 .w32 .w32 := by
+    _sgmv_expand_slice_kernel_repairedKernel input_dtype weight_format output_format starts lengths adapters =
+      _sgmv_expand_slice_kernel_repairedKernel input_dtype weight_format output_format .w32 .w32 .w32 := by
   cases starts <;> cases lengths <;> cases adapters <;> rfl
 
 theorem candidate_metadata_widths (input_dtype : FloatDType)
     (weight_format : LowFormat) (output_format : ScalarFormat)
     (starts lengths adapters : MetadataWidth) :
-    candidateKernel input_dtype weight_format output_format starts lengths adapters =
-      candidateKernel input_dtype weight_format output_format .w32 .w32 .w32 := by
+    _sgmv_expand_slice_kernel_index_reuseKernel input_dtype weight_format output_format starts lengths adapters =
+      _sgmv_expand_slice_kernel_index_reuseKernel input_dtype weight_format output_format .w32 .w32 .w32 := by
   cases starts <;> cases lengths <;> cases adapters <;> rfl
 
 #axiomsClean original_metadata_widths

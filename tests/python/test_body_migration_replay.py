@@ -71,6 +71,29 @@ class MigrationReceiptTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'not a proved specification'):
             self.invoke('--check')
 
+    def test_public_refutation_must_be_required_and_cannot_be_removed(self):
+        base='bench/tritonbench_g/dequantize_rowwise'
+        public=base+'/FPEquiv.lean'
+        path=self.root/public
+        source=path.read_text().replace('end FixtureFPEquiv',
+            'refutation rejected : False := by trivial\nend FixtureFPEquiv')
+        path.write_text(source)
+        manifest=self.root/runner.DEFAULT
+        data=json.loads(manifest.read_text())
+        with self.assertRaisesRegex(ValueError,'missing required refutation'):
+            runner.load_batch(self.root,manifest)
+        data['cases'][0]['public_theorems'][public].append('FixtureFPEquiv.rejected')
+        manifest.write_text(json.dumps(data))
+        ledger={'tasks':[{'task':'dequantize_rowwise','fp_verdict':{
+            'status':'DISPROVED','public_entry':public,'public_theorem':'FixtureFPEquiv.rejected'}}]}
+        (self.root/'validation/task_progress.json').write_text(json.dumps(ledger))
+        self.assertEqual(len(runner.load_batch(self.root,manifest)[0]),1)
+        for changed in [source.replace('refutation rejected : False := by trivial',''),
+                        source.replace('refutation rejected','specification rejected')]:
+            path.write_text(changed)
+            with self.assertRaisesRegex(ValueError,'missing required refutation'):
+                runner.load_batch(self.root,manifest)
+
     def test_public_preflight_uses_fully_qualified_names(self):
         cases, _, _ = runner.load_batch(self.root, self.root / runner.DEFAULT)
         def probe(command, **kwargs):
@@ -82,6 +105,38 @@ class MigrationReceiptTests(unittest.TestCase):
             return subprocess.CompletedProcess(command, 0)
         with patch.object(runner.subprocess, 'run', side_effect=probe):
             runner.verify_public_targets(self.root, cases)
+
+    def test_automatic_replay_includes_unimported_helpers_and_new_regressions(self):
+        manifest=self.root/runner.DEFAULT
+        data=json.loads(manifest.read_text())
+        data.update(replay_all_owned_modules=True,replay_all_regressions=True)
+        manifest.write_text(json.dumps(data))
+        helper='bench/tritonbench_g/dequantize_rowwise/Proofs/Unimported.lean'
+        regression='tests/lean/NewRegression.lean'
+        for name in [helper,regression]:
+            p=self.root/name;p.parent.mkdir(parents=True,exist_ok=True)
+            p.write_text('theorem checked : True := by trivial\n')
+        _,builds,replay=runner.load_batch(self.root,manifest)
+        self.assertTrue({helper,regression}<=set(builds))
+        self.assertTrue({helper,regression}<=set(replay))
+
+    def test_refutation_preflight_checks_negative_lean_type(self):
+        base='bench/tritonbench_g/dequantize_rowwise'
+        public=base+'/FPEquiv.lean'
+        path=self.root/public
+        path.write_text(path.read_text().replace('end FixtureFPEquiv',
+            'refutation rejected : False := by trivial\nend FixtureFPEquiv'))
+        manifest=self.root/runner.DEFAULT;data=json.loads(manifest.read_text())
+        data['cases'][0]['public_theorems'][public].append('FixtureFPEquiv.rejected')
+        manifest.write_text(json.dumps(data))
+        cases,_,_=runner.load_batch(self.root,manifest)
+        def probe(command,**kwargs):
+            source=Path(command[3]).read_text()
+            self.assertIn('getConstInfo `FixtureFPEquiv.rejected',source)
+            self.assertIn('claim.isAppOf ``Not',source)
+            return subprocess.CompletedProcess(command,0)
+        with patch.object(runner.subprocess,'run',side_effect=probe):
+            runner.verify_public_targets(self.root,cases)
 
     def test_missing_public_namespace_stops_before_comparator(self):
         receipt = self.root / 'receipt.json'

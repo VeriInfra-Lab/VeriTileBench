@@ -9,12 +9,12 @@ open VeriTile.Triton
 
 /-- Ordinary real interpretation of the actual repaired source. -/
 def mul2_kernel (X O : RegionName) (n B : Nat) : ComputeKernel :=
-  let k := VeriTile.Bench.Repairs.TritonMul2.sourceKernel X O n B |>.toAlgKernel
+  let k := VeriTile.Bench.Repairs.TritonMul2.mul2_kernel X O n B |>.toAlgKernel
   ComputeKernel.fromKernelBody k.inputs k.outputs k.body
 
 /-- The same source projection with aliased input and output. -/
 def mul2_inplace_kernel (X : RegionName) (n B : Nat) : ComputeKernel :=
-  let k := VeriTile.Bench.Repairs.TritonMul2.inplaceSourceKernel X n B |>.toAlgKernel
+  let k := VeriTile.Bench.Repairs.TritonMul2.mul2_inplace_kernel X n B |>.toAlgKernel
   ComputeKernel.fromKernelBody k.inputs k.outputs k.body
 
 end VeriTile.Bench.TritonBenchG.TritonMul2

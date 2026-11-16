@@ -51213,7 +51213,7 @@
     }
   },
   "source_sha256": {
-    "AGENTS.md": "99e2ca4e569105d28ea16420c2f6609b1bb7cb99685f3d2d0ce99b3d4408cb98",
+    "AGENTS.md": "b74592e8377c2e6c3e7a825b71f163860fc48ad498aed53b625dc78703d12794",
     "VeriTile/Triton/Float/GuardedProgramIO.lean": "d49d97865627028acef594b848a4627e83e139849ce8f882c8901d75e11d6046",
     "VeriTile/Triton/Memory/LogicalScheduledKernelIO.lean": "63fc2fd56a16d72f476294a9bd175483cc1d188e5760f18d0c40ba59d9764e2b",
     "bench/bug_detection/All.lean": "36bf0486086ef1a027d8e97527b9dc223b53a536a8b2c97f3d684a4ffd1b6b5e",
@@ -53898,7 +53898,7 @@
     "bench/pretrain_kernels/tasks/te_fused_attn_mla_thd_dv/Misc/Validation.lean": "dbf22c00f86f62f96fc9576d0e25dd926f46690a4012ceb8f660d9159ac5cbeb",
     "bench/pretrain_kernels/tasks/te_fused_attn_mla_thd_dv/Proofs/Backend.lean": "09415464d3e03083d4b58d7be07beb565f8a088764424799ce9be6790c9b899d",
     "bench/pretrain_kernels/tasks/te_fused_attn_mla_thd_dv/task.json": "ce9735151cf467d28fae4020d4a1399cf1e02ec6b5525665019c9f6d4a3fbbd8",
-    "documents/bench/MAIN_THEOREM_CONVENTIONS.md": "659d0513f32f73dd9ae50da1f6bf6636858bc4e3070fd8d9bb4fec79c1b96f05",
+    "documents/bench/MAIN_THEOREM_CONVENTIONS.md": "9dc259248e787fc23d3b496b716d152a0ff1557845bd61e9f2bee53a057994ea",
     "lakefile.toml": "29b691c2a5dd98e44bfc8458f9d8b64dfdc963737d76cbe074f518f16d182a3a",
     "scripts/bench/check_imported_kernel_review.py": "cf8bbf727a427a7db6d8dad40b9d7b59f7e7ef3691b6413ec138bb4adcdae387",
     "tests/lean/FPGuardedProgramIO.lean": "0fdd3d571fbb4343cf7340232e862484535e900d62005684d1db51d641553fc3"
@@ -54085,6 +54085,42 @@
     "probes_unchanged": true,
     "case_proof_statuses_changed": false,
     "scope": "Optional dependency view and local example registration only; no case source, mathematical target, proof-completion or numerical-admission changes."
+  },
+  "dependency_refresh": {
+    "revision": "6d520c6f715d3c9224440df33472652e6a94f859",
+    "basis": "Every pre-existing shared Lean source and dependency build input is byte-identical; two new dot modules are outside the unchanged imported-task dependency closures. Structural facts and counterexample probes are recomputed by check_imported_kernel_review.py.",
+    "new_modules": [
+      "VeriTile/Triton/Float/DotAdmission.lean",
+      "VeriTile/Triton/Float/DotContraction.lean"
+    ],
+    "semantic_certification": "NOT_ESTABLISHED",
+    "proof_or_source_binding_status_changes": false
+  },
+  "scaled_fp4_frontend_binding": {
+    "date": "2026-11-15",
+    "veritile_revision": "f050187612a116c9a6e3ed9345b8f6b5e5b2a9b0",
+    "changed_review_inputs": [
+      "documents/bench/MAIN_THEOREM_CONVENTIONS.md",
+      "lakefile.toml"
+    ],
+    "unchanged_reviewed_semantic_dependencies": 109,
+    "scope": "Dependency pin and selected-task count metadata only. The SourceProcedures/returned-helper frontend changes are outside the 334-challenge semantic closure; all 109 recorded semantic dependency files are byte-identical. Existing facts, pending source/backend connections and unsolved proof goals are unchanged.",
+    "proof_or_source_binding_status_changes": false
+  },
+  "python_lean_naming_rule": {
+    "changed_inputs": [
+      "AGENTS.md"
+    ],
+    "scope": "Documentation-only naming convention for new or reorganized Python-derived source definitions. Reviewed challenge programs, all 109 recorded semantic dependency files and pending statuses are unchanged.",
+    "proof_or_source_binding_status_changes": false
+  },
+  "bidirectional_source_rule": {
+    "changed_inputs": [
+      "AGENTS.md"
+    ],
+    "previous_instruction_sha256": "46d0f958ad6b5d3f09da99e04d26e00c3ba4f230a35ea4507c583c227a2f0066",
+    "scope": "Instruction clarification only: require Python-to-Lean and Lean-to-Python source coverage, including candidates and helper comments. The 334 deferred tasks, semantic dependencies and all pending classifications are unchanged.",
+    "proof_or_source_binding_status_changes": false
   },
   "shared_helpers_dependency_revalidation": {
     "date": "2026-11-16",

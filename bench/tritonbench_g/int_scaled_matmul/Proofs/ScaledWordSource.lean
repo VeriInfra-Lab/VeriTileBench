@@ -36,7 +36,7 @@ theorem statement_step {α : Type} [Inhabited α] (M : Algebra α) (p : Paramete
   simp [statement,body,originalBody,original,source,typedScaled,
     VeriTile.Bench.Repairs.IntScaledMatmul.Kernels.scaled,
     VeriTile.Bench.Repairs.IntScaledMatmul.Kernels.scaledSource,
-    VeriTile.Bench.Repairs.IntScaledMatmul.Body.scaledKernel,ComputeKernel.surfaceBody,
+    VeriTile.Bench.Repairs.IntScaledMatmul.Body.scaled_matmul_kernel_with_block_pointersKernel,ComputeKernel.surfaceBody,
     step,evalOp_unfold,numeric,FP.Structural.bop,mirror,Region.cast]
 #axiomsClean statement_step
 
@@ -47,7 +47,7 @@ theorem statement_safety {α : Type} [Inhabited α] (M : Algebra α) (p : Parame
   simp [statement,body,originalBody,original,source,typedScaled,
     VeriTile.Bench.Repairs.IntScaledMatmul.Kernels.scaled,
     VeriTile.Bench.Repairs.IntScaledMatmul.Kernels.scaledSource,
-    VeriTile.Bench.Repairs.IntScaledMatmul.Body.scaledKernel,ComputeKernel.surfaceBody,
+    VeriTile.Bench.Repairs.IntScaledMatmul.Body.scaled_matmul_kernel_with_block_pointersKernel,ComputeKernel.surfaceBody,
     Safety.stepSafe,Safety.safeOp_unfold,evalOp_unfold,numeric,FP.Structural.bop,mirror,Region.cast]
 #axiomsClean statement_safety
 #axiomsClean original_decomposition

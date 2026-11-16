@@ -64,10 +64,11 @@ def write_config(directory, theorems, *, challenge="ComparatorChallenge",
     return path
 
 
-def comparator_command(directory, comparator, config=None):
+def comparator_command(directory, comparator, config=None, *, unit=None):
     # Follow upstream's AF_UNIX restriction as well as comparator's landrun
     # sandbox. Failure to start either is a failed check, never a fallback.
     return ['systemd-run', '--user', '--pipe', '--wait', '--collect',
+            *(['--unit=' + unit] if unit else []),
             '--property=RestrictAddressFamilies=~AF_UNIX',
             '--setenv=PATH=' + os.environ['PATH'],
             '--working-directory=' + str(directory),

@@ -24,7 +24,7 @@ def callSignature : CallSignature where
 
 /-- The unchanged complete original Python body. Storage and invocation types
 are outside the quotation; the unused runtime argument emits no instruction. -/
-def sourceKernel (x_ptr output_ptr output_maxs : RegionName)
+def _quantize_rowwiseKernel (x_ptr output_ptr output_maxs : RegionName)
     (columns width : Nat) : ComputeKernel :=
   let BLOCK_SIZE := columns
   let P2 := width
@@ -45,7 +45,7 @@ def sourceKernel (x_ptr output_ptr output_maxs : RegionName)
   }
 
 /-- Existing early-maximum-store candidate, with all source operations retained. -/
-def earlyMaximumKernel (x_ptr output_ptr output_maxs : RegionName)
+def _quantize_rowwise_early_maxKernel (x_ptr output_ptr output_maxs : RegionName)
     (columns width : Nat) : ComputeKernel :=
   let BLOCK_SIZE := columns
   let P2 := width

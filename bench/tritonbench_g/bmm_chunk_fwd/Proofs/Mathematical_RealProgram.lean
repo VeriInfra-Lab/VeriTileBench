@@ -94,8 +94,8 @@ theorem body_split (swapped : Bool) (BM BN BK : Nat) (p : Parameters) :
   all_goals
     simp [kernel,source,branch,parts,condition,realPart,loopBound,TypedSource.specialize,
       VeriTile.Bench.Repairs.BmmChunkFwd.Kernels.mainSource,
-      VeriTile.Bench.Repairs.BmmChunkFwd.originalKernel,
-      VeriTile.Bench.Repairs.BmmChunkFwd.dotFirstKernel,
+      VeriTile.Bench.Repairs.BmmChunkFwd._bmm_chunk_fwd_kernel_repairedKernel,
+      VeriTile.Bench.Repairs.BmmChunkFwd._bmm_chunk_fwd_kernel_repaired_dot_firstKernel,
       Source.conditional?,Source.signedRange?,ComputeKernel.surfaceBody,
       ComputeKernel.eraseDType,ComputeKernel.fromKernelBody,
       ComputeStmt.listToAlgorithm?_map_alg,ComputeKernel.toAlgKernel,ComputeKernel.toAlgorithm?,

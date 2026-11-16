@@ -1,0 +1,55 @@
+name: Pending challenge interfaces
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'bench/bug_detection/**'
+      - 'bench/pretrain_kernels/**'
+      - 'validation/imported_kernel_review.json'
+      - 'scripts/bench/check_imported_kernel_review.py'
+      - 'lakefile.toml'
+      - 'lake-manifest.json'
+      - 'lean-toolchain'
+      - '.github/workflows/pending-interfaces.yml'
+      - '.github/actions/build-lean/**'
+  push:
+    branches: [main]
+    paths:
+      - 'bench/bug_detection/**'
+      - 'bench/pretrain_kernels/**'
+      - 'validation/imported_kernel_review.json'
+      - 'scripts/bench/check_imported_kernel_review.py'
+      - 'lakefile.toml'
+      - 'lake-manifest.json'
+      - 'lean-toolchain'
+      - '.github/workflows/pending-interfaces.yml'
+      - '.github/actions/build-lean/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pending-interfaces-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  interfaces:
+    name: 334 pending interfaces (not proof acceptance)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Make room for the interface builds
+        run: sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
+      - uses: ./.github/actions/build-lean
+        with:
+          build-args: VeriTile BugDetection PretrainKernels
+      - name: Preserve pending obligations and validate recorded interfaces
+        run: |
+          python3 bench/bug_detection/check.py --verify-record
+          python3 bench/pretrain_kernels/check.py --verify-record
+          python3 scripts/bench/check_imported_kernel_review.py

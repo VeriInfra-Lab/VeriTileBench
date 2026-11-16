@@ -15,7 +15,7 @@ def callSignature (dtype : FloatDType) : CallSignature where
   readPorts := ["B_Seqlen","B_Start_Loc","B_req_idx","Prob","Req_to_tokens","V"]
   writePorts := ["Out"]
 
-def sourceKernel (dtype : FloatDType) (Prob V Out Req_to_tokens B_req_idx B_Start_Loc B_Seqlen : RegionName)
+def _fwd_kernel_token_att2Kernel (dtype : FloatDType) (Prob V Out Req_to_tokens B_req_idx B_Start_Loc B_Seqlen : RegionName)
     (stride_b_req_idx stride_b_start_loc stride_b_seq_len : Nat)
     (stride_req_to_tokens_b stride_req_to_tokens_s stride_ph stride_pbs
       stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od
@@ -59,7 +59,7 @@ def sourceKernel (dtype : FloatDType) (Prob V Out Req_to_tokens B_req_idx B_Star
   }
 
 def kernel (p : Parameters) : ComputeKernel :=
-  sourceKernel .fp32 p.prob p.value p.output p.tokens p.request p.start p.length
+  _fwd_kernel_token_att2Kernel .fp32 p.prob p.value p.output p.tokens p.request p.start p.length
     p.requestStride p.startStride p.lengthStride
     p.requestBatchStride p.requestTokenStride p.probHeadStride p.probTokenStride
     p.valueBatchStride p.valueHeadStride p.valueDimStride
@@ -73,7 +73,7 @@ open VeriTile.Triton TokenAttnReduceV
 
 abbrev kernel := TokenAttnReduceV.kernel
 
-def affineSourcePastedKernel (dtype : FloatDType) (Prob V Out Req_to_tokens B_req_idx B_Start_Loc B_Seqlen : RegionName)
+def _fwd_kernel_token_att2_affineKernel (dtype : FloatDType) (Prob V Out Req_to_tokens B_req_idx B_Start_Loc B_Seqlen : RegionName)
     (stride_b_req_idx stride_b_start_loc stride_b_seq_len : Nat)
     (stride_req_to_tokens_b stride_req_to_tokens_s stride_ph stride_pbs
       stride_vbs stride_vh stride_vd stride_obs stride_oh stride_od
@@ -117,7 +117,7 @@ def affineSourcePastedKernel (dtype : FloatDType) (Prob V Out Req_to_tokens B_re
   }
 
 def affineKernel (p : Parameters) : ComputeKernel :=
-  affineSourcePastedKernel .fp32 p.prob p.value p.output p.tokens p.request p.start p.length
+  _fwd_kernel_token_att2_affineKernel .fp32 p.prob p.value p.output p.tokens p.request p.start p.length
     p.requestStride p.startStride p.lengthStride
     p.requestBatchStride p.requestTokenStride p.probHeadStride p.probTokenStride
     p.valueBatchStride p.valueHeadStride p.valueDimStride

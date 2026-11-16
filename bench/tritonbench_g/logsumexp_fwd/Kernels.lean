@@ -15,7 +15,7 @@ def callSignature : CallSignature where
   scalars := [("scale",.fp32)]
   constexpr := ["D","B","HAS_SCALE"]
 
-def rowBlockKernel (x z : RegionName) (D B : Nat) (HAS_SCALE : Bool) : ComputeKernel :=
+def logsumexp_fwd_kernel (x z : RegionName) (D B : Nat) (HAS_SCALE : Bool) : ComputeKernel :=
   with_triton_signature callSignature in
   triton {
     i_n, i_d = tl.program_id(0).to(tl.int64), tl.program_id(1).to(tl.int64)
@@ -33,7 +33,7 @@ def rowBlockKernel (x z : RegionName) (D B : Nat) (HAS_SCALE : Bool) : ComputeKe
     tl.store(z + i_n * tl.cdiv(D, B) + i_d, b_z)
   }
 
-def rowBlockCandidateKernel (x z : RegionName) (D B : Nat) (HAS_SCALE : Bool) : ComputeKernel :=
+def logsumexp_fwd_kernel_optimizedKernel (x z : RegionName) (D B : Nat) (HAS_SCALE : Bool) : ComputeKernel :=
   with_triton_signature callSignature in
   triton {
     i_n, i_d = tl.program_id(0).to(tl.int64), tl.program_id(1).to(tl.int64)

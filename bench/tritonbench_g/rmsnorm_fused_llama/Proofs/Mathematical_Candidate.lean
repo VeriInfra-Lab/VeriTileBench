@@ -15,8 +15,8 @@ def pointerPrefix (v : Bool) (Y : RegionName) (stride : Nat) (eps : ℝ) : List 
 theorem prefix_source (v : Bool) (X Y W : RegionName) (stride N B : Nat) (eps : ℝ) :
     (mathKernel v X Y W stride N B eps).body.take 3 = pointerPrefix v Y stride eps := by
   cases v <;> simp [mathKernel, typedKernel,
-    VeriTile.Bench.Repairs.RmsnormFusedLlama.runtimeKernel,
-    VeriTile.Bench.Repairs.RmsnormFusedLlama.runtimeCandidateKernel,
+    VeriTile.Bench.Repairs.RmsnormFusedLlama._rms_norm_fwd_fusedKernel,
+    VeriTile.Bench.Repairs.RmsnormFusedLlama._rms_norm_fwd_fused_index_commutedKernel,
     ComputeKernel.withScalarArguments, ScalarArgument.statement, ScalarArgument.fp32,
     ComputeKernel.eraseDType, ComputeKernel.surfaceBody, ComputeKernel.toAlgKernel,
     ComputeKernel.toAlgorithm?, ComputeKernel.fromKernelBody,
@@ -30,8 +30,8 @@ theorem tail_source (X Y W : RegionName) (stride N B : Nat) (eps : ℝ) :
     (mathKernel Bool.true X Y W stride N B eps).body.drop 3 =
       (mathKernel Bool.false X Y W stride N B eps).body.drop 3 := by
   simp [mathKernel, typedKernel,
-    VeriTile.Bench.Repairs.RmsnormFusedLlama.runtimeKernel,
-    VeriTile.Bench.Repairs.RmsnormFusedLlama.runtimeCandidateKernel,
+    VeriTile.Bench.Repairs.RmsnormFusedLlama._rms_norm_fwd_fusedKernel,
+    VeriTile.Bench.Repairs.RmsnormFusedLlama._rms_norm_fwd_fused_index_commutedKernel,
     ComputeKernel.withScalarArguments, ScalarArgument.statement, ScalarArgument.fp32,
     ComputeKernel.eraseDType, ComputeKernel.surfaceBody, ComputeKernel.toAlgKernel,
     ComputeKernel.toAlgorithm?, ComputeKernel.fromKernelBody,

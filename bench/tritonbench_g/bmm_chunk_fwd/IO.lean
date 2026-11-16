@@ -75,7 +75,7 @@ def mainSource (p : Parameters) (c : Host.Config) : AlgorithmSource where
 def cleanupSource (p : Parameters) : AlgorithmSource where
   kernel := (Kernels.clearUpperKernel p.Out p.shape.chunk (p.shape.chunks*p.shape.groups)).eraseDType
   projection := by
-    simp [Kernels.clearUpperKernel,clearUpperKernel,ComputeKernel.surfaceBody,ComputeKernel.eraseDType,
+    simp [Kernels.clearUpperKernel,_clear_causal_upperKernel,ComputeKernel.surfaceBody,ComputeKernel.eraseDType,
       ComputeKernel.toAlgorithm?,ComputeKernel.toAlgKernel,ComputeKernel.fromKernelBody,
       ComputeStmt.listToAlgorithm?,ComputeStmt.toAlgorithm?,ComputeExpr.toAlgorithm?,
       ComputeOp.toAlgorithm?,Except.bind,bind]

@@ -23,12 +23,12 @@ def softmax_kernel (output_ptr input_ptr mask_ptr : RegionName)
     optional_pointers [mask_ptr := HAS_MASK] in
   triton {
     """the kernel function for implementing softmax operator
-        Args:
-            output_ptr: the output after finishing softmax operation, (N, hidden_dim)
-            input_ptr: the tensor of input, shape should be (N, hidden_dim)
-            n_cols(tl.constexpr): the number of cols of input
-            BLOCK_SIZE(tl.constexpr): the block_size of your hidden_dim dimension, typically BLOCK_SIZE >= hidden_dim
-        """
+    Args:
+        output_ptr: the output after finishing softmax operation, (N, hidden_dim)
+        input_ptr: the tensor of input, shape should be (N, hidden_dim)
+        n_cols(tl.constexpr): the number of cols of input
+        BLOCK_SIZE(tl.constexpr): the block_size of your hidden_dim dimension, typically BLOCK_SIZE >= hidden_dim
+    """
     row_idx = tl.program_id(0).to(tl.int64)
     row_start_ptr = input_ptr + row_idx * row_stride
     col_offsets = tl.arange(0, BLOCK_SIZE).to(tl.int64)
@@ -56,12 +56,12 @@ def guarded_reciprocal_kernel (output_ptr input_ptr mask_ptr : RegionName)
     optional_pointers [mask_ptr := HAS_MASK] in
   triton {
     """the kernel function for implementing softmax operator
-        Args:
-            output_ptr: the output after finishing softmax operation, (N, hidden_dim)
-            input_ptr: the tensor of input, shape should be (N, hidden_dim)
-            n_cols(tl.constexpr): the number of cols of input
-            BLOCK_SIZE(tl.constexpr): the block_size of your hidden_dim dimension, typically BLOCK_SIZE >= hidden_dim
-        """
+    Args:
+        output_ptr: the output after finishing softmax operation, (N, hidden_dim)
+        input_ptr: the tensor of input, shape should be (N, hidden_dim)
+        n_cols(tl.constexpr): the number of cols of input
+        BLOCK_SIZE(tl.constexpr): the block_size of your hidden_dim dimension, typically BLOCK_SIZE >= hidden_dim
+    """
     row_idx = tl.program_id(0).to(tl.int64)
     row_start_ptr = input_ptr + row_idx * row_stride
     col_offsets = tl.arange(0, BLOCK_SIZE).to(tl.int64)

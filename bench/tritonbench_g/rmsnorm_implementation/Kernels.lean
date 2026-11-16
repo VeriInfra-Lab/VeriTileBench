@@ -23,7 +23,7 @@ def callSignature (input weight output : Storage) : CallSignature where
   writePorts := ["out_ptr"]
 
 set_option maxHeartbeats 1000000 in
-def originalForKernel (input weight output : Storage) (X W O : RegionName)
+def rmsnorm_tritonKernel (input weight output : Storage) (X W O : RegionName)
     (sxb sxm sxk sw sob som sok N B : Nat) (eps : ℝ) : ComputeKernel :=
   let x_ptr := X
   let rms_w_ptr := W
@@ -64,7 +64,7 @@ def originalForKernel (input weight output : Storage) (X W O : RegionName)
   }
 
 set_option maxHeartbeats 1000000 in
-def commutedForKernel (input weight output : Storage) (X W O : RegionName)
+def rmsnorm_triton_index_commutedKernel (input weight output : Storage) (X W O : RegionName)
     (sxb sxm sxk sw sob som sok N B : Nat) (eps : ℝ) : ComputeKernel :=
   let x_ptr := X
   let rms_w_ptr := W
@@ -105,12 +105,12 @@ def commutedForKernel (input weight output : Storage) (X W O : RegionName)
   }
 
 def family (input weight output : Storage) (candidate : Bool) : Source :=
-  if candidate then commutedForKernel input weight output else originalForKernel input weight output
+  if candidate then rmsnorm_triton_index_commutedKernel input weight output else rmsnorm_tritonKernel input weight output
 
 def kernel (X W O : RegionName) (sxb sxm sxk sw sob som sok N B : Nat) (eps : ℝ) : ComputeKernel :=
-  originalForKernel .fp32 .fp32 .fp32 X W O sxb sxm sxk sw sob som sok N B eps
+  rmsnorm_tritonKernel .fp32 .fp32 .fp32 X W O sxb sxm sxk sw sob som sok N B eps
 
 def indexCommutedKernel (X W O : RegionName)
     (sxb sxm sxk sw sob som sok N B : Nat) (eps : ℝ) : ComputeKernel :=
-  commutedForKernel .fp32 .fp32 .fp32 X W O sxb sxm sxk sw sob som sok N B eps
+  rmsnorm_triton_index_commutedKernel .fp32 .fp32 .fp32 X W O sxb sxm sxk sw sob som sok N B eps
 end VeriTile.Bench.Repairs.RmsnormImplementation

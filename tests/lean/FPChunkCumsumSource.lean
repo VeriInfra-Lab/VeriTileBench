@@ -10,7 +10,7 @@ set_option maxHeartbeats 1000000
 set_option maxRecDepth 16000
 
 def source (swapped : Bool) (dtype out_dtype : FloatDType) (T BT : Nat) : ComputeKernel :=
-  if swapped then sumLeftKernel dtype out_dtype "s" "o" T BT else repairedKernel dtype out_dtype "s" "o" T BT
+  if swapped then chunk_global_cumsum_scalar_kernel_sum_leftKernel dtype out_dtype "s" "o" T BT else chunk_global_cumsum_scalar_kernel_repairedKernel dtype out_dtype "s" "o" T BT
 
 def loop (swapped : Bool) (dtype out_dtype : FloatDType) (T BT : Nat) : Source.IntRange :=
   (Source.intRange? (source swapped dtype out_dtype T BT).surfaceBody "i_t").getD

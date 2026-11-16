@@ -32,7 +32,7 @@ theorem successful {A : Type} [Inhabited A] (rest : Algebra A) (add : A → A �
     (p : Launch) (s : State A) (current incoming : Nat → A)
     (stride : p.stride=1) (count : p.count≤p.block)
     (inputs : InputValues p s current incoming) :
-    ∃ t,exec (Source.backend (arithmetic rest add)) (sourceKernel p) s=some t ∧
+    ∃ t,exec (Source.backend (arithmetic rest add)) (index_select_cat_bwd_repaired_kernel p) s=some t ∧
       t.mem=reference add p s current incoming ∧
       (∀ i,i<p.count → t.mem p.destination i=.mk .real (sliceTarget add current incoming i)) ∧
       (∀ region offset,region≠p.destination ∨ p.count≤offset →
@@ -73,10 +73,10 @@ theorem argument_checks_iff (a : Arguments) :
   | tensors r => exact Native.checkInputs_iff r
   | other => simp [checkArguments,AdmittedArguments]
 
-#specNonCircular sliceTarget avoiding [sourceKernel,Source.scalar,Source.execution]
-#specNonCircular reference avoiding [sourceKernel,Source.expected,Source.execution]
-#specNonCircular gradientTarget avoiding [sourceKernel,Program.run,Source.execution]
-#specNonCircular orderedGradientTarget avoiding [sourceKernel,Program.run,Source.execution]
+#specNonCircular sliceTarget avoiding [index_select_cat_bwd_repaired_kernel,Source.scalar,Source.execution]
+#specNonCircular reference avoiding [index_select_cat_bwd_repaired_kernel,Source.expected,Source.execution]
+#specNonCircular gradientTarget avoiding [index_select_cat_bwd_repaired_kernel,Program.run,Source.execution]
+#specNonCircular orderedGradientTarget avoiding [index_select_cat_bwd_repaired_kernel,Program.run,Source.execution]
 #axiomsClean successful
 #axiomsClean argument_checks_iff
 end

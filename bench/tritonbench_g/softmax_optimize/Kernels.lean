@@ -12,15 +12,16 @@ def callSignature : CallSignature where
   readPorts := ["input_ptr"]
   writePorts := ["output_ptr"]
 
-def previousMultipleSource : BinaryPureJitFunction := with_triton_params (a, b) constexpr_args [] in triton {
+def prev_multiple_ofSource : BinaryPureJitFunction := with_triton_params (a, b) constexpr_args [] in triton {
+    # the largest x<a that x%b ==0
     return tl.cdiv(a, b) * b - b
 }
 
-def sourceKernel (output_ptr input_ptr : RegionName) (M N TILE_N : Nat) : ComputeKernel :=
+def softmax_kernel_online_v2_repairedKernel (output_ptr input_ptr : RegionName) (M N TILE_N : Nat) : ComputeKernel :=
   let M_value : Int := M
   let N_value : Int := N
   with_triton_call callSignature call_args [M := M_value, N := N_value]
-    binary_functions [prev_multiple_of := previousMultipleSource] in triton {
+    binary_functions [prev_multiple_of := prev_multiple_ofSource] in triton {
     pid_m = tl.program_id(0).to(tl.int64)
     m = tl.full((TILE_N,), value=-float("inf"), dtype=output_ptr.dtype.element_ty)
     z = tl.full((TILE_N,), value=0, dtype=output_ptr.dtype.element_ty)
@@ -74,15 +75,16 @@ def sourceKernel (output_ptr input_ptr : RegionName) (M N TILE_N : Nat) : Comput
         tl.store(output_ptrs, out, mask=mask)
   }
 
-def commutedPreviousMultipleSource : BinaryPureJitFunction := with_triton_params (a, b) constexpr_args [] in triton {
+def prev_multiple_of_candidateSource : BinaryPureJitFunction := with_triton_params (a, b) constexpr_args [] in triton {
+    # the largest x<a that x%b ==0
     return tl.cdiv(a, b) * b - b
 }
 
-def indexCommutedKernel (output_ptr input_ptr : RegionName) (M N TILE_N : Nat) : ComputeKernel :=
+def softmax_kernel_online_v2_index_commutedKernel (output_ptr input_ptr : RegionName) (M N TILE_N : Nat) : ComputeKernel :=
   let M_value : Int := M
   let N_value : Int := N
   with_triton_call callSignature call_args [M := M_value, N := N_value]
-    binary_functions [prev_multiple_of_candidate := commutedPreviousMultipleSource] in triton {
+    binary_functions [prev_multiple_of_candidate := prev_multiple_of_candidateSource] in triton {
     pid_m = tl.program_id(0).to(tl.int64)
     m = tl.full((TILE_N,), value=-float("inf"), dtype=output_ptr.dtype.element_ty)
     z = tl.full((TILE_N,), value=0, dtype=output_ptr.dtype.element_ty)

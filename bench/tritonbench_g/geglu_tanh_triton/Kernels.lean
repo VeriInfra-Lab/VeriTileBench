@@ -22,7 +22,7 @@ def backwardSignature : CallSignature where
   readPorts := ["dc","a","b"]
   writePorts := ["a","b"]
 
-def forwardKernel (a b c : RegionName) (count block : Nat) : ComputeKernel :=
+def _geglu_tanh_forward_kernel_repairedKernel (a b c : RegionName) (count block : Nat) : ComputeKernel :=
   let n_elements := count
   let BLOCK_SIZE := block
   with_triton_signature forwardSignature in triton {
@@ -45,7 +45,7 @@ def forwardKernel (a b c : RegionName) (count block : Nat) : ComputeKernel :=
     tl.store(c + col_offsets, c_row, mask=mask)
   }
 
-def forwardIndexCommutedKernel (a b c : RegionName) (count block : Nat) : ComputeKernel :=
+def forward_index_commuted_kernel (a b c : RegionName) (count block : Nat) : ComputeKernel :=
   let n_elements := count
   let BLOCK_SIZE := block
   with_triton_signature forwardSignature in triton {
@@ -68,7 +68,7 @@ def forwardIndexCommutedKernel (a b c : RegionName) (count block : Nat) : Comput
     tl.store(c + col_offsets, c_row, mask=mask)
   }
 
-def backwardKernel (dc a b : RegionName) (count block : Nat) : ComputeKernel :=
+def _geglu_tanh_backward_kernel_repairedKernel (dc a b : RegionName) (count block : Nat) : ComputeKernel :=
   let n_elements := count
   let BLOCK_SIZE := block
   with_triton_signature backwardSignature in triton {
@@ -108,7 +108,7 @@ def backwardKernel (dc a b : RegionName) (count block : Nat) : ComputeKernel :=
     tl.store(b + col_offsets, db_row, mask=mask)
   }
 
-def backwardIndexCommutedKernel (dc a b : RegionName) (count block : Nat) : ComputeKernel :=
+def backward_index_commuted_kernel (dc a b : RegionName) (count block : Nat) : ComputeKernel :=
   let n_elements := count
   let BLOCK_SIZE := block
   with_triton_signature backwardSignature in triton {
@@ -162,14 +162,14 @@ instance (b : Bool) (ch : Channel) : Decidable (enabled b ch) := by
   unfold enabled; infer_instance
 
 def source (backward : Bool) (block count : Nat) : ComputeKernel :=
-  if backward then backwardKernel "DC" "A" "B" count block
-  else forwardKernel "A" "B" "C" count block
+  if backward then _geglu_tanh_backward_kernel_repairedKernel "DC" "A" "B" count block
+  else _geglu_tanh_forward_kernel_repairedKernel "A" "B" "C" count block
 
 /-- The existing signed integer address-product commutation on the repaired
 flat grid. No floating operation changes. -/
 def indexCommutedSource (backward : Bool) (block count : Nat) : ComputeKernel :=
-  if backward then backwardIndexCommutedKernel "DC" "A" "B" count block
-  else forwardIndexCommutedKernel "A" "B" "C" count block
+  if backward then backward_index_commuted_kernel "DC" "A" "B" count block
+  else forward_index_commuted_kernel "A" "B" "C" count block
 
 def selectedSource (backward candidate : Bool) (block count : Nat) : ComputeKernel :=
   if candidate then indexCommutedSource backward block count else source backward block count

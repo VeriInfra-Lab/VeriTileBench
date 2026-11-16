@@ -34,7 +34,7 @@ def Ready (BM BN : Nat) (s : State α) : Prop :=
 
 theorem prelude_success [Inhabited α] (m : Model α) (M N BM BN : Nat) (s : State α) :
     ∃ t,run (engine m) (prelude M N BM BN) s=some t ∧ Ready BM BN t := by
-  simp [prelude,code,TypedSource.finalBackwardKernel,finalBackwardKernel,ComputeKernel.surfaceBody,
+  simp [prelude,code,TypedSource.finalBackwardKernel,_layer_norm_bwd_dwdbKernel,ComputeKernel.surfaceBody,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,Ready,
     engine,numeric,natLt,numericLt,numericLe,numericEq,bop,
     State.setReg,ComputeDType.eraseDType,
@@ -45,7 +45,7 @@ theorem body_success [Inhabited α] (m : Model α) (M N BM BN : Nat) (i : Int)
     (s : State α) (h : Ready BM BN s) :
     ∃ t,run (engine m) (body M N BM BN) (s.setReg "i" .int [] (fun _ => i))=some t ∧ Ready BM BN t := by
   obtain ⟨⟨pid,hpid⟩,⟨cols,hcols⟩,⟨dw,hdw⟩,⟨db,hdb⟩⟩ := h
-  simp [body,code,TypedSource.finalBackwardKernel,finalBackwardKernel,ComputeKernel.surfaceBody,
+  simp [body,code,TypedSource.finalBackwardKernel,_layer_norm_bwd_dwdbKernel,ComputeKernel.surfaceBody,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,Ready,
     engine,numeric,natLt,numericLt,numericLe,numericEq,bop,
     State.setReg,ComputeDType.eraseDType,
@@ -71,7 +71,7 @@ theorem suffix_success [Inhabited α] (m : Model α) (M N BM BN : Nat)
     (s : State α) (h : Ready BM BN s) :
     ∃ t,run (engine m) (suffix M N BM BN) s=some t := by
   obtain ⟨⟨pid,hpid⟩,⟨cols,hcols⟩,⟨dw,hdw⟩,⟨db,hdb⟩⟩ := h
-  simp [suffix,code,TypedSource.finalBackwardKernel,finalBackwardKernel,ComputeKernel.surfaceBody,
+  simp [suffix,code,TypedSource.finalBackwardKernel,_layer_norm_bwd_dwdbKernel,ComputeKernel.surfaceBody,
     run,step,evalExpr,evalComputeOp,evalOp_unfold,
     engine,numeric,natLt,numericLt,numericLe,numericEq,bop,
     State.setReg,FP.Structural.store,ComputeDType.eraseDType,

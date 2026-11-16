@@ -15,7 +15,7 @@ def callSignature : CallSignature where
 
 /-- Complete selected original FP32 source, including explicit input casts,
 sigmoid, left-associated products, source masks and kernel ports. -/
-def sourceKernel (X Y OUT : RegionName) (sx sy so cols block : Nat) : ComputeKernel :=
+def _swiglu_fwd_kernel (X Y OUT : RegionName) (sx sy so cols block : Nat) : ComputeKernel :=
   let BLOCK_N : Nat := block
   with_triton_call callSignature call_args [stride_x_row := sx, stride_y_row := sy, stride_out_row := so, ncols := cols] in
   triton {
@@ -37,7 +37,7 @@ noncomputable def formula (x y : ℝ) : ℝ := x*y/(1+Real.exp (-x))
 
 /-- Complete existing candidate: commute only the three integer row-stride
 products, preserving FP32 loads, casts, sigmoid and multiplication order. -/
-def indexCommutedKernel (X Y OUT : RegionName) (sx sy so cols block : Nat) : ComputeKernel :=
+def _swiglu_fwd_kernel_index_commutedKernel (X Y OUT : RegionName) (sx sy so cols block : Nat) : ComputeKernel :=
   let BLOCK_N : Nat := block
   with_triton_call callSignature call_args [stride_x_row := sx, stride_y_row := sy, stride_out_row := so, ncols := cols] in
   triton {

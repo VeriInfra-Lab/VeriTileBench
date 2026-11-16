@@ -17,7 +17,7 @@ def forwardCallSignature : CallSignature where
   writePorts := ["loss_ptr", "lse_ptr", "z_loss_ptr"]
 
 /-- Complete repaired Python function body; caller metadata stays outside. -/
-def forwardKernel (p : Parameters) : ComputeKernel :=
+def cross_entropy_fwd_kernel (p : Parameters) : ComputeKernel :=
   let loss_ptr := p.loss
   let lse_ptr := p.lse
   let z_loss_ptr := p.zLoss
@@ -77,7 +77,7 @@ def forwardKernel (p : Parameters) : ComputeKernel :=
   }
 
 /-- Complete existing index candidate; caller metadata stays outside. -/
-def forwardIndexCommutedKernel (p : Parameters) : ComputeKernel :=
+def cross_entropy_fwd_kernel_index_commutedKernel (p : Parameters) : ComputeKernel :=
   let loss_ptr := p.loss
   let lse_ptr := p.lse
   let z_loss_ptr := p.zLoss
@@ -144,7 +144,7 @@ def backwardCallSignature : CallSignature where
   writePorts := ["dlogits_ptr"]
 
 /-- Complete repaired Python function body; caller metadata stays outside. -/
-def backwardKernel (p : Parameters) : ComputeKernel :=
+def cross_entropy_bwd_kernel (p : Parameters) : ComputeKernel :=
   let dlogits_ptr := p.gradient
   let dloss_ptr := p.upstream
   let logits_ptr := p.logits
@@ -183,7 +183,7 @@ def backwardKernel (p : Parameters) : ComputeKernel :=
   }
 
 /-- Complete existing index candidate; caller metadata stays outside. -/
-def backwardIndexCommutedKernel (p : Parameters) : ComputeKernel :=
+def cross_entropy_bwd_kernel_index_commutedKernel (p : Parameters) : ComputeKernel :=
   let dlogits_ptr := p.gradient
   let dloss_ptr := p.upstream
   let logits_ptr := p.logits
@@ -222,7 +222,7 @@ def backwardIndexCommutedKernel (p : Parameters) : ComputeKernel :=
   }
 
 def forwardSyntax (p : Parameters) : ComputeKernel :=
-  (forwardKernel p).withScalarArguments [
+  (cross_entropy_fwd_kernel p).withScalarArguments [
     ScalarArgument.integer "ignored_index" p.ignored,
     ScalarArgument.integer "class_start_idx" p.classStart,
     ScalarArgument.integer "n_cols" (p.cols : Int),
@@ -230,7 +230,7 @@ def forwardSyntax (p : Parameters) : ComputeKernel :=
     ScalarArgument.integer "n_rows" (p.rows : Int)]
 
 def forwardIndexCommutedSyntax (p : Parameters) : ComputeKernel :=
-  (forwardIndexCommutedKernel p).withScalarArguments [
+  (cross_entropy_fwd_kernel_index_commutedKernel p).withScalarArguments [
     ScalarArgument.integer "ignored_index" p.ignored,
     ScalarArgument.integer "class_start_idx" p.classStart,
     ScalarArgument.integer "n_cols" (p.cols : Int),
@@ -238,7 +238,7 @@ def forwardIndexCommutedSyntax (p : Parameters) : ComputeKernel :=
     ScalarArgument.integer "n_rows" (p.rows : Int)]
 
 def backwardSyntax (p : Parameters) : ComputeKernel :=
-  (backwardKernel p).withScalarArguments [
+  (cross_entropy_bwd_kernel p).withScalarArguments [
     ScalarArgument.integer "ignored_index" p.ignored,
     ScalarArgument.integer "class_start_idx" p.classStart,
     ScalarArgument.integer "n_cols" (p.cols : Int),
@@ -247,7 +247,7 @@ def backwardSyntax (p : Parameters) : ComputeKernel :=
     ScalarArgument.integer "dloss_row_stride" (p.upstreamStride : Int)]
 
 def backwardIndexCommutedSyntax (p : Parameters) : ComputeKernel :=
-  (backwardIndexCommutedKernel p).withScalarArguments [
+  (cross_entropy_bwd_kernel_index_commutedKernel p).withScalarArguments [
     ScalarArgument.integer "ignored_index" p.ignored,
     ScalarArgument.integer "class_start_idx" p.classStart,
     ScalarArgument.integer "n_cols" (p.cols : Int),

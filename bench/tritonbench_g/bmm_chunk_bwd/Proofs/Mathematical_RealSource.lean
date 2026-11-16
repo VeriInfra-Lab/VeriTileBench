@@ -36,7 +36,7 @@ theorem storage_erasure :
   cases aStorage <;> cases doutStorage <;> cases swapped
   all_goals
     simp only [source, TypedSource.specialize, VeriTile.Bench.Repairs.BmmChunkBwd.Kernels.family,
-      VeriTile.Bench.Repairs.BmmChunkBwd.Kernels.sourceKernel,
+      VeriTile.Bench.Repairs.BmmChunkBwd.Kernels._bmm_chunk_bwd_kernel,
       VeriTile.Bench.Repairs.BmmChunkBwd.Kernels.dotDType, ComputeKernel.surfaceBody, ComputeKernel.eraseDType,
       ComputeKernel.toAlgorithm?, ComputeKernel.toAlgKernel, ComputeKernel.fromKernelBody,
       ComputeStmt.listToAlgorithm?, ComputeStmt.toAlgorithm?, ComputeExpr.toAlgorithm?,

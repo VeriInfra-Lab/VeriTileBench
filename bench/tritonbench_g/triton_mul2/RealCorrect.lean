@@ -41,7 +41,7 @@ specification mul2_inplace_kernel_correctness
 #stmtSurfaceSubset mul2_inplace_kernel_correctness ⊆
   [Spec.Real, RegionName, mul2InplaceIO, MaskedKernelIO₁.Implements, MaskedKernelIO₁.B]
 
-#specNonCircular mathematical avoiding [sourceKernel, commutedSourceKernel]
+#specNonCircular mathematical avoiding [mul2_kernel, mul2_commuted_kernel]
 #axiomsClean mul2_kernel_correctness
 #axiomsClean mul2_inplace_kernel_correctness
 #guard_msgs (drop info) in

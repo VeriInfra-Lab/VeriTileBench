@@ -12,13 +12,13 @@ set_option linter.unusedSimpArgs false
 /-- Algorithm projection generated from the complete current repair/candidate.
 The explicit source conversion is retained until its Real semantics is evaluated. -/
 def realKernel (swapped : Bool) (a b : RegionName) (n B : Nat) : ComputeKernel :=
-  let source := if swapped then VeriTile.Bench.Repairs.CosineCompute.indexCommutedKernel a b n B
-    else VeriTile.Bench.Repairs.CosineCompute.sourceKernel a b n B
+  let source := if swapped then VeriTile.Bench.Repairs.CosineCompute.cos_func_index_commutedKernel a b n B
+    else VeriTile.Bench.Repairs.CosineCompute.cos_funcKernel a b n B
   let k := source.toAlgKernel
   ComputeKernel.fromKernelBody k.inputs k.outputs k.body
 
-attribute [local simp] VeriTile.Bench.Repairs.CosineCompute.sourceKernel
-  VeriTile.Bench.Repairs.CosineCompute.indexCommutedKernel Region.cast
+attribute [local simp] VeriTile.Bench.Repairs.CosineCompute.cos_funcKernel
+  VeriTile.Bench.Repairs.CosineCompute.cos_func_index_commutedKernel Region.cast
   ComputeKernel.toAlgorithm? ComputeKernel.fromKernelBody ComputeStmt.listToAlgorithm?
   ComputeStmt.toAlgorithm? Except.bind bind ComputeDType.eraseDType
 

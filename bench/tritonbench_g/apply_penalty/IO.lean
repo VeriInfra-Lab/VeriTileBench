@@ -96,7 +96,7 @@ def applyPenaltyIO
     (p_token_ids p_token_counts p_cumsum_seq_len : Region .nat)
     (stride_logit_b stride_logit_s BLOCK_P : Nat) :
     SignedScatterIO where
-  kernel := sourceKernel Logits presence_penalty freqency_penalty
+  kernel := _fwd_kernel_apply_penalty_repairedKernel Logits presence_penalty freqency_penalty
     repetition_penalty p_token_ids p_token_counts p_cumsum_seq_len
     stride_logit_b stride_logit_s BLOCK_P
   projection := by rfl
@@ -127,7 +127,7 @@ def reciprocalIO (Logits presence_penalty freqency_penalty repetition_penalty : 
   { applyPenaltyIO Logits presence_penalty freqency_penalty
       repetition_penalty p_token_ids p_token_counts p_cumsum_seq_len
       stride_logit_b stride_logit_s BLOCK_P with
-    kernel := reciprocalKernel Logits presence_penalty freqency_penalty
+    kernel := _fwd_kernel_apply_penalty_reciprocalKernel Logits presence_penalty freqency_penalty
       repetition_penalty p_token_ids p_token_counts p_cumsum_seq_len
       stride_logit_b stride_logit_s BLOCK_P
     projection := by rfl }

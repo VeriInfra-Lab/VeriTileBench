@@ -10,7 +10,7 @@ open VeriTile.Bench.Repairs.ChunkCumsumVector
 set_option maxRecDepth 24000
 
 def loop (h : Call) (c : Config) : Source.IntRange :=
-  (Source.intRange? (Kernels.sourceKernel h c).surfaceBody "i_t").getD
+  (Source.intRange? (Kernels.chunk_global_cumsum_vector_kernel h c).surfaceBody "i_t").getD
     ⟨[], .constInt 0, .constInt 0, .constNat 0, [], []⟩
 
 theorem load_explicitly_promotes (h : Call) (c : Config) :

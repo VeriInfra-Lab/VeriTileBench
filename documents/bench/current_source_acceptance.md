@@ -1,6 +1,6 @@
 # Final selected corpus
 
-`validation/task_progress.json` selects the repaired source and public entries for all 183 tasks. The inventory tool checks these entries against the current directories and imports. The specification sheets read the selected Lean declarations directly. CI generates a temporary inventory and checks the source hashes again during proof replay.
+`validation/task_progress.json` selects the repaired source and public entries for all 184 tasks. The inventory tool checks these entries against the current directories and imports. The specification sheets read the selected Lean declarations directly. CI generates a temporary inventory and checks the source hashes again during proof replay.
 
 The [archived contract review](../../validation/archive/contracts.json) preserves mathematical targets, FP program pairs, required conditions and numerical dependencies from the earlier review. The [proof replay receipts](../../validation/body_receipts/benchmark-layout-replay.json) record the benchmark layout validation.
 
@@ -11,16 +11,17 @@ python3 -B -m unittest discover -s tests/python -p 'test_*.py'
 python3 -B scripts/bench/final_inventory.py --check
 python3 -B -m scripts.bench.check_body_corpus --check
 python3 -B scripts/bench/check_imported_kernel_review.py
-lake build TritonBenchGFinal BenchmarkRegressions BenchmarkExamples BugDetection PretrainKernels
+lake build TritonBenchGFinal BenchmarkRegressions BenchmarkExamples
 scripts/bench/audit_trust.sh --final-inventory
 ```
 
 The proof comparator requires the pinned tools and their systemd/Landlock isolation; `.github/actions/setup-comparator` installs them in CI. Every retained corpus module must pass the axiom/specification audit and independent proof replay. The complete gate fails if any worker is missing, skipped, cancelled or fails.
 
-PR and main-push CI run the source/regression checks and build the matrix-transpose
-proofs against the locked VeriTile package. Complete
-corpus builds, all 334 draft interfaces and per-module replay run daily at
-04:00 Asia/Singapore (20:00 UTC), or on manual dispatch with `full_audit=true`.
+PR and main-push CI build and independently replay changed cases and affected
+proof dependencies against the locked VeriTile package. Complete verified-corpus
+builds and replay run daily at 04:00 Asia/Singapore (20:00 UTC), or on manual
+full-audit dispatch. The 334 pending interfaces have a separate workflow.
+See [CI scope and local commands](ci.md) for selection, sharding and required gates.
 Run the complete applicable proof checks locally before merging proof changes.
 
 Source correspondence is tracked independently in `validation/source-correspondence.json`. Pending Python-to-Lean correspondence remains pending. The 65 bug-detection and 269 pretraining benchmark tasks are explicit unsolved challenges; their successful compilation does not complete their proof or backend obligations. Native execution and compiler conformance are not established by these checks.

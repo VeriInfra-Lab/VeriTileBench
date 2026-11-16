@@ -21,7 +21,7 @@ def sourceSignature : CallSignature where
   readPorts := ["src"]
   writePorts := ["dst"]
 
-def sourceKernel (src dst : RegionName) (n_elements BLOCK_SIZE : Nat) : ComputeKernel :=
+def mul_kernel_repairedKernel (src dst : RegionName) (n_elements BLOCK_SIZE : Nat) : ComputeKernel :=
   let n_elements_value : Int := n_elements
   with_triton_call sourceSignature call_args [n_elements := n_elements_value] in
   triton {
@@ -38,7 +38,7 @@ def sourceKernel (src dst : RegionName) (n_elements BLOCK_SIZE : Nat) : ComputeK
     tl.store(dst + idxs, y, mask=mask)
   }
 
-def scalarLeftBodyPastedKernel (src dst : RegionName) (n_elements BLOCK_SIZE : Nat) : ComputeKernel :=
+def mul_kernel_scalar_leftKernel (src dst : RegionName) (n_elements BLOCK_SIZE : Nat) : ComputeKernel :=
   let n_elements_value : Int := n_elements
   with_triton_call sourceSignature call_args [n_elements := n_elements_value] in
   triton {
@@ -52,10 +52,10 @@ def scalarLeftBodyPastedKernel (src dst : RegionName) (n_elements BLOCK_SIZE : N
   }
 
 def candidateKernel (src dst : RegionName) (n B : Nat) : ComputeKernel :=
-  sourceKernel src dst n B
+  mul_kernel_repairedKernel src dst n B
 
 def scalarLeftKernel (src dst : RegionName) (n B : Nat) : ComputeKernel :=
-  scalarLeftBodyPastedKernel src dst n B
+  mul_kernel_scalar_leftKernel src dst n B
 
 end
 end VeriTile.Bench.Repairs.MulExponentCompensator.Contiguous
