@@ -7,10 +7,10 @@
    "type": "git",
    "subDir": "library",
    "scope": "",
-   "rev": "725b16a5aa507a6fbcfb984c487be17ddb6d552b",
+   "rev": "7577e5edd6892a3ec424ad165eed994f74d50109",
    "name": "veritile",
    "manifestFile": "../lake-manifest.json",
-   "inputRev": "725b16a5aa507a6fbcfb984c487be17ddb6d552b",
+   "inputRev": "7577e5edd6892a3ec424ad165eed994f74d50109",
    "inherited": false,
    "configFile": "lakefile.toml"
   },
