@@ -1,0 +1,85 @@
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-dense-2-512.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-masked-2-512.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-dense-4-512.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-masked-4-512.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-dense-2-1024.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-masked-2-1024.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-dense-4-1024.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-masked-4-1024.
+Linked 52 common runtime files and the candidate's private kernels.
+Certified tail lerp artifacts and rejected rate, rounding, store, and subtraction mutations.
+Certified norm restoration and rejected tile, ratio, arithmetic, and rounding mutations.
+Certified narrow QKV packing and the Gluon TTGIR/PTX byte exchange.
+Certified halfValue QKV packing and the Gluon TTGIR/PTX byte exchange.
+Certified wide QKV packing and the Gluon TTGIR/PTX byte exchange.
+Certified the three grouped QKV GPU stages and rejected width-routing, address and arithmetic mutations.
+Certified the QKV scale TTIR and PTX and rejected reduction, constant, and store mutations.
+Certified the compiled per-width QKV fallback for all three widths.
+Certified shifted RoPE at 16384 tokens, including the original reduction and all store masks.
+Certified shifted RoPE at 32768 tokens, including the original reduction and all store masks.
+Certified shifted RoPE at 40960 tokens, including the original reduction and all store masks.
+Certified shifted RoPE at 49152 tokens, including the original reduction and all store masks.
+Certified shifted RoPE at 262144 tokens, including the original reduction and all store masks.
+Certified RoPE backward at 16384 tokens, including both FP8 stores and the K load masks.
+Certified RoPE backward at 32768 tokens, including both FP8 stores and the K load masks.
+Certified RoPE backward at 40960 tokens, including both FP8 stores and the K load masks.
+Certified RoPE backward at 49152 tokens, including both FP8 stores and the K load masks.
+Certified paired RoPE backward at 16384 tokens, including factor and FP8 store routing.
+Certified paired RoPE backward at 32768 tokens, including factor and FP8 store routing.
+Certified paired RoPE backward at 40960 tokens, including factor and FP8 store routing.
+Certified paired RoPE backward at 49152 tokens, including factor and FP8 store routing.
+Certified half-v RoPE backward at 16384 tokens, including factor and FP8 store routing.
+Certified half-v RoPE backward at 32768 tokens, including factor and FP8 store routing.
+Certified half-v RoPE backward at 40960 tokens, including factor and FP8 store routing.
+Certified half-v RoPE backward at 49152 tokens, including factor and FP8 store routing.
+Certified the byte transpose and rejected mask, axis, pitch, barrier and byte permutation mutations.
+Certified all 36 compact and stationary YaRN decoder launches.
+Certified ANVIL rails, 128-wide Gram and polynomial TMA with specialized diagonal and off-diagonal loops and queued stores, divisor trees, in-place normalization, counter seeds and cooperative rounds, and both rounded weight halves.
+Certified full-row sparse packets, the value wire-only path, and the sent row clear.
+Certified both n-gram scratch consumers, including the gradient payloads and positive-zero stores.
+Certified n-gram Adam entry preparation, owner and peer scatters, and the weight, moment, and stamp update.
+Certified value Adam scatters, claim-selected FP16 scaling, and workspace clears.
+Certified value Adam results and both workspace clear modes for period 2, tile 512.
+Certified value Adam results and both workspace clear modes for period 2, tile 1024.
+Certified value Adam results and both workspace clear modes for period 4, tile 512.
+Certified value Adam results and both workspace clear modes for period 4, tile 1024.
+Certified the guarded FP16 pack, both branch effects and the distinct workspace clear predicate.
+Certified both local value scatter layouts, markers, disabled lanes and positive-zero stores.
+Certified sparse row fetch and rejected assert, address, bank, and boundary mutations.
+Certified n-gram moment replay, including positive-zero detection and the scalar fallback.
+Certified the BF16 sink scatter on FP16 slots and checked its conversion, atomic, and destination.
+Certified both value embedding backward layouts and the debug token bounds.
+Certified the flat and full-row n-gram embeddings and both BF16 gradient planes.
+Certified the ordinary graph copies and both fused lookup variants in all five SM90a shapes.
+Certified sampled gather at 10240 rows and rejected class, phase and byte-store mutations.
+Certified sampled gather at 14336 rows and rejected class, phase and byte-store mutations.
+Certified sampled gather at 24576 rows and rejected class, phase and byte-store mutations.
+Certified fused sampled gather at 10240 rows and rejected grid, search, warp sum, tail, barrier and vector-store mutations.
+Certified fused sampled gather at 14336 rows and rejected grid, search, warp sum, tail, barrier and vector-store mutations.
+Certified fused sampled gather at 24576 rows and rejected grid, search, warp sum, tail, barrier and vector-store mutations.
+Certified the activation's BF16 rounding, E4M3 overflow and packed FP8 stores.
+Certified sampled gradient densify at 10240 classes, including inverse lookup, four row phases and zero stores.
+Certified sampled gradient densify at 14336 classes, including inverse lookup, four row phases and zero stores.
+Certified sampled gradient densify at 24576 classes, including inverse lookup, four row phases and zero stores.
+Certified BF16 transpose copy, including the vector loads and transposed shared stores.
+Certified BF16 transpose add, including the vector loads and transposed shared stores.
+Certified both LM-head packers, including the exact gain guard, packed BF16 multiplication, FP16 rounding and both vectorized FP8 cache layouts.
+Certified the MLP scale, both FP8 layouts and the two maxima through the separate 64-byte shared buffer.
+Certified the MUDD coefficient arithmetic, packed BF16 stores and ten output pointers.
+Certified MUDD's BF16 coefficient bank, FP32 mixed residual and square sum, and packed E4M3 stores.
+Certified the cached inverse RMS store and three RMSNorm backward specializations.
+Certified the duplicate E4M3 store elimination in 6 reduction schedules.
+Certified BF16 residual register reuse and fallback in 36 reduction schedules.
+Certified the grouped MUDD backward launches in 56 reduction schedules.
+Checked the packing reorder in 16 sampled schedules.
+Certified one selected BF16 load and the ordered packing arithmetic in 8 schedules.
+Certified both outputs of MUDD fusion in 32 independently selected schedules.
+Certified the ten-column MUDD launch in 16 matching schedules.
+Certified direct BF16 writes and the FMA packer in 40 sampled launch variants.
+Checked the original projection scale and packed reduction and certified all three stores in 24 full-vocabulary launch variants.
+Certified 48 mixed MUDD schedules using the two original ordered reduction trees.
+Certified 24 mixed MUDD schedules using the two original ordered reduction trees.
+Certified the default softcap and head gradient scale, table initialization, logit scan, reductions, loss and E5M2 stores in the five training CE PTX variants.
+Certified both CE transpose ranges, the widened loads and the two shared-memory phases.
+Certified the wrapper's BF16 head views and FP32 output aliases, vocabulary projection and mask lookup, tail, online updates, cross-warp reduction, target projection and mask, logarithm and FP32 loss stores for the seven validation PTX variants.
+Linked 500 compiled programs to the guarded value Adam training and validation driver.

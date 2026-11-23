@@ -1,0 +1,114 @@
+Pinned Track 1 baseline
+4ea6b937337a4889b8cfe3f38a93d120048d8f71
+
+Installed source and benchmark gate
+Linked 52 common runtime files and the candidate's private kernels.
+Source changes outside the checked substitutions were rejected.
+Benchmark source gate accepted default-installed.
+Benchmark source gate accepted packed.
+
+Lean proof
+info: bench/models/NanoGPT/Track1/CombinedTraining.lean:413:0: FP assumptions used by combined_training_end_to_end:
+info: bench/models/NanoGPT/Track1/CombinedTraining.lean:413:0: none
+info: bench/models/NanoGPT/Track1/CombinedTraining.lean:414:0: VeriTile.Bench.Models.NanoGPT.Track1.Driver.CombinedTraining.combined_training_end_to_end: axiom footprint ⊆ standard base ✓  ([propext,
+ Quot.sound,
+ Classical.choice])
+info: bench/models/NanoGPT/Track1/CombinedTraining.lean:415:0: VeriTile.Bench.Models.NanoGPT.Track1.Driver.CombinedTraining.final_validation_eq: axiom footprint ⊆ standard base ✓  ([propext,
+ Quot.sound,
+ Classical.choice])
+✔ [2214/2215] Built bench.models.NanoGPT.Track1.ValueAdamNativeLoader (4.6s)
+✔ [2215/2215] Built bench.models.NanoGPT.Track1.CheckSource (22s)
+Build completed successfully (2215 jobs).
+
+Hopper machine code comparison
+consume-dense-2-512 matches the measured machine code
+consume-dense-2-1024 matches the measured machine code
+consume-masked-2-512 matches the measured machine code
+consume-masked-2-1024 matches the measured machine code
+consume-dense-4-512 matches the measured machine code
+consume-dense-4-1024 matches the measured machine code
+consume-masked-4-512 matches the measured machine code
+consume-masked-4-1024 matches the measured machine code
+
+Machine code replay
+consume-dense-2-512: 32 routes checked and 8 mutations rejected.
+consume-masked-2-512: 32 routes checked and 8 mutations rejected.
+consume-dense-4-512: 32 routes checked and 8 mutations rejected.
+consume-masked-4-512: 32 routes checked and 8 mutations rejected.
+consume-dense-2-1024: 1544 routes checked and 8 mutations rejected.
+consume-masked-2-1024: 1544 routes checked and 9 mutations rejected.
+consume-dense-4-1024: 1544 routes checked and 8 mutations rejected.
+consume-masked-4-1024: 1544 routes checked and 9 mutations rejected.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-dense-2-512.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-masked-2-512.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-dense-4-512.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-masked-4-512.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-dense-2-1024.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-masked-2-1024.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-dense-4-1024.
+Certified gradient scaling, workspace clearing, moments, division and weight writeback for consume-masked-4-1024.
+
+Ordinary-path executed SM90 instruction counts
+| 512 masked | 106 | 90 | 22 |
+| 512 dense | 105 | 89 | 22 |
+| 1024 masked | 321 | 244 | 40 |
+| 1024 dense | 328 | 251 | 40 |
+
+
+Final source including dispatch memoization
+Linked 52 common runtime files and the candidate's private kernels.
+Source changes outside the checked substitutions were rejected.
+Linked 52 common runtime files and the candidate's private kernels.
+Source changes outside the checked substitutions were rejected.
+Benchmark source gate accepted default-installed
+Benchmark source gate accepted packed-installed
+
+Dispatch cache proof and CPU microbenchmark
+'VeriTile.Bench.Models.NanoGPT.Track1.Driver.DispatchMemo.Memo.access_exact' depends on axioms: [propext]
+'VeriTile.Bench.Models.NanoGPT.Track1.Driver.DispatchMemo.Memo.trace_exact' depends on axioms: [propext]
+Reference wrapper and PTX matched period 2 tile 512. Cached lookups saw changes to the wrapper, PTX and launch metadata.
+Reference wrapper and PTX matched period 2 tile 1024. Cached lookups saw changes to the wrapper, PTX and launch metadata.
+Reference wrapper and PTX matched period 4 tile 512. Cached lookups saw changes to the wrapper, PTX and launch metadata.
+Reference wrapper and PTX matched period 4 tile 1024. Cached lookups saw changes to the wrapper, PTX and launch metadata.
+Repeated complete profile lookup 4401.8 -> 61.1 CPU microseconds
+matches_reference_wrapper: exact results through 32 distinct keys, bounded to 16 entries
+wrapper_function_digest: exact results through 32 distinct keys, bounded to 16 entries
+ptx_digest: exact results through 32 distinct keys, bounded to 16 entries
+
+Binary identity and final Lean build
+consume-dense-2-512 CUBINs match before and after the dispatcher cache
+consume-dense-2-1024 CUBINs match before and after the dispatcher cache
+consume-masked-2-512 CUBINs match before and after the dispatcher cache
+consume-masked-2-1024 CUBINs match before and after the dispatcher cache
+consume-dense-4-512 CUBINs match before and after the dispatcher cache
+consume-dense-4-1024 CUBINs match before and after the dispatcher cache
+consume-masked-4-512 CUBINs match before and after the dispatcher cache
+consume-masked-4-1024 CUBINs match before and after the dispatcher cache
+info: bench/models/NanoGPT/Track1/CombinedTraining.lean:427:0: FP assumptions used by combined_training_end_to_end:
+info: bench/models/NanoGPT/Track1/CombinedTraining.lean:427:0: none
+info: bench/models/NanoGPT/Track1/CombinedTraining.lean:428:0: VeriTile.Bench.Models.NanoGPT.Track1.Driver.CombinedTraining.cached_dispatch_run_eq: axiom footprint ⊆ standard base ✓  ([propext,
+ Quot.sound,
+ Classical.choice])
+info: bench/models/NanoGPT/Track1/CombinedTraining.lean:429:0: VeriTile.Bench.Models.NanoGPT.Track1.Driver.CombinedTraining.combined_training_end_to_end: axiom footprint ⊆ standard base ✓  ([propext,
+ Quot.sound,
+ Classical.choice])
+info: bench/models/NanoGPT/Track1/CombinedTraining.lean:430:0: VeriTile.Bench.Models.NanoGPT.Track1.Driver.CombinedTraining.final_validation_eq: axiom footprint ⊆ standard base ✓  ([propext,
+ Quot.sound,
+ Classical.choice])
+✔ [2215/2215] Built bench.models.NanoGPT.Track1.CheckSource (20s)
+Build completed successfully (2215 jobs).
+✔ [2215/2215] Built bench.models.NanoGPT.Track1.CheckSource (20s)
+Build completed successfully (2215 jobs).
+
+Final regression cases
+NanoGPTClocks passed
+NanoGPTEquivalence passed
+NanoGPTEquivalencePlan passed
+NanoGPTPlan passed
+NanoGPTSource passed
+NanoGPTSpec passed
+Track1Driver passed
+
+Full compiled artifact replay for the same CUDA binaries
+Certified the wrapper's BF16 head views and FP32 output aliases, vocabulary projection and mask lookup, tail, online updates, cross-warp reduction, target projection and mask, logarithm and FP32 loss stores for the seven validation PTX variants.
+Linked 500 compiled programs to the guarded value Adam training and validation driver.
