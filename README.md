@@ -10,6 +10,7 @@ The original history and earlier proof snapshots remain available in that reposi
 | [Bug detection](bench/bug_detection) | 65 independent challenges |
 | [Pretraining kernels](bench/pretrain_kernels) | 269 independent challenges |
 | [Worked examples](bench/examples) | 19 examples with Python sources and public Real/FP proof entries |
+| [NanoGPT Track 1](models/NanoGPT/Track1) | Training optimizations, end-to-end FP equivalence, and [validation records](validation/nanogpt-track1) |
 
 ## Verify
 

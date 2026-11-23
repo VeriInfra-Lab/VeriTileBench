@@ -29,3 +29,8 @@ weakLeanArgs = ["--tstack=65536"]
 [[lean_lib]]
 name = "BenchmarkRegressions"
 globs = ["tests.lean.+"]
+
+[[lean_lib]]
+name = "NanoGPTTrack1"
+globs = ["models.NanoGPT.Track1.+"]
+weakLeanArgs = ["--tstack=65536"]

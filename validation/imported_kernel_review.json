@@ -53899,7 +53899,7 @@
     "bench/pretrain_kernels/tasks/te_fused_attn_mla_thd_dv/Proofs/Backend.lean": "09415464d3e03083d4b58d7be07beb565f8a088764424799ce9be6790c9b899d",
     "bench/pretrain_kernels/tasks/te_fused_attn_mla_thd_dv/task.json": "ce9735151cf467d28fae4020d4a1399cf1e02ec6b5525665019c9f6d4a3fbbd8",
     "documents/bench/MAIN_THEOREM_CONVENTIONS.md": "9dc259248e787fc23d3b496b716d152a0ff1557845bd61e9f2bee53a057994ea",
-    "lakefile.toml": "5b4e402f57b29f5702d2d4ee9cfde352d0281e1c96ce15c2815582de5c5ef8da",
+    "lakefile.toml": "d9b0487ebfcb1b63296acc255b9c4a97aac34a464e8963ab4ee83e6a544e2249",
     "scripts/bench/check_imported_kernel_review.py": "cf8bbf727a427a7db6d8dad40b9d7b59f7e7ef3691b6413ec138bb4adcdae387",
     "tests/lean/FPGuardedProgramIO.lean": "0fdd3d571fbb4343cf7340232e862484535e900d62005684d1db51d641553fc3"
   },
@@ -54145,6 +54145,15 @@
       "VeriTile/Triton/Float/RangeInduction.lean"
     ],
     "basis": "The core revision only adds RangeInduction.lean; every pre-existing shared Lean source is byte-identical. The new module is imported by nine TritonBench-G loop proofs, outside the 334-challenge semantic closure. Structural facts and counterexample probes are recomputed by check_imported_kernel_review.py.",
+    "semantic_certification": "NOT_ESTABLISHED",
+    "proof_or_source_binding_status_changes": false
+  },
+  "nanogpt_track1_packaging_revalidation": {
+    "date": "2026-11-23",
+    "reviewed_inputs_changed": [
+      "lakefile.toml"
+    ],
+    "basis": "Lake adds an independent NanoGPTTrack1 target. The existing libraries and dependency pin are unchanged. The checker recomputed the recorded structural facts and counterexample probes.",
     "semantic_certification": "NOT_ESTABLISHED",
     "proof_or_source_binding_status_changes": false
   }
